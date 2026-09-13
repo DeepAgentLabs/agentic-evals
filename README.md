@@ -219,6 +219,44 @@ Python targets execute local code and HTTP targets can reach arbitrary
 URLs. Only point them at trusted suite files and trusted target
 definitions.
 
+## Eval packs
+
+A pack bundles a `TestSuite` with the scorer names it needs into one
+shareable YAML/JSON file:
+
+```python
+from agentic_evals import (
+    EvalSpan,
+    EvalTrace,
+    EvaluationSample,
+    default_registry,
+    evaluate_suite,
+    load_builtin_pack,
+)
+
+pack = load_builtin_pack("tool-use-correctness")  # validates required_scorers up front
+sample = EvaluationSample(
+    case_id="refund-status-lookup",
+    output="Your refund is on its way.",
+    trace=EvalTrace(spans=[EvalSpan(tool_name="lookup_refund")]),
+)
+report = evaluate_suite(pack.to_suite(), [sample], registry=default_registry())
+```
+
+Ships 3 built-in packs (`list_builtin_packs()`): `tool-use-correctness`,
+`json-output-contract` (both runnable with `default_registry()`), and
+`factual-qa` (needs a registry with an `LLMRubricEvaluator` registered,
+since it uses the `FACTUALITY` rubric). Load your own with `load_pack(path)`.
+
+## Skills
+
+`agentic_evals/skills/` ships methodology playbooks (`SKILL.md` cards --
+Trigger/Do/Avoid/Check/Risk), not runnable code: `write-a-scorer`,
+`define-a-release-gate`, `size-a-test-suite`, `instrument-a-trace`. These
+document how to use this package well and are meant to be read directly,
+or picked up by a coding agent's own skill mechanism -- distinct from
+"packs" above, which are runnable configuration.
+
 ## Using it with AgenticLens's own traces
 
 If you already have an AgenticLens `Run` (from its instrumentation API or

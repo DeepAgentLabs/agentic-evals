@@ -14,13 +14,17 @@ from agentic_evals import (
 
 
 def _context(
-    *, output: str, expected_output: str | None, input_: object = None
+    *, output: str, reference: str | None = None, input_: object = None, threshold: float = 0.8
 ) -> EvaluationContext:
-    case = TestCase(id="case-1", name="case", expected_output=expected_output, input=input_)
+    # Filler expectation unrelated to the rubric under test: TestCase
+    # requires at least one, and expected_output is deliberately not used
+    # here (see LLMRubricEvaluator's docstring on why).
+    case = TestCase(id="case-1", name="case", input=input_, max_turns=1_000_000)
     sample = EvaluationSample(case_id="case-1", output=output, trace=EvalTrace())
-    return EvaluationContext(
-        case=case, sample=sample, config=EvaluatorConfig(name="judge", threshold=0.8)
+    config = EvaluatorConfig(
+        name="judge", threshold=threshold, config={"reference": reference} if reference else {}
     )
+    return EvaluationContext(case=case, sample=sample, config=config)
 
 
 def test_rubric_template_renders_all_fields() -> None:
@@ -67,7 +71,7 @@ def test_battle_template_distinguishes_win_and_tie_tokens() -> None:
 
 def test_llm_rubric_evaluator_scores_using_complete_fn() -> None:
     evaluator = LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=lambda prompt: "(A)")
-    context = _context(output="Paris", expected_output="Paris is the capital of France")
+    context = _context(output="Paris", reference="Paris is the capital of France")
 
     scores = evaluator.evaluate(context)
 
@@ -81,7 +85,7 @@ def test_llm_rubric_evaluator_scores_using_complete_fn() -> None:
 
 def test_llm_rubric_evaluator_applies_threshold_from_config() -> None:
     evaluator = LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=lambda prompt: "(C)")
-    context = _context(output="Paris", expected_output="Paris is the capital of France")
+    context = _context(output="Paris", reference="Paris is the capital of France")
 
     score = evaluator.evaluate(context)[0]
 
@@ -91,7 +95,7 @@ def test_llm_rubric_evaluator_applies_threshold_from_config() -> None:
 
 def test_llm_rubric_evaluator_propagates_unparseable_completion() -> None:
     evaluator = LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=lambda prompt: "unclear")
-    context = _context(output="Paris", expected_output="Paris is the capital of France")
+    context = _context(output="Paris", reference="Paris is the capital of France")
 
     with pytest.raises(ValueError, match="could not parse a verdict"):
         evaluator.evaluate(context)

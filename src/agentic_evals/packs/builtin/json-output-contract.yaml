@@ -1,0 +1,23 @@
+name: json-output-contract
+description: >
+  Checks that an agent's output is valid JSON and matches an expected
+  structure -- catches both malformed JSON and structurally wrong
+  responses.
+required_scorers:
+  - valid_json
+  - json_diff
+suite:
+  name: json-output-contract
+  version: "1"
+  description: >
+    The agent must return a JSON object with the exact structure the
+    caller expects.
+  cases:
+    - id: structured-answer
+      name: Output is valid JSON matching the expected structure
+      expected_output: '{"answer": "42", "confidence": 0.9}'
+      evaluators:
+        - name: valid_json
+          threshold: 1.0
+        - name: json_diff
+          threshold: 1.0

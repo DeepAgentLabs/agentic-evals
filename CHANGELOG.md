@@ -4,6 +4,32 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.3.0 - 2026-09-13
+
+### Added
+
+- `agentic_evals.skills`: methodology playbooks (`SKILL.md` cards --
+  Trigger/Do/Avoid/Check/Risk, matching the format Braintrust's
+  `eval-library/skills` uses), scoped to this package's own API:
+  `write-a-scorer`, `define-a-release-gate`, `size-a-test-suite`,
+  `instrument-a-trace`. These are guidance documents, not runnable code --
+  consumable by a human or by a coding agent's own skill mechanism.
+- `agentic_evals.packs`: runnable eval-config bundles -- a `TestSuite`
+  paired with the scorer names it needs, loaded from a single YAML/JSON
+  file. `load_pack()`/`load_builtin_pack()` validate that every
+  `required_scorers` entry resolves in the registry before returning.
+  Ships 3 built-in packs: `tool-use-correctness`, `factual-qa`,
+  `json-output-contract`.
+
+### Fixed
+
+- `LLMRubricEvaluator` now reads its reference material (the expert
+  answer for `FACTUALITY`, candidate B for `BATTLE`) from
+  `EvaluatorConfig.config["reference"]` instead of `case.expected_output`.
+  Reusing `expected_output` collided with `evaluate_suite`'s hardcoded
+  exact-match check, which fires whenever that field is set -- silently
+  forcing every rubric-graded case to also require a literal string match.
+
 ## 0.2.0 - 2026-09-13
 
 ### Added

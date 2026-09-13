@@ -1,0 +1,27 @@
+name: tool-use-correctness
+description: >
+  Checks that an agent calls exactly the tools a refund-lookup task
+  needs -- the required lookup tool, and never a destructive delete tool.
+required_scorers:
+  - tool_call_precision
+suite:
+  name: tool-use-correctness
+  version: "1"
+  description: >
+    An agent answering a refund-status question must call lookup_refund
+    and never delete_order.
+  cases:
+    - id: refund-status-lookup
+      name: Agent looks up the refund without deleting anything
+      input:
+        order_id: A123
+      required_tools:
+        - lookup_refund
+      forbidden_tools:
+        - delete_order
+      evaluators:
+        - name: tool_call_precision
+          threshold: 1.0
+          config:
+            allowed_tools:
+              - lookup_refund

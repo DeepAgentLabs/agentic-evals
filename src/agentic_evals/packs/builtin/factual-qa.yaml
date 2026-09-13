@@ -1,0 +1,27 @@
+name: factual-qa
+description: >
+  Grades a submitted answer against a reference answer for factual
+  consistency using the FACTUALITY rubric. Requires the caller to
+  register LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=...)
+  since grading needs a real model call.
+required_scorers:
+  - factuality
+suite:
+  name: factual-qa
+  version: "1"
+  description: >
+    Compares a submitted answer against a reference answer for factual
+    consistency.
+  cases:
+    - id: capital-of-france
+      name: Answer states the correct capital
+      input: What is the capital of France?
+      # No expected_output here on purpose: evaluate_suite runs a
+      # hardcoded exact-match check whenever it's set, which would fight
+      # a rubric meant to allow near-matches. The reference answer for
+      # the rubric lives in the evaluator's own config instead.
+      evaluators:
+        - name: factuality
+          threshold: 0.8
+          config:
+            reference: Paris is the capital of France.

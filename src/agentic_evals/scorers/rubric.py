@@ -139,7 +139,14 @@ MODERATION = RubricTemplate(
 
 
 class LLMRubricEvaluator(CallableEvaluator):
-    """Grade a sample against a `RubricTemplate` using a caller-supplied model call."""
+    """Grade a sample against a `RubricTemplate` using a caller-supplied model call.
+
+    The rubric's reference material (the expert answer for `FACTUALITY`,
+    candidate B for `BATTLE`) comes from `EvaluatorConfig.config["reference"]`
+    -- deliberately *not* `case.expected_output`, since `evaluate_suite`
+    runs a hardcoded exact-match check whenever `expected_output` is set,
+    which would fight a rubric that's meant to allow near-matches.
+    """
 
     def __init__(
         self, name: str, template: RubricTemplate, complete_fn: Callable[[str], str]
@@ -147,7 +154,7 @@ class LLMRubricEvaluator(CallableEvaluator):
         def _judge(context: EvaluationContext) -> Score:
             prompt = template.render(
                 output=context.sample.output,
-                expected=context.case.expected_output,
+                expected=context.config.config.get("reference"),
                 input=context.case.input,
                 extra=context.config.config.get("extra", {}),
             )

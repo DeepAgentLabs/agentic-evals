@@ -29,6 +29,7 @@ from agentic_evals.models import (
     TestCase,
     TestSuite,
 )
+from agentic_evals.packs import EvalPack, list_builtin_packs, load_builtin_pack, load_pack
 from agentic_evals.runner import (
     evaluate_suite,
     load_samples,
@@ -59,7 +60,7 @@ from agentic_evals.scorers import (
     valid_json,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "BATTLE",
@@ -70,6 +71,7 @@ __all__ = [
     "BusinessRuleEvaluator",
     "CallableEvaluator",
     "CaseEvaluation",
+    "EvalPack",
     "EvalSpan",
     "EvalTrace",
     "EvaluationContext",
@@ -101,6 +103,9 @@ __all__ = [
     "exact_match",
     "json_diff",
     "levenshtein_similarity",
+    "list_builtin_packs",
+    "load_builtin_pack",
+    "load_pack",
     "load_samples",
     "load_suite",
     "no_redundant_tool_calls",
