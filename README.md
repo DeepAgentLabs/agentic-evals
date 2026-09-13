@@ -146,6 +146,63 @@ Never fabricates a value it can't back up: `total_cost_usd` on a summary or
 gate decision stays `None` unless every case in scope has a known cost —
 an incomplete cost picture is reported as unavailable, not `$0.00`.
 
+## Built-in scorers
+
+`agentic_evals.scorers` ships ready-to-use scorers so you don't have to
+hand-write a `CallableEvaluator` for common checks:
+
+- **`scorers.text`** (deterministic, no LLM): `exact_match`, `contains_all`,
+  `contains_any`, `levenshtein_similarity`, `embedding_similarity`,
+  `valid_json`, `json_diff`, `numeric_diff`.
+- **`scorers.rubric`** (LLM-graded, provider-neutral): `RubricTemplate` +
+  `LLMRubricEvaluator`, with built-in templates `FACTUALITY`, `CLOSED_QA`,
+  `SUMMARY_QUALITY`, `BATTLE` (pairwise A/B), `MODERATION`. Like
+  `LLMJudgeEvaluator`, this package never calls a model itself -- you pass
+  a `complete_fn: Callable[[str], str]`.
+- **`scorers.trajectory`** (reads the trace, not just the output text --
+  the part a plain text-scoring library has no equivalent for):
+  `tool_call_precision`, `tool_call_recall`, `no_redundant_tool_calls`,
+  `trajectory_efficiency`.
+
+```python
+from agentic_evals import (
+    EvalTrace,
+    EvaluationSample,
+    EvaluatorConfig,
+    TestCase,
+    TestSuite,
+    default_registry,
+    evaluate_suite,
+)
+
+suite = TestSuite(
+    name="support-answers",
+    version="1",
+    cases=[
+        TestCase(
+            id="case-1",
+            name="Answer is close to the reference",
+            expected_output="The combined total is 42.",
+            evaluators=[EvaluatorConfig(name="levenshtein_similarity", threshold=0.9)],
+        )
+    ],
+)
+sample = EvaluationSample(case_id="case-1", output="The combined total is 42.", trace=EvalTrace())
+
+report = evaluate_suite(suite, [sample], registry=default_registry())
+```
+
+`default_registry()` covers every `text`/`trajectory` scorer under a
+stable name. Rubric scorers need a `complete_fn`, so register an
+`LLMRubricEvaluator` instance yourself:
+
+```python
+from agentic_evals import FACTUALITY, LLMRubricEvaluator, default_registry
+
+registry = default_registry()
+registry.register(LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=call_your_model))
+```
+
 ## Live targets
 
 Point a suite at a real running system (a trusted Python callable, or an
