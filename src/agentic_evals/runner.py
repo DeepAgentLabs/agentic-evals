@@ -1,6 +1,7 @@
 import json
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
@@ -25,6 +26,8 @@ from agentic_evals.models import (
     TestSuite,
 )
 
+TraceAdapter = Callable[[Any], Any]
+
 
 def _load_data(path: Path) -> Any:
     text = path.read_text(encoding="utf-8")
@@ -35,9 +38,23 @@ def load_suite(path: Path) -> TestSuite:
     return TestSuite.model_validate(_load_data(path))
 
 
-def load_samples(path: Path) -> list[EvaluationSample]:
+def load_samples(
+    path: Path, *, trace_adapter: TraceAdapter | None = None
+) -> list[EvaluationSample]:
+    """Load samples from a JSON/YAML file.
+
+    `trace_adapter`, if given, is applied to each sample's raw `trace` value
+    before validation -- callers whose trace payloads predate or otherwise
+    don't match `EvalTrace`'s shape can normalize them here instead of
+    having them silently validate with defaulted-out fields.
+    """
     data = _load_data(path)
     items = data["samples"] if isinstance(data, dict) and "samples" in data else data
+    if trace_adapter is not None:
+        items = [
+            {**item, "trace": trace_adapter(item["trace"])} if "trace" in item else item
+            for item in items
+        ]
     return [EvaluationSample.model_validate(item) for item in items]
 
 
@@ -294,25 +311,38 @@ def _load_python_callable(callable_path: str) -> Any:
     return target
 
 
+def _sample_from_payload(
+    payload: dict[str, Any], case_id: str, trace_adapter: TraceAdapter | None
+) -> EvaluationSample:
+    if trace_adapter is not None and "trace" in payload:
+        payload = {**payload, "trace": trace_adapter(payload["trace"])}
+    return EvaluationSample.model_validate({**payload, "case_id": case_id})
+
+
 def run_live_suite(
     suite: TestSuite,
     target: LiveTarget,
     *,
     registry: EvaluatorRegistry | None = None,
+    trace_adapter: TraceAdapter | None = None,
 ) -> EvaluationReport:
     """Run a trusted live target against every case in a suite.
 
     Live targets are intentionally powerful developer-facing integrations:
     Python targets execute local code and HTTP targets can reach arbitrary URLs.
     Only use trusted suite files and trusted target definitions.
+
+    `trace_adapter`, if given, is applied to each result's raw `trace` value
+    before validation -- callers whose target implementations return trace
+    payloads that don't match `EvalTrace`'s shape can normalize them here
+    instead of having them silently validate with defaulted-out fields.
     """
     samples: list[EvaluationSample] = []
     if isinstance(target, PythonTarget):
         callable_target = _load_python_callable(target.callable_path)
         for case in suite.cases:
             result = callable_target(case.input, case=case)
-            sample = EvaluationSample.model_validate({**result, "case_id": case.id})
-            samples.append(sample)
+            samples.append(_sample_from_payload(result, case.id, trace_adapter))
     elif isinstance(target, HTTPTarget):
         for case in suite.cases:
             request = urllib.request.Request(
@@ -326,8 +356,7 @@ def run_live_suite(
                     payload = json.loads(response.read().decode("utf-8"))
             except urllib.error.URLError as exc:
                 raise ValueError(f"HTTP target request failed for case {case.id!r}: {exc}") from exc
-            sample = EvaluationSample.model_validate({**payload, "case_id": case.id})
-            samples.append(sample)
+            samples.append(_sample_from_payload(payload, case.id, trace_adapter))
     else:
         raise ValueError(f"Unsupported live target kind: {target.kind}")
     return evaluate_suite(suite, samples, registry=registry)
