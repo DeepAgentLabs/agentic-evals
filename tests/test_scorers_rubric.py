@@ -4,6 +4,11 @@ from agentic_evals import (
     BATTLE,
     CLOSED_QA,
     FACTUALITY,
+    PII_LEAKAGE,
+    POSSIBLE,
+    SECURITY,
+    SQL_CORRECTNESS,
+    TRANSLATION,
     EvalTrace,
     EvaluationContext,
     EvaluationSample,
@@ -99,3 +104,48 @@ def test_llm_rubric_evaluator_propagates_unparseable_completion() -> None:
 
     with pytest.raises(ValueError, match="could not parse a verdict"):
         evaluator.evaluate(context)
+
+
+def test_translation_template_parses_verdict() -> None:
+    letter, value = TRANSLATION.parse_verdict("(A) accurate and fluent")
+    assert letter == "A"
+    assert value == 1.0
+
+
+def test_security_template_parses_verdict() -> None:
+    letter, value = SECURITY.parse_verdict("Verdict: (D) exploitable")
+    assert letter == "D"
+    assert value == 0.0
+
+
+def test_sql_correctness_template_renders_expected_as_reference_query() -> None:
+    prompt = SQL_CORRECTNESS.render(
+        output="SELECT * FROM t",
+        expected="SELECT id FROM t",
+        input="get all rows",
+    )
+    assert "SELECT * FROM t" in prompt
+    assert "SELECT id FROM t" in prompt
+
+
+def test_possible_template_parses_verdict() -> None:
+    letter, value = POSSIBLE.parse_verdict("(C) fabricates an answer")
+    assert letter == "C"
+    assert value == 0.0
+
+
+def test_pii_leakage_template_parses_verdict() -> None:
+    letter, value = PII_LEAKAGE.parse_verdict("(A) no PII disclosed")
+    assert letter == "A"
+    assert value == 1.0
+
+
+def test_llm_rubric_evaluator_works_with_new_templates() -> None:
+    evaluator = LLMRubricEvaluator("security", SECURITY, complete_fn=lambda prompt: "(A)")
+    context = _context(output="def f(): return 1")
+
+    score = evaluator.evaluate(context)[0]
+
+    assert score.name == "security"
+    assert score.value == 1.0
+    assert score.passed is True

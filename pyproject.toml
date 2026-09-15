@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentic-evals"
-version = "0.3.0"
+version = "0.4.0"
 description = "A standalone, framework-agnostic evaluation and scoring engine for LLM/agent outputs — extracted from AgenticLens's evaluation module."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 authors = [{ name = "agentic-evals Contributors" }]
 keywords = ["llm", "agents", "evaluation", "scoring", "llm-as-judge", "testing"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.10",
@@ -43,6 +43,9 @@ dev = [
   "build>=1.2",
   "twine>=5.1",
 ]
+
+[project.scripts]
+agentic-evals = "agentic_evals.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/DeepAgentLabs/agentic-evals"

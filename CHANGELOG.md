@@ -4,6 +4,52 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- Four new deterministic `scorers.text` checks: `regex_match` (with
+  `full_match`/`case_insensitive` options), `starts_with`, `ends_with`,
+  `numeric_range` (one- or two-sided `min`/`max`). All registered under
+  `default_registry()` like the existing text scorers.
+- Five new `scorers.rubric` templates, autoevals-style: `TRANSLATION`,
+  `SECURITY` (code/output vulnerability review), `SQL_CORRECTNESS`
+  (semantic equivalence against a reference query, not textual
+  similarity), `POSSIBLE` (fabricate-vs-refuse on unanswerable requests),
+  `PII_LEAKAGE`.
+- Two new zero-setup scorers for the `Eval()` API: `matches` (regex
+  search) and `numeric_close` (1% relative tolerance).
+- Thirteen new methodology skills, bringing `agentic_evals/skills/` from 4
+  to 17 and covering the full eval lifecycle the way Braintrust's
+  `eval-library` does (Frame/Build data/Score/Run/Experiment/Investigate/
+  Operate), scoped
+  to this package's own API: `define-an-eval-objective`,
+  `elicit-eval-criteria`, `build-an-eval-dataset`, `choose-a-rubric-template`,
+  `validate-a-scorer`, `run-a-live-suite`, `design-an-eval-experiment`,
+  `analyze-an-eval-experiment`, `discover-failure-modes`,
+  `red-team-an-agent-suite`, `debug-a-flaky-llm-judge`,
+  `report-eval-results`, `monitor-evals-in-production`.
+
+## 0.4.0 - 2026-09-14
+
+### Added
+
+- `Eval(name, data=..., task=..., scores=[...])`: a one-call entry point
+  alongside the existing `TestSuite`/`TestCase`/`evaluate_suite` API, for
+  the same "install and run a first eval in a minute" experience as
+  `braintrust.Eval(...)`. Takes plain dicts (`{"input": ..., "expected":
+  ...}`), any callable as the task under test, and scorer functions that
+  return a float/bool/`Score`/`{"score": ...}`; prints a pass/fail table
+  and returns an `EvalResult` (`bool(result)` is the overall verdict).
+- `agentic-evals run [paths...]`: a CLI (`pip install agentic-evals` now
+  also installs this command) that discovers `*_eval.py` / `eval_*.py` /
+  `*.eval.py` files, runs every `Eval(...)` call in them, and exits
+  non-zero if any case failed -- drop-in for CI, no config file needed.
+- Four zero-setup scorers for the new `Eval()` API: `equals`, `contains`,
+  `icontains`, `levenshtein`. (The existing `scorers.text`/`scorers.rubric`/
+  `scorers.trajectory` library is unchanged and still the deeper,
+  trace-aware option for `TestSuite`-based evaluation.)
+
 ## 0.3.0 - 2026-09-13
 
 ### Added

@@ -1,5 +1,10 @@
 # agentic-evals
 
+[![PyPI](https://img.shields.io/pypi/v/agentic-evals)](https://pypi.org/project/agentic-evals/)
+[![Python versions](https://img.shields.io/pypi/pyversions/agentic-evals)](https://pypi.org/project/agentic-evals/)
+[![CI](https://github.com/DeepAgentLabs/agentic-evals/actions/workflows/ci.yml/badge.svg)](https://github.com/DeepAgentLabs/agentic-evals/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **A standalone, framework-agnostic evaluation and scoring engine for LLM and
 agent outputs.**
 
@@ -11,9 +16,12 @@ dependency on AgenticLens itself.
 
 ## Status
 
-**Alpha.** The engine (deterministic checks, LLM-as-judge and custom
-evaluators, a release gate, live Python/HTTP targets) is real, tested code
-lifted directly from AgenticLens's evaluation module. No PyPI release yet.
+**Published on PyPI.** The engine (deterministic checks, LLM-as-judge and
+custom evaluators, a release gate, live Python/HTTP targets, the `Eval()`
+quickstart API, and the `agentic-evals` CLI) is real, tested code — see the
+[changelog](CHANGELOG.md) for what shipped in each release. The API may
+still move between minor versions ahead of a 1.0; pin a version in
+production and read the changelog before upgrading.
 
 ## Why a separate package
 
@@ -33,7 +41,77 @@ full trace schema, CLI, or dashboards. Pulling it out means:
 pip install agentic-evals
 ```
 
-## Core concepts
+## Quickstart in under a minute
+
+The fast path in -- no `TestSuite`, no `TestCase`, no trace object. Write a
+file, run it:
+
+```python
+# capitals_eval.py
+from agentic_evals import Eval, equals
+
+def my_agent(country: str) -> str:
+    return {"France": "Paris", "Japan": "Tokyo"}[country]
+
+Eval(
+    "capitals",
+    data=[
+        {"input": "France", "expected": "Paris"},
+        {"input": "Japan", "expected": "Tokyo"},
+    ],
+    task=my_agent,
+    scores=[equals],
+)
+```
+
+```bash
+$ python capitals_eval.py
+agentic-evals :: capitals
+--------------------------
+  [PASS] France  equals=1.00
+  [PASS] Japan  equals=1.00
+
+  equals                       avg 1.000
+
+  2/2 passed  (100.0%)  in 0ms
+```
+
+Or let the CLI find every eval file in a directory and roll them into one
+CI-friendly exit code -- `0` if every case in every file passed, `1`
+otherwise, no config file required:
+
+```bash
+pip install agentic-evals
+agentic-evals run                 # discovers *_eval.py / eval_*.py / *.eval.py
+```
+
+A scorer is any function that returns a `float`/`bool` (0-1), a `Score`, or
+`{"score": ..., "name": ...}` -- called with whichever of `input`, `output`,
+`expected` it declares as parameters:
+
+```python
+def contains_the_total(output: str, expected: str) -> bool:
+    return expected in output
+```
+
+Six ready-made scorers ship for this API: `equals`, `contains`,
+`icontains`, `levenshtein`, `matches` (regex), `numeric_close` (tolerance-
+based). `Eval()` also accepts `threshold=` (default
+`1.0`) -- a case passes when every one of its scores clears it -- and
+`data=` may be a zero-argument callable for data you'd rather build lazily.
+
+This is deliberately the *simple* surface. Everything below -- trace-aware
+scorers, JSON Schema/tool-call expectations, eval packs, cost/latency
+release gates -- is the same engine underneath, for when a plain
+`input`/`output`/`expected` row isn't enough.
+
+## The declarative API
+
+For trace-aware expectations (tool calls, latency/cost thresholds, JSON
+Schema) and CI release gates, use `TestSuite`/`TestCase`/`evaluate_suite`
+directly -- the engine `Eval()` above is a thin, opinionated front end for.
+
+### Core concepts
 
 - **`EvalTrace`/`EvalSpan`** — the minimal trace shape the engine inspects:
   a trace id, spans (each optionally naming a `tool_name` and carrying
@@ -55,7 +133,7 @@ pip install agentic-evals
 - **`GateConfig`/`evaluate_gate`** — turn an `EvaluationReport` into a
   pass/fail release decision on configurable thresholds.
 
-## Quickstart
+### TestSuite quickstart
 
 ```python
 from agentic_evals import (
@@ -153,10 +231,12 @@ hand-write a `CallableEvaluator` for common checks:
 
 - **`scorers.text`** (deterministic, no LLM): `exact_match`, `contains_all`,
   `contains_any`, `levenshtein_similarity`, `embedding_similarity`,
-  `valid_json`, `json_diff`, `numeric_diff`.
+  `valid_json`, `json_diff`, `numeric_diff`, `regex_match`, `starts_with`,
+  `ends_with`, `numeric_range`.
 - **`scorers.rubric`** (LLM-graded, provider-neutral): `RubricTemplate` +
   `LLMRubricEvaluator`, with built-in templates `FACTUALITY`, `CLOSED_QA`,
-  `SUMMARY_QUALITY`, `BATTLE` (pairwise A/B), `MODERATION`. Like
+  `SUMMARY_QUALITY`, `BATTLE` (pairwise A/B), `MODERATION`, `TRANSLATION`,
+  `SECURITY`, `SQL_CORRECTNESS`, `POSSIBLE`, `PII_LEAKAGE`. Like
   `LLMJudgeEvaluator`, this package never calls a model itself -- you pass
   a `complete_fn: Callable[[str], str]`.
 - **`scorers.trajectory`** (reads the trace, not just the output text --
@@ -251,11 +331,23 @@ since it uses the `FACTUALITY` rubric). Load your own with `load_pack(path)`.
 ## Skills
 
 `agentic_evals/skills/` ships methodology playbooks (`SKILL.md` cards --
-Trigger/Do/Avoid/Check/Risk), not runnable code: `write-a-scorer`,
-`define-a-release-gate`, `size-a-test-suite`, `instrument-a-trace`. These
-document how to use this package well and are meant to be read directly,
-or picked up by a coding agent's own skill mechanism -- distinct from
-"packs" above, which are runnable configuration.
+Trigger/Do/Avoid/Check/Risk), not runnable code -- the same format
+Braintrust's `eval-library/skills` uses, scoped to this package's own API.
+17 skills cover the eval lifecycle end to end:
+
+- **Frame**: `define-an-eval-objective`, `elicit-eval-criteria`
+- **Build data**: `build-an-eval-dataset`, `size-a-test-suite`
+- **Score**: `write-a-scorer`, `choose-a-rubric-template`, `validate-a-scorer`
+- **Run**: `instrument-a-trace`, `run-a-live-suite`
+- **Experiment**: `design-an-eval-experiment`, `analyze-an-eval-experiment`
+- **Investigate**: `discover-failure-modes`, `red-team-an-agent-suite`,
+  `debug-a-flaky-llm-judge`
+- **Operate**: `define-a-release-gate`, `report-eval-results`,
+  `monitor-evals-in-production`
+
+These document how to use this package well and are meant to be read
+directly, or picked up by a coding agent's own skill mechanism -- distinct
+from "packs" above, which are runnable configuration.
 
 ## Using it with AgenticLens's own traces
 

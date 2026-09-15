@@ -2,6 +2,7 @@
 
 import json
 import math
+import re
 from typing import Any
 
 from agentic_evals.evaluators import EvaluationContext
@@ -227,6 +228,82 @@ def json_diff(context: EvaluationContext) -> Score:
         explanation="Output matches the expected JSON structure."
         if passed
         else f"First difference: {difference}.",
+    )
+
+
+def regex_match(context: EvaluationContext) -> Score:
+    """Output matches a regex `pattern` from `EvaluatorConfig.config`.
+
+    Set `full_match=True` in config to require `re.fullmatch` instead of the
+    default `re.search` (i.e. the whole output must match, not a substring).
+    """
+    pattern = context.config.config.get("pattern")
+    if not pattern:
+        raise ValueError("regex_match requires a 'pattern' string in EvaluatorConfig.config")
+    flags = re.IGNORECASE if context.config.config.get("case_insensitive") else 0
+    compiled = re.compile(pattern, flags)
+    matcher = compiled.fullmatch if context.config.config.get("full_match") else compiled.search
+    matched = matcher(context.sample.output) is not None
+    return Score(
+        name="regex_match",
+        value=float(matched),
+        passed=matched,
+        explanation=f"Output {'matches' if matched else 'does not match'} pattern {pattern!r}.",
+    )
+
+
+def starts_with(context: EvaluationContext) -> Score:
+    """Output starts with the reference text (see `_require_reference_text`)."""
+    reference = _require_reference_text(context, "starts_with")
+    output = context.sample.output
+    passed = output.casefold().startswith(reference.casefold())
+    return Score(
+        name="starts_with",
+        value=float(passed),
+        passed=passed,
+        explanation=f"Output {'starts' if passed else 'does not start'} with {reference!r}.",
+    )
+
+
+def ends_with(context: EvaluationContext) -> Score:
+    """Output ends with the reference text (see `_require_reference_text`)."""
+    reference = _require_reference_text(context, "ends_with")
+    output = context.sample.output
+    passed = output.casefold().endswith(reference.casefold())
+    return Score(
+        name="ends_with",
+        value=float(passed),
+        passed=passed,
+        explanation=f"Output {'ends' if passed else 'does not end'} with {reference!r}.",
+    )
+
+
+def numeric_range(context: EvaluationContext) -> Score:
+    """Output, parsed as a float, falls within `[min, max]` from config (either bound optional)."""
+    config = context.config.config
+    minimum = config.get("min")
+    maximum = config.get("max")
+    if minimum is None and maximum is None:
+        raise ValueError(
+            "numeric_range requires at least one of 'min'/'max' in EvaluatorConfig.config"
+        )
+    try:
+        value = float(context.sample.output.strip())
+    except ValueError as exc:
+        return Score(
+            name="numeric_range",
+            value=0.0,
+            passed=False,
+            explanation=f"Output is not numeric: {exc}.",
+        )
+    passed = (minimum is None or value >= minimum) and (maximum is None or value <= maximum)
+    return Score(
+        name="numeric_range",
+        value=float(passed),
+        passed=passed,
+        explanation=(
+            f"Output {value} is {'within' if passed else 'outside'} range [{minimum}, {maximum}]."
+        ),
     )
 
 

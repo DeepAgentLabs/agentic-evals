@@ -9,10 +9,14 @@ from agentic_evals import (
     contains_all,
     contains_any,
     embedding_similarity,
+    ends_with,
     exact_match,
     json_diff,
     levenshtein_similarity,
     numeric_diff,
+    numeric_range,
+    regex_match,
+    starts_with,
     valid_json,
 )
 
@@ -159,3 +163,71 @@ def test_numeric_diff_rejects_non_numeric_output() -> None:
     score = numeric_diff(context)
     assert score.value == 0.0
     assert score.passed is False
+
+
+def test_regex_match_searches_by_default() -> None:
+    context = _context("order #42 shipped", config={"pattern": r"#\d+"})
+    score = regex_match(context)
+    assert score.value == 1.0
+    assert score.passed is True
+
+
+def test_regex_match_full_match_requires_whole_string() -> None:
+    context = _context("order #42 shipped", config={"pattern": r"#\d+", "full_match": True})
+    assert regex_match(context).value == 0.0
+
+    context = _context("#42", config={"pattern": r"#\d+", "full_match": True})
+    assert regex_match(context).value == 1.0
+
+
+def test_regex_match_case_insensitive() -> None:
+    context = _context("HELLO", config={"pattern": "hello", "case_insensitive": True})
+    assert regex_match(context).value == 1.0
+
+
+def test_regex_match_requires_pattern() -> None:
+    context = _context("anything")
+    with pytest.raises(ValueError, match="pattern"):
+        regex_match(context)
+
+
+def test_starts_with_is_case_insensitive() -> None:
+    context = _context("Hello world", expected_output="hello")
+    assert starts_with(context).value == 1.0
+
+    context = _context("world hello", expected_output="hello")
+    assert starts_with(context).value == 0.0
+
+
+def test_ends_with_is_case_insensitive() -> None:
+    context = _context("say Hello", expected_output="hello")
+    assert ends_with(context).value == 1.0
+
+    context = _context("hello world", expected_output="hello")
+    assert ends_with(context).value == 0.0
+
+
+def test_numeric_range_passes_within_bounds() -> None:
+    context = _context("5", config={"min": 1, "max": 10})
+    assert numeric_range(context).value == 1.0
+
+
+def test_numeric_range_fails_outside_bounds() -> None:
+    context = _context("15", config={"min": 1, "max": 10})
+    assert numeric_range(context).value == 0.0
+
+
+def test_numeric_range_supports_one_sided_bounds() -> None:
+    context = _context("1000", config={"min": 1})
+    assert numeric_range(context).value == 1.0
+
+
+def test_numeric_range_requires_a_bound() -> None:
+    context = _context("5")
+    with pytest.raises(ValueError, match="min.*max"):
+        numeric_range(context)
+
+
+def test_numeric_range_rejects_non_numeric_output() -> None:
+    context = _context("not a number", config={"min": 0, "max": 10})
+    assert numeric_range(context).value == 0.0
