@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Examples
+    url: https://github.com/DeepAgentLabs/agentic-evals/tree/main/examples
+    about: Browse runnable example scripts for scorers, rubrics, and eval packs.
+  - name: AgenticLens
+    url: https://github.com/DeepAgentLabs/agenticlens
+    about: The tracing/profiling project this evaluation engine was extracted from.

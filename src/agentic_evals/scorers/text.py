@@ -15,6 +15,24 @@ def _require_expected_output(context: EvaluationContext, scorer_name: str) -> st
     return expected
 
 
+def _require_reference_text(context: EvaluationContext, scorer_name: str) -> str:
+    """Reference text for a graded (non-exact) comparison.
+
+    Prefers `EvaluatorConfig.config["reference"]` over `case.expected_output`
+    so a near-miss scorer can be used *without* also triggering
+    `evaluate_suite`'s hardcoded strict exact-match check, which fires
+    whenever `expected_output` is set. Falls back to `expected_output` for
+    the common case where a case has only this one criterion.
+    """
+    reference = context.config.config.get("reference") or context.case.expected_output
+    if reference is None:
+        raise ValueError(
+            f"{scorer_name} requires either 'reference' in EvaluatorConfig.config "
+            "or the test case to set expected_output"
+        )
+    return str(reference)
+
+
 def exact_match(context: EvaluationContext) -> Score:
     expected = _require_expected_output(context, "exact_match")
     passed = context.sample.output.strip() == expected.strip()
@@ -84,7 +102,7 @@ def _levenshtein_distance(a: str, b: str) -> int:
 
 
 def levenshtein_similarity(context: EvaluationContext) -> Score:
-    reference = _require_expected_output(context, "levenshtein_similarity").strip()
+    reference = _require_reference_text(context, "levenshtein_similarity").strip()
     output = context.sample.output.strip()
     distance = _levenshtein_distance(output, reference)
     longest = max(len(output), len(reference), 1)
@@ -121,7 +139,7 @@ def embedding_similarity(context: EvaluationContext) -> Score:
     calls). Cosine similarity is rescaled from [-1, 1] to [0, 1] to fit
     `Score.value`'s range; the raw value is kept in `Score.metadata`.
     """
-    expected = _require_expected_output(context, "embedding_similarity")
+    expected = _require_reference_text(context, "embedding_similarity")
     embed_fn = context.config.config.get("embed_fn")
     if embed_fn is None or not callable(embed_fn):
         raise ValueError(
@@ -186,7 +204,7 @@ def _first_json_difference(expected: Any, actual: Any, path: str = "$") -> str |
 
 def json_diff(context: EvaluationContext) -> Score:
     """Structural diff of the output against `expected_output`, both parsed as JSON."""
-    expected_raw = _require_expected_output(context, "json_diff")
+    expected_raw = _require_reference_text(context, "json_diff")
     try:
         actual_value = json.loads(context.sample.output)
     except ValueError as exc:
@@ -214,7 +232,7 @@ def json_diff(context: EvaluationContext) -> Score:
 
 def numeric_diff(context: EvaluationContext) -> Score:
     """Tolerance-based numeric comparison; configure via `rel_tol`/`abs_tol` in config."""
-    expected_raw = _require_expected_output(context, "numeric_diff")
+    expected_raw = _require_reference_text(context, "numeric_diff")
     try:
         actual_value = float(context.sample.output.strip())
     except ValueError as exc:
