@@ -5,7 +5,7 @@ calls `Eval(...)` at module level (the same convention `pytest` uses for
 `test_*.py`, just for evals instead of assertions). This command imports
 each one, lets its own `Eval()` calls print their own report, and exits
 non-zero if any of them failed a case -- so it drops into CI exactly the
-way `pytest` or `braintrust eval` do:
+way `pytest` does:
 
     agentic-evals run                 # everything under the current directory
     agentic-evals run evals/          # a specific directory

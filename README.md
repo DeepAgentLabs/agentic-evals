@@ -32,8 +32,7 @@ full trace schema, CLI, or dashboards. Pulling it out means:
 - `agentic-sidecar`, `agentic-chaos`, or any other project can score outputs
   without depending on all of AgenticLens.
 - Anyone with *any* trace-shaped data — not just AgenticLens users — can use
-  it, the same way Braintrust's `autoevals` doesn't care what produced the
-  string it's scoring.
+  it; scoring a string doesn't need to care what produced it.
 
 ## Install
 
@@ -50,8 +49,10 @@ file, run it:
 # capitals_eval.py
 from agentic_evals import Eval, equals
 
+
 def my_agent(country: str) -> str:
     return {"France": "Paris", "Japan": "Tokyo"}[country]
+
 
 Eval(
     "capitals",
@@ -331,9 +332,8 @@ since it uses the `FACTUALITY` rubric). Load your own with `load_pack(path)`.
 ## Skills
 
 `agentic_evals/skills/` ships methodology playbooks (`SKILL.md` cards --
-Trigger/Do/Avoid/Check/Risk), not runnable code -- the same format
-Braintrust's `eval-library/skills` uses, scoped to this package's own API.
-17 skills cover the eval lifecycle end to end:
+Trigger/Do/Avoid/Check/Risk), not runnable code, scoped to this package's
+own API. 17 skills cover the eval lifecycle end to end:
 
 - **Frame**: `define-an-eval-objective`, `elicit-eval-criteria`
 - **Build data**: `build-an-eval-dataset`, `size-a-test-suite`
@@ -360,8 +360,7 @@ an `EvalTrace`. This package has no dependency in the other direction.
 
 Dataset versioning/splitting, judge calibration, and HTML report rendering
 stay in AgenticLens for now — those are product features built *on top of*
-this engine (the same way Braintrust's dataset/experiment platform is
-separate from the `autoevals` library itself), not the engine.
+this engine, not the engine.
 
 ## License
 

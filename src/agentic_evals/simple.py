@@ -4,7 +4,7 @@ Everything else in this package (`TestSuite`/`TestCase`/`evaluate_suite`,
 packs, the release gate) stays available for teams that want declarative
 suites, trace-aware scorers, or CI gating on cost/latency. This module is
 the other on-ramp -- the one that gets a first eval running in under a
-minute, the way `braintrust.Eval(...)` or a Promptfoo config does, with no
+minute, the way a Promptfoo config does, with no
 `TestCase`/`EvaluationSample` boilerplate required.
 
     from agentic_evals import Eval, exact_match

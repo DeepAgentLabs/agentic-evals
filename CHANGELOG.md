@@ -4,7 +4,7 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.5.0 - 2026-09-15
 
 ### Added
 
@@ -20,10 +20,9 @@ This project follows [Semantic Versioning](https://semver.org/).
 - Two new zero-setup scorers for the `Eval()` API: `matches` (regex
   search) and `numeric_close` (1% relative tolerance).
 - Thirteen new methodology skills, bringing `agentic_evals/skills/` from 4
-  to 17 and covering the full eval lifecycle the way Braintrust's
-  `eval-library` does (Frame/Build data/Score/Run/Experiment/Investigate/
-  Operate), scoped
-  to this package's own API: `define-an-eval-objective`,
+  to 17 and covering the full eval lifecycle end to end (Frame/Build data/
+  Score/Run/Experiment/Investigate/Operate), scoped to this package's own
+  API: `define-an-eval-objective`,
   `elicit-eval-criteria`, `build-an-eval-dataset`, `choose-a-rubric-template`,
   `validate-a-scorer`, `run-a-live-suite`, `design-an-eval-experiment`,
   `analyze-an-eval-experiment`, `discover-failure-modes`,
@@ -36,8 +35,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 - `Eval(name, data=..., task=..., scores=[...])`: a one-call entry point
   alongside the existing `TestSuite`/`TestCase`/`evaluate_suite` API, for
-  the same "install and run a first eval in a minute" experience as
-  `braintrust.Eval(...)`. Takes plain dicts (`{"input": ..., "expected":
+  the same "install and run a first eval in a minute" experience popular
+  eval SDKs offer. Takes plain dicts (`{"input": ..., "expected":
   ...}`), any callable as the task under test, and scorer functions that
   return a float/bool/`Score`/`{"score": ...}`; prints a pass/fail table
   and returns an `EvalResult` (`bool(result)` is the overall verdict).
@@ -55,8 +54,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - `agentic_evals.skills`: methodology playbooks (`SKILL.md` cards --
-  Trigger/Do/Avoid/Check/Risk, matching the format Braintrust's
-  `eval-library/skills` uses), scoped to this package's own API:
+  Trigger/Do/Avoid/Check/Risk), scoped to this package's own API:
   `write-a-scorer`, `define-a-release-gate`, `size-a-test-suite`,
   `instrument-a-trace`. These are guidance documents, not runnable code --
   consumable by a human or by a coding agent's own skill mechanism.
