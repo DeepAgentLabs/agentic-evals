@@ -3,300 +3,217 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f0e9">
   <meta name="description" content="Agentic Evals documentation — API reference, guides, and examples">
-  <title>Agentic Evals Documentation</title>
+  <title>Agentic Evals Docs — DeepAgentLabs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     :root {
       --ink: #07110e;
       --paper: #f2f0e9;
       --acid: #b7f343;
       --mint: #d8f7c0;
+      --line: rgba(7, 17, 14, .18);
       --muted: #5f6863;
-      --bg-primary: #07110e;
-      --bg-secondary: #0f1a17;
-      --bg-tertiary: #1a2825;
-      --text-primary: #e8eae7;
-      --text-secondary: #a8ada9;
-      --accent-primary: #b7f343;
-      --accent-secondary: #b7f343;
-      --border-color: #2a3a36;
+      --body: #3f4944;
+      --max: 1240px;
+      --font-display: 'Bricolage Grotesque', Arial, sans-serif;
+      --font-body: Inter, Arial, sans-serif;
+      --font-mono: 'DM Mono', ui-monospace, monospace;
     }
 
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      background-color: var(--paper);
+      background-image: radial-gradient(rgba(7, 17, 14, .12) 1px, transparent 1px);
+      background-size: 26px 26px;
+      color: var(--ink);
+      font-family: var(--font-body);
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
+    a { color: inherit; }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 28px; }
 
     header {
-      border-bottom: 1px solid var(--border-color);
-      padding: 24px 0;
-      margin-bottom: 40px;
       position: sticky;
       top: 0;
-      background: rgba(7, 17, 14, 0.95);
-      backdrop-filter: blur(10px);
       z-index: 100;
+      background: rgba(242, 240, 233, .94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 48px;
     }
-
-    .header-content {
+    .header-content { height: 76px; display: flex; justify-content: space-between; align-items: center; }
+    .brand {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-    }
-
-    .logo {
-      font-weight: 600;
+      gap: 11px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      letter-spacing: -.04em;
       font-size: 20px;
-    }
-
-    nav {
-      display: flex;
-      gap: 24px;
-    }
-
-    nav a {
-      color: var(--text-secondary);
       text-decoration: none;
     }
-
-    nav a:hover {
-      color: var(--accent-primary);
+    .brand-logo {
+      display: block;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 36px;
+      overflow: hidden;
+      background-image: url("/assets/img/dal-logo.png");
+      background-repeat: no-repeat;
+      background-size: 88px 88px;
+      background-position: center -15px;
+      border-radius: 8px;
     }
-
-    main {
-      display: grid;
-      grid-template-columns: 250px 1fr;
-      gap: 40px;
-      margin-bottom: 80px;
+    .brand small {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-left: 4px;
     }
+    header nav { display: flex; align-items: center; gap: 28px; font-size: 14px; font-weight: 600; }
+    header nav a { text-decoration: none; }
+    header nav a:hover { opacity: .6; }
+    header nav .nav-cta { padding: 10px 14px; border: 1px solid var(--ink); }
+    header nav .nav-cta:hover { opacity: 1; background: var(--ink); color: #fff; }
 
-    .sidebar {
-      position: sticky;
-      top: 80px;
-      height: fit-content;
+    main { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 48px; margin-bottom: 80px; }
+
+    .sidebar { position: sticky; top: 110px; height: fit-content; }
+    .sidebar-section { margin-bottom: 28px; }
+    .sidebar-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
     }
+    .sidebar-links { list-style: none; margin: 0; }
+    .sidebar-links li { margin: 0; }
+    .sidebar-links a {
+      display: block;
+      padding: 6px 10px;
+      font-size: 14px;
+      color: var(--body);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: background .15s, border-color .15s;
+    }
+    .sidebar-links a:hover,
+    .sidebar-links a.active { color: var(--ink); background: var(--mint); border-left-color: var(--ink); }
 
-    .sidebar-section {
+    article {
+      background: #fbfaf6;
+      border: 1px solid var(--ink);
+      padding: 44px;
       margin-bottom: 32px;
     }
 
-    .sidebar-title {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--accent-primary);
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-
-    .sidebar-links {
-      list-style: none;
-    }
-
-    .sidebar-links li {
-      margin-bottom: 8px;
-    }
-
-    .sidebar-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      display: block;
-      padding: 8px;
-      border-radius: 4px;
-      transition: all 0.2s;
-    }
-
-    .sidebar-links a:hover,
-    .sidebar-links a.active {
-      color: var(--accent-primary);
-      background: var(--bg-tertiary);
-    }
-
-    article {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 40px;
-      margin-bottom: 40px;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 16px;
-      color: var(--accent-secondary);
-    }
-
+    h1, h2, h3 { font-family: var(--font-display); color: var(--ink); }
+    h1 { font-size: clamp(36px, 4vw, 52px); font-weight: 800; letter-spacing: -.05em; line-height: 1.02; margin-bottom: 16px; }
     h2 {
-      font-size: 2rem;
-      margin: 40px 0 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
+      font-size: 30px;
+      font-weight: 750;
+      letter-spacing: -.035em;
+      line-height: 1.1;
+      margin: 44px 0 18px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
     }
+    h2:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+    h3 { font-size: 21px; font-weight: 700; letter-spacing: -.02em; margin: 32px 0 12px; }
 
-    h2:first-child {
-      border-top: none;
-      padding-top: 0;
-      margin-top: 0;
-    }
-
-    h3 {
-      font-size: 1.3rem;
-      margin: 24px 0 16px;
-      color: var(--accent-primary);
-    }
-
-    p {
-      margin-bottom: 16px;
-      color: var(--text-secondary);
-      line-height: 1.8;
-    }
+    p { margin-bottom: 16px; color: var(--body); line-height: 1.75; }
+    strong { color: var(--ink); }
 
     code {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: "SF Mono", monospace;
-      font-size: 0.9em;
+      font-family: var(--font-mono);
+      font-size: .88em;
+      background: var(--mint);
+      padding: 1px 6px;
     }
-
     pre {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 16px;
+      background: var(--ink);
+      border: 1px solid var(--ink);
+      padding: 20px 22px;
       overflow-x: auto;
-      margin: 16px 0;
+      margin: 18px 0;
     }
-
     pre code {
       background: none;
-      border: none;
       padding: 0;
-      color: #b7f343;
+      color: #dfe6e1;
+      font-size: 13.5px;
+      line-height: 1.7;
     }
 
-    .param-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
+    .param-table { width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid var(--ink); font-size: 14px; }
     .param-table th {
-      background: var(--bg-tertiary);
-      padding: 12px;
+      background: var(--ink);
+      color: #fff;
+      padding: 11px 14px;
       text-align: left;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-color);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
     }
+    .param-table td { padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--body); vertical-align: top; }
+    .param-table tr:last-child td { border-bottom: none; }
+    .param-name { font-family: var(--font-mono); font-weight: 500; color: var(--ink); }
 
-    .param-table td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
+    .example-box { background: var(--paper); border-left: 4px solid var(--ink); padding: 16px 18px; margin: 20px 0; }
+    .note { background: var(--mint); border-left: 4px solid var(--acid); padding: 16px 18px; margin: 20px 0; }
+    .warning { background: #fdecd8; border-left: 4px solid #c2620a; padding: 16px 18px; margin: 20px 0; }
+    .note p:last-child, .warning p:last-child, .example-box p:last-child { margin-bottom: 0; }
 
-    .param-table tr:last-child td {
-      border-bottom: none;
-    }
+    ul, ol { margin: 14px 0 18px 22px; color: var(--body); }
+    li { margin-bottom: 7px; }
 
-    .param-name {
-      font-weight: 600;
-      color: var(--accent-primary);
-      font-family: monospace;
-    }
-
-    .example-box {
-      background: var(--bg-tertiary);
-      border-left: 4px solid var(--accent-primary);
-      padding: 16px;
-      margin: 20px 0;
-      border-radius: 4px;
-    }
-
-    .note {
-      background: rgba(183, 243, 67, 0.1);
-      border-left: 4px solid var(--accent-secondary);
-      padding: 16px;
-      margin: 20px 0;
-      border-radius: 4px;
-    }
-
-    .warning {
-      background: rgba(249, 115, 22, 0.1);
-      border-left: 4px solid #f97316;
-      padding: 16px;
-      margin: 20px 0;
-      border-radius: 4px;
-    }
-
-    ul, ol {
-      margin: 16px 0 16px 24px;
-    }
-
-    li {
-      margin-bottom: 8px;
-    }
-
-    a {
-      color: var(--accent-secondary);
-    }
-
-    a:hover {
-      color: var(--accent-primary);
-    }
+    article a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--acid); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+    article a:hover { background: var(--acid); }
 
     .method-signature {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 16px;
-      font-family: monospace;
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      border-left: 4px solid var(--acid);
+      padding: 14px 18px;
+      font-family: var(--font-mono);
+      font-size: 13.5px;
       margin: 16px 0;
-      color: #b7f343;
+      color: var(--ink);
       overflow-x: auto;
     }
 
     footer {
-      border-top: 1px solid var(--border-color);
-      padding: 40px 0;
-      color: var(--text-secondary);
+      border-top: 1px solid var(--line);
+      padding: 36px 0;
+      color: var(--muted);
+      font-size: 13px;
       text-align: center;
     }
 
-    @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        position: static;
-      }
-
-      h1 {
-        font-size: 1.8rem;
-      }
-
-      h2 {
-        font-size: 1.5rem;
-      }
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      article { padding: 28px 20px; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 0 16px; }
+      header nav a:not(.nav-cta) { display: none; }
     }
   </style>
 </head>
@@ -304,10 +221,11 @@
   <header>
     <div class="container">
       <div class="header-content">
-        <div class="logo">agentic-evals</div>
-        <nav>
-          <a href="../">← Back to main</a>
-          <a href="https://github.com/DeepAgentLabs/agentic-evals">GitHub</a>
+        <a class="brand" href="../"><span class="brand-logo" aria-hidden="true"></span><span>DeepAgentLabs <small>/ Evals docs</small></span></a>
+        <nav aria-label="Docs navigation">
+          <a href="../">Overview</a>
+          <a href="https://pypi.org/project/agentic-evals/">PyPI</a>
+          <a class="nav-cta" href="https://github.com/DeepAgentLabs/agentic-evals">GitHub ↗</a>
         </nav>
       </div>
     </div>
@@ -364,7 +282,7 @@
           <p>A standalone, framework-agnostic evaluation and scoring engine for LLM and agent outputs.</p>
 
           <h2>What is agentic-evals?</h2>
-          <p>agentic-evals is a Python package that lets you evaluate the quality of LLM and agent outputs programmatically. It was extracted from <a href="https://github.com/DeepAgentLabs/agenticlens">AgenticLens</a>'s proven evaluation module, but works completely standalone with zero dependencies on AgenticLens or any specific agent framework.</p>
+          <p>agentic-evals is a Python package for evaluating the quality of LLM and agent outputs programmatically. It runs standalone and is not tied to any agent framework or tracing format.</p>
 
           <p>You provide:</p>
           <ul>
@@ -838,7 +756,7 @@ evaluator = registry.get("my_rule")</code></pre>
 
   <footer>
     <p>agentic-evals documentation — Part of the <a href="https://deepagentlabs.io/">DeepAgentLabs ecosystem</a></p>
-    <p style="margin-top: 12px; color: var(--text-secondary);">© 2026 DeepAgentLabs · MIT License</p>
+    <p>© 2026 DeepAgentLabs · MIT License</p>
   </footer>
 </body>
 </html>
