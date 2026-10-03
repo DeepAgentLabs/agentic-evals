@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Agentic Evals documentation — API reference, guides, and examples">
+  <title>Agentic Evals Documentation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #07110e;
+      --bg-secondary: #0f1a17;
+      --bg-tertiary: #1a2825;
+      --text-primary: #e8eae7;
+      --text-secondary: #a8ada9;
+      --accent-primary: #4ade80;
+      --accent-secondary: #0ea5e9;
+      --border-color: #2a3a36;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px 0;
+      margin-bottom: 40px;
+      position: sticky;
+      top: 0;
+      background: rgba(7, 17, 14, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 20px;
+    }
+
+    nav {
+      display: flex;
+      gap: 24px;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: var(--accent-primary);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 40px;
+      margin-bottom: 80px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 80px;
+      height: fit-content;
+    }
+
+    .sidebar-section {
+      margin-bottom: 32px;
+    }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-primary);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .sidebar-links {
+      list-style: none;
+    }
+
+    .sidebar-links li {
+      margin-bottom: 8px;
+    }
+
+    .sidebar-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: block;
+      padding: 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .sidebar-links a:hover,
+    .sidebar-links a.active {
+      color: var(--accent-primary);
+      background: var(--bg-tertiary);
+    }
+
+    article {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 40px;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      color: var(--accent-secondary);
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin: 40px 0 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    h2:first-child {
+      border-top: none;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      margin: 24px 0 16px;
+      color: var(--accent-primary);
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    code {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", monospace;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #4ade80;
+    }
+
+    .param-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .param-table th {
+      background: var(--bg-tertiary);
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .param-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .param-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .param-name {
+      font-weight: 600;
+      color: var(--accent-primary);
+      font-family: monospace;
+    }
+
+    .example-box {
+      background: var(--bg-tertiary);
+      border-left: 4px solid var(--accent-primary);
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .note {
+      background: rgba(14, 165, 233, 0.1);
+      border-left: 4px solid var(--accent-secondary);
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .warning {
+      background: rgba(249, 115, 22, 0.1);
+      border-left: 4px solid #f97316;
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    ul, ol {
+      margin: 16px 0 16px 24px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    a {
+      color: var(--accent-secondary);
+    }
+
+    a:hover {
+      color: var(--accent-primary);
+    }
+
+    .method-signature {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      font-family: monospace;
+      margin: 16px 0;
+      color: #4ade80;
+      overflow-x: auto;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 40px 0;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">agentic-evals</div>
+        <nav>
+          <a href="index.html">← Back to main</a>
+          <a href="https://github.com/DeepAgentLabs/agentic-evals">GitHub</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <main>
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">Getting Started</div>
+          <ul class="sidebar-links">
+            <li><a href="#intro">Introduction</a></li>
+            <li><a href="#install">Installation</a></li>
+            <li><a href="#first-eval">Your first eval</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">Core Concepts</div>
+          <ul class="sidebar-links">
+            <li><a href="#eval-trace">EvalTrace & EvalSpan</a></li>
+            <li><a href="#test-suite">TestSuite & TestCase</a></li>
+            <li><a href="#evaluators">Evaluators</a></li>
+            <li><a href="#scores">Scores & Reports</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">APIs</div>
+          <ul class="sidebar-links">
+            <li><a href="#eval-api">Eval() quickstart</a></li>
+            <li><a href="#suite-api">TestSuite API</a></li>
+            <li><a href="#scorers-api">Scorers</a></li>
+            <li><a href="#gates-api">Release Gates</a></li>
+            <li><a href="#live-targets">Live Targets</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">Advanced</div>
+          <ul class="sidebar-links">
+            <li><a href="#custom-evaluators">Custom Evaluators</a></li>
+            <li><a href="#eval-packs">Eval Packs</a></li>
+            <li><a href="#registry">Evaluator Registry</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <section>
+        <article id="intro">
+          <h1>Agentic Evals Documentation</h1>
+          <p>A standalone, framework-agnostic evaluation and scoring engine for LLM and agent outputs.</p>
+
+          <h2>What is agentic-evals?</h2>
+          <p>agentic-evals is a Python package that lets you evaluate the quality of LLM and agent outputs programmatically. It was extracted from <a href="https://github.com/DeepAgentLabs/agenticlens">AgenticLens</a>'s proven evaluation module, but works completely standalone with zero dependencies on AgenticLens or any specific agent framework.</p>
+
+          <p>You provide:</p>
+          <ul>
+            <li><strong>Test cases</strong> — expectations (exact match, substring, JSON Schema, tool calls, latency, etc.)</li>
+            <li><strong>Evaluation samples</strong> — actual outputs and execution traces</li>
+            <li><strong>Custom evaluators</strong> (optional) — your own scoring logic or LLM judges</li>
+          </ul>
+
+          <p>agentic-evals returns:</p>
+          <ul>
+            <li><strong>Per-case scores</strong> — individual judgments with explanations</li>
+            <li><strong>Summary metrics</strong> — pass rate, average score, cost, latency</li>
+            <li><strong>Pass/fail gates</strong> — CI-ready exit codes for release decisions</li>
+          </ul>
+
+          <h2 id="install">Installation</h2>
+          <pre><code>pip install agentic-evals</code></pre>
+
+          <p>Optional: for voice agent evaluation examples with FastAPI:</p>
+          <pre><code>pip install "agentic-evals[voice]"</code></pre>
+
+          <h2 id="first-eval">Your first eval in 60 seconds</h2>
+          <p>The simplest way to write an eval:</p>
+          <pre><code>from agentic_evals import Eval, equals
+
+Eval(
+    "my_first_eval",
+    data=[
+        {"input": "France", "expected": "Paris"},
+        {"input": "Japan", "expected": "Tokyo"},
+    ],
+    task=lambda x: my_agent(x["input"]),
+    scores=[equals],
+)</code></pre>
+
+          <p>Save as <code>my_eval.py</code> and run:</p>
+          <pre><code>python my_eval.py</code></pre>
+
+          <p>Or discover and run all eval files:</p>
+          <pre><code>agentic-evals run</code></pre>
+        </article>
+
+        <article id="eval-trace">
+          <h2>Core Concepts</h2>
+
+          <h3>EvalTrace and EvalSpan</h3>
+          <p>The minimal trace structure agentic-evals inspects — deliberately <strong>not</strong> tied to any specific tracing tool or framework.</p>
+
+          <div class="method-signature">
+class EvalTrace:
+    trace_id: str
+    spans: list[EvalSpan]
+    total_latency_ms: float
+    estimated_cost_usd: float | None
+    metadata: dict[str, Any]
+
+class EvalSpan:
+    tool_name: str | None
+    attributes: dict[str, Any]
+          </div>
+
+          <p>You build these from whatever trace data you have (AgenticLens, OpenTelemetry, custom instrumentation, etc.):</p>
+          <pre><code>from agentic_evals import EvalTrace, EvalSpan
+
+trace = EvalTrace(
+    trace_id="run-123",
+    spans=[
+        EvalSpan(tool_name="calculator", attributes={"tool_args": {"expr": "2+2"}}),
+        EvalSpan(tool_name="search", attributes={}),
+    ],
+    total_latency_ms=250,
+    estimated_cost_usd=0.015,
+    metadata={"turn_count": 2},
+)</code></pre>
+
+          <h3 id="test-suite">TestSuite and TestCase</h3>
+          <p>Define expectations for your agent outputs:</p>
+
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="param-name">expected_output</td>
+                <td>str</td>
+                <td>Exact match (whitespace-trimmed)</td>
+              </tr>
+              <tr>
+                <td class="param-name">expected_contains</td>
+                <td>list[str]</td>
+                <td>Required substrings (case-insensitive)</td>
+              </tr>
+              <tr>
+                <td class="param-name">output_json_schema</td>
+                <td>dict</td>
+                <td>JSON Schema Draft 2020-12 validation</td>
+              </tr>
+              <tr>
+                <td class="param-name">required_output_fields</td>
+                <td>list[str]</td>
+                <td>Dotted paths in JSON (e.g., "data.total")</td>
+              </tr>
+              <tr>
+                <td class="param-name">required_tools</td>
+                <td>list[str]</td>
+                <td>Tool calls that must happen</td>
+              </tr>
+              <tr>
+                <td class="param-name">forbidden_tools</td>
+                <td>list[str]</td>
+                <td>Tool calls that must NOT happen</td>
+              </tr>
+              <tr>
+                <td class="param-name">required_tool_arguments</td>
+                <td>dict[str, list[str]]</td>
+                <td>Specific arguments a tool must receive</td>
+              </tr>
+              <tr>
+                <td class="param-name">max_latency_ms</td>
+                <td>float</td>
+                <td>Latency threshold in milliseconds</td>
+              </tr>
+              <tr>
+                <td class="param-name">max_cost_usd</td>
+                <td>float</td>
+                <td>Cost threshold in USD</td>
+              </tr>
+              <tr>
+                <td class="param-name">max_turns</td>
+                <td>int</td>
+                <td>Maximum conversation turns (from trace metadata)</td>
+              </tr>
+              <tr>
+                <td class="param-name">evaluators</td>
+                <td>list[EvaluatorConfig]</td>
+                <td>Custom evaluators to run</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><code>from agentic_evals import TestSuite, TestCase
+
+suite = TestSuite(
+    name="support-agent",
+    version="1.0",
+    cases=[
+        TestCase(
+            id="refund-status",
+            name="Check refund status",
+            expected_contains=["Your refund", "processing"],
+            required_tools=["lookup_order"],
+            max_latency_ms=1000,
+        ),
+    ],
+)</code></pre>
+
+          <h3 id="evaluators">Evaluators</h3>
+          <p>An evaluator is anything with a <code>.name</code> property and an <code>.evaluate(context) -> list[Score]</code> method.</p>
+
+          <p>Built-in types:</p>
+          <ul>
+            <li><code>CallableEvaluator</code> — Wrap any Python function</li>
+            <li><code>LLMJudgeEvaluator</code> — Provider-neutral LLM judge</li>
+            <li><code>BusinessRuleEvaluator</code> — Named convenience for custom logic</li>
+          </ul>
+
+          <h3 id="scores">Scores and Reports</h3>
+          <p>Each evaluation produces a <code>Score</code>:</p>
+
+          <pre><code>class Score(BaseModel):
+    name: str                    # e.g., "factuality", "exact_match"
+    value: float                 # 0.0 to 1.0
+    passed: bool                 # True if value >= threshold
+    required: bool = True
+    explanation: str             # Why it passed/failed
+    evaluator_type: str = "deterministic"  # or "llm_judge"
+    metadata: dict[str, Any] = {}</code></pre>
+
+          <p>Multiple scores combine into a <code>CaseEvaluation</code> (one per test case), and those roll up into an <code>EvaluationReport</code>:</p>
+
+          <pre><code>class EvaluationReport(BaseModel):
+    suite_name: str
+    suite_version: str
+    created_at: datetime
+    summary: EvaluationSummary  # Pass rate, avg score, cost, latency
+    cases: list[CaseEvaluation] # Per-case details</code></pre>
+        </article>
+
+        <article id="eval-api">
+          <h2>APIs</h2>
+
+          <h3>Eval() Quickstart</h3>
+          <p>The fastest, most opinionated API. Perfect for simple cases.</p>
+
+          <div class="method-signature">
+def Eval(
+    name: str,
+    data: list[dict] | Callable[[], list[dict]],
+    task: Callable[[Any], str],
+    scores: list[Callable],
+    threshold: float = 1.0,
+) -> EvalResult
+          </div>
+
+          <p><strong>Parameters:</strong></p>
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="param-name">name</td>
+                <td>str</td>
+                <td>Eval name (appears in output)</td>
+              </tr>
+              <tr>
+                <td class="param-name">data</td>
+                <td>list[dict] or callable</td>
+                <td>Test data with "input"/"expected" keys, or callable that returns it</td>
+              </tr>
+              <tr>
+                <td class="param-name">task</td>
+                <td>callable</td>
+                <td>Function to evaluate, takes input dict, returns string</td>
+              </tr>
+              <tr>
+                <td class="param-name">scores</td>
+                <td>list[callable]</td>
+                <td>Scorer functions; each returns 0-1 or bool</td>
+              </tr>
+              <tr>
+                <td class="param-name">threshold</td>
+                <td>float</td>
+                <td>Min score for a case to pass (default 1.0)</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p><strong>Built-in scorers for Eval():</strong></p>
+          <ul>
+            <li><code>equals</code> — Exact match</li>
+            <li><code>contains</code> — Case-sensitive substring</li>
+            <li><code>icontains</code> — Case-insensitive substring</li>
+            <li><code>levenshtein</code> — Similarity (0-1)</li>
+            <li><code>matches</code> — Regex match</li>
+            <li><code>numeric_close</code> — 1% relative tolerance</li>
+          </ul>
+
+          <h3 id="suite-api">TestSuite API</h3>
+          <p>More structured, trace-aware evaluation with custom expectations.</p>
+
+          <div class="method-signature">
+def evaluate_suite(
+    suite: TestSuite,
+    samples: list[EvaluationSample],
+    registry: EvaluatorRegistry | None = None,
+) -> EvaluationReport
+          </div>
+
+          <p>Returns a full <code>EvaluationReport</code> with per-case scores, summary metrics, pass rates, cost/latency.</p>
+
+          <h3 id="scorers-api">Scorers Library</h3>
+          <p>Pre-built evaluators organized by type:</p>
+
+          <h4>Text Scorers (No LLM)</h4>
+          <pre><code>from agentic_evals import scorers
+
+# Deterministic checks
+scorer = scorers.text.exact_match
+scorer = scorers.text.levenshtein_similarity
+scorer = scorers.text.valid_json
+scorer = scorers.text.json_diff
+scorer = scorers.text.regex_match</code></pre>
+
+          <h4>Rubric Scorers (LLM-Graded)</h4>
+          <pre><code>from agentic_evals import LLMRubricEvaluator, FACTUALITY, default_registry
+
+# Register an LLM rubric evaluator
+registry = default_registry()
+registry.register(
+    LLMRubricEvaluator(
+        "factuality_check",
+        FACTUALITY,
+        complete_fn=your_model_call,  # Your function to call LLM
+    )
+)</code></pre>
+
+          <h4>Trajectory Scorers (Trace-Aware)</h4>
+          <pre><code>from agentic_evals import scorers
+
+scorer = scorers.trajectory.tool_call_precision
+scorer = scorers.trajectory.tool_call_recall
+scorer = scorers.trajectory.no_redundant_tool_calls
+scorer = scorers.trajectory.trajectory_efficiency</code></pre>
+
+          <h3 id="gates-api">Release Gates</h3>
+          <p>Turn an evaluation report into a pass/fail CI decision:</p>
+
+          <div class="method-signature">
+def evaluate_gate(
+    report: EvaluationReport,
+    config: GateConfig,
+) -> GateDecision
+          </div>
+
+          <pre><code>from agentic_evals import evaluate_gate, GateConfig
+
+decision = evaluate_gate(
+    report,
+    GateConfig(
+        min_pass_rate=0.95,           # At least 95% of cases pass
+        max_average_latency_ms=1500,  # Avg latency under 1.5s
+        max_total_cost_usd=0.25,      # Total cost under $0.25
+    )
+)
+
+if not decision.passed:
+    print(f"Release blocked: {decision.reasons}")
+    exit(1)</code></pre>
+
+          <h3 id="live-targets">Live Targets</h3>
+          <p>Run a suite against a real system (trusted code or HTTP endpoint) instead of pre-recorded samples:</p>
+
+          <div class="method-signature">
+def run_live_suite(
+    suite: TestSuite,
+    target: LiveTarget,
+    registry: EvaluatorRegistry | None = None,
+) -> EvaluationReport
+          </div>
+
+          <p><strong>Python Target (executes local code):</strong></p>
+          <pre><code>from agentic_evals import PythonTarget, run_live_suite
+
+report = run_live_suite(
+    suite,
+    PythonTarget(callable_path="my_module:my_agent"),
+    # my_module.py must have a my_agent(input, case=None) function
+)</code></pre>
+
+          <p><strong>HTTP Target (calls a remote endpoint):</strong></p>
+          <pre><code>from agentic_evals import HTTPTarget, run_live_suite
+
+report = run_live_suite(
+    suite,
+    HTTPTarget(
+        url="http://localhost:8000/evaluate",
+        method="POST",
+        headers={"Authorization": "Bearer token"},
+    ),
+)</code></pre>
+        </article>
+
+        <article id="custom-evaluators">
+          <h2>Advanced Topics</h2>
+
+          <h3>Custom Evaluators</h3>
+          <p>Write your own evaluation logic with full access to the test case, output, and trace.</p>
+
+          <pre><code>from agentic_evals import (
+    LLMJudgeEvaluator, CallableEvaluator,
+    EvaluationContext, Score, EvaluatorRegistry
+)
+
+# LLM-based judge
+def my_judge(context: EvaluationContext) -> Score:
+    output = context.sample.output
+    expected = context.case.expected_output
+
+    # Call your LLM here
+    judgment = your_llm_model(
+        f"Is this output correct? {output} vs {expected}"
+    )
+
+    return Score(
+        name="llm_judgment",
+        value=1.0 if judgment else 0.0,
+        passed=judgment,
+        explanation="LLM agrees" if judgment else "LLM disagrees",
+    )
+
+registry = EvaluatorRegistry()
+registry.register(LLMJudgeEvaluator("my_judge", my_judge))</code></pre>
+
+          <p>Then use it in your test case:</p>
+          <pre><code>case = TestCase(
+    id="case-1",
+    name="Custom judge",
+    evaluators=[EvaluatorConfig(name="my_judge", threshold=0.8)],
+)</code></pre>
+
+          <h3 id="eval-packs">Eval Packs</h3>
+          <p>Bundle a TestSuite with the scorers it needs into one shareable YAML/JSON file:</p>
+
+          <pre><code>name: my-eval-pack
+version: 1.0
+required_scorers:
+  - levenshtein_similarity
+  - factuality
+
+cases:
+  - id: case-1
+    name: Check if output is factual
+    expected_output: Paris
+    evaluators:
+      - name: factuality
+        threshold: 0.9</code></pre>
+
+          <p>Load and use it:</p>
+          <pre><code>from agentic_evals import load_pack, evaluate_suite, default_registry
+
+pack = load_pack("path/to/pack.yaml")
+report = evaluate_suite(pack.to_suite(), samples, registry=default_registry())</code></pre>
+
+          <p><strong>Built-in packs:</strong></p>
+          <ul>
+            <li><code>tool-use-correctness</code> — Evaluate tool selection and arguments</li>
+            <li><code>json-output-contract</code> — Validate JSON structure</li>
+            <li><code>factual-qa</code> — QA with factuality rubric</li>
+          </ul>
+
+          <pre><code>from agentic_evals import load_builtin_pack
+
+pack = load_builtin_pack("tool-use-correctness")</code></pre>
+
+          <h3 id="registry">Evaluator Registry</h3>
+          <p>Manage evaluators centrally so test cases can reference them by name:</p>
+
+          <pre><code>from agentic_evals import (
+    EvaluatorRegistry, default_registry,
+    LLMJudgeEvaluator, CallableEvaluator
+)
+
+# Start with defaults
+registry = default_registry()
+
+# Add custom evaluators
+def my_rule(context):
+    return Score(...)
+
+registry.register(
+    CallableEvaluator("my_rule", my_rule)
+)
+
+# Get an evaluator
+evaluator = registry.get("my_rule")</code></pre>
+        </article>
+
+        <article>
+          <h2>Next Steps</h2>
+          <ul>
+            <li>🚀 <a href="#first-eval">Write your first eval</a></li>
+            <li>📚 <a href="https://github.com/DeepAgentLabs/agentic-evals#readme">Read the README</a></li>
+            <li>💡 <a href="https://github.com/DeepAgentLabs/agentic-evals/tree/main/agentic-evals/skills">Explore 17 methodology skills</a></li>
+            <li>🔊 <a href="https://github.com/DeepAgentLabs/agentic-evals/tree/main/voice-agent-evals">See the voice agent example</a></li>
+            <li>🐛 <a href="https://github.com/DeepAgentLabs/agentic-evals/issues">Report issues or request features</a></li>
+          </ul>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p>agentic-evals documentation — Part of the <a href="https://deepagentlabs.io/">DeepAgentLabs ecosystem</a></p>
+    <p style="margin-top: 12px; color: var(--text-secondary);">© 2026 DeepAgentLabs · MIT License</p>
+  </footer>
+</body>
+</html>
