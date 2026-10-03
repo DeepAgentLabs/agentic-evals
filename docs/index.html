@@ -622,8 +622,8 @@
 
   <!-- Quick Start -->
   <section id="quickstart">
-    <div class="section-label">Production Patterns</div>
-    <h2>Enterprise-ready evaluation code</h2>
+    <div class="section-label">Get Started</div>
+    <h2>Evaluate your agents in minutes</h2>
 
     <div class="code-section">
       <div class="tabs">
@@ -633,76 +633,55 @@
       </div>
 
       <div id="tab-simple" class="tab-content active">
-        <pre><code>from agentic_evals import Eval, contains, json_schema
-from your_agent import research_agent
+        <pre><code>from agentic_evals import Eval, contains
 
-report = Eval(
-    "research_qa",
-    data=load_eval_dataset("production/qa_samples.jsonl"),
-    task=lambda x: research_agent(x["query"], tools=x.get("tools")),
+eval_run = Eval(
+    "customer_qa",
+    data=load_samples("samples.jsonl"),
+    task=lambda x: my_agent(x["question"]),
     scores=[
-        contains(field="answer", text=["key_fact_1", "key_fact_2"]),
-        json_schema(schema={"type": "object", "required": ["sources"]}),
+        contains(["expected_answer"]),
     ],
-    tags=["production", "v2.1"],
-).with_release_gate(
-    pass_rate=0.95,
-    max_cost=0.15,
-    max_latency_ms=5000,
-)</code></pre>
+).release_gate(pass_rate=0.95, max_cost=0.10)</code></pre>
       </div>
 
       <div id="tab-suite" class="tab-content">
-        <pre><code>from agentic_evals import TestSuite, TestCase, evaluate_suite, ReleaseGate
+        <pre><code>from agentic_evals import TestSuite, TestCase, evaluate_suite
 
 suite = TestSuite(
-    name="customer_support_qa",
-    description="Multi-turn agent evaluation",
+    name="support_escalation",
     cases=[
         TestCase(
-            id="case-billing-dispute",
-            scenario="customer_support",
-            input="Customer claims overcharge of $500",
-            expected_tools=["lookup_invoice", "refund"],
-            required_outputs=["reason", "refund_amount"],
-            max_turns=4,
-            max_latency_ms=8000,
+            input="Customer billing issue",
+            expected_tools=["lookup_invoice"],
+            required_outputs=["resolution"],
+            max_latency_ms=5000,
         ),
     ],
-    release_gate=ReleaseGate(
-        pass_rate_threshold=0.92,
-        max_cost_per_run=0.22,
-        fail_fast_on=["safety_violation"],
-    ),
 )
 
-report = evaluate_suite(suite, live_target=production_agent)</code></pre>
+report = evaluate_suite(suite, my_agent)
+print(f"Pass rate: {report.pass_rate}")
+print(f"Cost: ${report.total_cost}")</code></pre>
       </div>
 
       <div id="tab-judge" class="tab-content">
-        <pre><code>from agentic_evals import LLMJudge, Score
+        <pre><code>from agentic_evals import LLMJudge
 
 judge = LLMJudge(
-    name="response_quality",
     model="gpt-4-turbo",
     rubric={
-        "factuality": "Is information accurate and verifiable?",
-        "coherence": "Is the response logically structured?",
-        "completeness": "Were all questions addressed?",
+        "factual": "Is the answer correct?",
+        "helpful": "Does it address the question?",
+        "safe": "Any harmful content?",
     },
-    scale=0.0,
-    weights={"factuality": 0.5, "coherence": 0.3, "completeness": 0.2},
-    cost_limit=0.05,
 )
 
-score = judge.evaluate(
-    input=sample.input,
-    output=sample.output,
-    context={"knowledge_base": kb_version},
-)
-
-# Automatically integrates with suite reporting
-# Score included in pass_rate, cost, latency metrics</code></pre>
+# Use as a scorer in your eval
+scores=[
+    judge,
+    contains("key_info"),
+]</code></pre>
       </div>
     </div>
 
