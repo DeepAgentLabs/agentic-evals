@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Agentic Evals — A standalone evaluation engine for LLM and agent outputs.">
-  <meta name="theme-color" content="#0a0f0d">
+  <meta name="theme-color" content="#07110e">
   <title>Agentic Evals — AI Agent Evaluation</title>
   <style>
     * {
@@ -14,13 +14,18 @@
     }
 
     :root {
-      --bg: #0a0f0d;
+      --ink: #07110e;
+      --paper: #f2f0e9;
+      --acid: #b7f343;
+      --mint: #d8f7c0;
+      --muted: #5f6863;
+      --line: rgba(7, 17, 14, 0.18);
+      --bg: #07110e;
       --bg-card: #0f1513;
       --bg-hover: #141a17;
       --text: #e8eae7;
-      --text-muted: #8a8d8a;
-      --accent: #4ade80;
-      --accent-blue: #0ea5e9;
+      --text-muted: #5f6863;
+      --accent: #b7f343;
       --border: #1a2420;
     }
 
@@ -61,10 +66,7 @@
       font-size: 24px;
       font-weight: 700;
       letter-spacing: -0.5px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-blue) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--ink);
     }
 
     nav {
@@ -111,9 +113,9 @@
     }
 
     .nav-cta:hover {
-      background: #22c55e;
+      background: #a8e83f;
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3);
+      box-shadow: 0 8px 24px rgba(183, 243, 67, 0.3);
     }
 
     .nav-cta::after {
@@ -136,8 +138,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: radial-gradient(circle at 30% 50%, rgba(74, 222, 128, 0.1) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 50%);
+      background: radial-gradient(circle at 30% 50%, rgba(183, 243, 67, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(183, 243, 67, 0.08) 0%, transparent 50%);
       pointer-events: none;
     }
 
@@ -154,8 +156,8 @@
       align-items: center;
       gap: 8px;
       padding: 12px 16px;
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid rgba(74, 222, 128, 0.3);
+      background: rgba(183, 243, 67, 0.1);
+      border: 1px solid rgba(183, 243, 67, 0.3);
       border-radius: 20px;
       margin-bottom: 32px;
       animation: fadeInDown 0.8s ease-out;
@@ -179,7 +181,7 @@
     }
 
     .hero h1 em {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-blue) 100%);
+      background: linear-gradient(transparent 62%, var(--accent) 0);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -219,13 +221,13 @@
     .btn-primary {
       background: var(--accent);
       color: var(--bg);
-      box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3);
+      box-shadow: 0 8px 24px rgba(183, 243, 67, 0.3);
     }
 
     .btn-primary:hover {
-      background: #22c55e;
+      background: #a8e83f;
       transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(74, 222, 128, 0.4);
+      box-shadow: 0 12px 32px rgba(183, 243, 67, 0.4);
     }
 
     .btn-secondary {
@@ -235,7 +237,7 @@
     }
 
     .btn-secondary:hover {
-      background: rgba(74, 222, 128, 0.1);
+      background: rgba(183, 243, 67, 0.1);
       border-color: var(--accent);
       transform: translateY(-4px);
     }
@@ -251,8 +253,8 @@
 
     .badge {
       padding: 8px 16px;
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid rgba(74, 222, 128, 0.3);
+      background: rgba(183, 243, 67, 0.1);
+      border: 1px solid rgba(183, 243, 67, 0.3);
       border-radius: 4px;
       font-size: 12px;
       font-weight: 500;
