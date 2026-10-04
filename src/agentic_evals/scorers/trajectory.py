@@ -14,16 +14,25 @@ def tool_call_precision(context: EvaluationContext) -> Score:
     """Fraction of called tools that were in the allowed set.
 
     Configure via `EvaluatorConfig.config = {"allowed_tools": [...]}`; falls
-    back to `case.required_tools` if not given.
+    back to `case.required_tools` if not given. A trace with no tool calls
+    scores 0.0 rather than raising: an agent that never reached for a tool
+    is a result to report, not a reason to abort the run.
     """
     called = [span.tool_name for span in context.sample.trace.spans if span.tool_name]
     allowed = context.config.config.get("allowed_tools") or context.case.required_tools
-    if not called:
-        raise ValueError("tool_call_precision requires at least one tool call in the trace")
     if not allowed:
         raise ValueError(
             "tool_call_precision requires 'allowed_tools' in EvaluatorConfig.config "
             "or a non-empty case.required_tools"
+        )
+    if not called:
+        return Score(
+            name="tool_call_precision",
+            value=0.0,
+            passed=False,
+            explanation=(
+                f"No tool calls in the trace; expected calls from {sorted(set(allowed))}."
+            ),
         )
     correct = sum(1 for tool in called if tool in allowed)
     precision = correct / len(called)
@@ -56,10 +65,18 @@ def tool_call_recall(context: EvaluationContext) -> Score:
 
 
 def no_redundant_tool_calls(context: EvaluationContext) -> Score:
-    """Fraction of tool calls that were NOT exact duplicates of an earlier call."""
+    """Fraction of tool calls that were NOT exact duplicates of an earlier call.
+
+    A trace with no tool calls scores 1.0: nothing was repeated.
+    """
     spans = [span for span in context.sample.trace.spans if span.tool_name]
     if not spans:
-        raise ValueError("no_redundant_tool_calls requires at least one tool call in the trace")
+        return Score(
+            name="no_redundant_tool_calls",
+            value=1.0,
+            passed=True,
+            explanation="No tool calls in the trace, so none were redundant.",
+        )
     seen: set[tuple[str, str]] = set()
     redundant = 0
     for span in spans:

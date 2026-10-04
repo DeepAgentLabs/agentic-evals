@@ -6,10 +6,13 @@ from agentic_evals import (
     EvaluationSample,
     EvaluatorConfig,
     TestCase,
+    TestSuite,
     contains_all,
     contains_any,
+    default_registry,
     embedding_similarity,
     ends_with,
+    evaluate_suite,
     exact_match,
     json_diff,
     levenshtein_similarity,
@@ -149,6 +152,28 @@ def test_numeric_diff_within_tolerance_passes() -> None:
     score = numeric_diff(context)
     assert score.passed is True
     assert score.value == pytest.approx(1.0, abs=1e-4)
+
+
+def test_numeric_diff_within_configured_tolerance_clears_the_default_threshold() -> None:
+    suite = TestSuite(
+        name="totals",
+        version="1",
+        cases=[
+            TestCase(
+                id="case-1",
+                name="total within 5%",
+                evaluators=[
+                    EvaluatorConfig(
+                        name="numeric_diff", config={"reference": "100", "rel_tol": 0.05}
+                    )
+                ],
+            )
+        ],
+    )
+    report = evaluate_suite(suite, [_sample("101")], registry=default_registry())
+    score = report.cases[0].scores[0]
+    assert score.value == 1.0
+    assert score.passed is True
 
 
 def test_numeric_diff_outside_tolerance_fails() -> None:

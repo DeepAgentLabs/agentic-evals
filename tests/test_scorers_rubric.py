@@ -54,9 +54,42 @@ def test_parse_verdict_extracts_known_letter() -> None:
     assert value == 1.0
 
 
-def test_parse_verdict_prefers_earliest_match() -> None:
+def test_parse_verdict_prefers_the_stated_answer_over_an_earlier_mention() -> None:
     letter, _ = CLOSED_QA.parse_verdict("Not B, actually the answer is A.")
-    assert letter == "B"
+    assert letter == "A"
+
+
+@pytest.mark.parametrize(
+    ("completion", "expected"),
+    [
+        ("D", "D"),
+        ("d", "D"),
+        ("**D**", "D"),
+        ("A contradiction on a material fact. Verdict: D", "D"),
+        ("The submitted answer is a contradiction of the reference. Grade: D", "D"),
+        ("D. A material fact is contradicted.", "D"),
+        ("The reference is contradicted, so this is a D.", "D"),
+        ("I would grade this a C because it omits detail.", "C"),
+        ("Verdict: B\nOn reflection, final verdict: C", "C"),
+    ],
+)
+def test_parse_verdict_reads_the_verdict_not_the_surrounding_prose(
+    completion: str, expected: str
+) -> None:
+    letter, _ = FACTUALITY.parse_verdict(completion)
+    assert letter == expected
+
+
+@pytest.mark.parametrize(
+    "completion",
+    [
+        "A reasonable summary overall.",
+        "It could be B or it could be C, hard to say which applies here",
+    ],
+)
+def test_parse_verdict_raises_instead_of_guessing(completion: str) -> None:
+    with pytest.raises(ValueError, match="could not parse a verdict"):
+        FACTUALITY.parse_verdict(completion)
 
 
 def test_parse_verdict_raises_on_unrecognized_output() -> None:

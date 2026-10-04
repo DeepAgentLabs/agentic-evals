@@ -34,20 +34,61 @@ class RubricTemplate:
         )
 
     def parse_verdict(self, raw_completion: str) -> tuple[str, float]:
-        text = raw_completion.upper()
-        found: list[tuple[int, str]] = []
-        for token in self.verdict_scores:
-            match = re.search(rf"\b{re.escape(token)}\b", text)
-            if match:
-                found.append((match.start(), token))
-        if not found:
-            raise ValueError(
-                f"could not parse a verdict ({sorted(self.verdict_scores)}) from "
-                f"model output: {raw_completion!r}"
-            )
-        found.sort()
-        _, token = found[0]
-        return token, self.verdict_scores[token]
+        """Extract the verdict token from a judge completion.
+
+        Looks for the verdict where a judge actually states one, most
+        explicit form first: the bare token, a marked one ("Verdict: D"),
+        a parenthesised one, a leading one ("D. because ..."), a trailing
+        one, and finally a single token mentioned anywhere. Single-letter
+        tokens match case-sensitively outside the bare form, so the article
+        in "the answer is a contradiction" is never read as verdict A.
+        Raises `ValueError` when no verdict, or more than one candidate,
+        is found -- an ambiguous completion is not guessed at.
+        """
+        by_upper = {token.upper(): token for token in self.verdict_scores}
+        ordered = sorted(self.verdict_scores, key=len, reverse=True)
+        words = [re.escape(token) for token in ordered if len(token) > 1]
+        letters = [re.escape(token) for token in ordered if len(token) == 1]
+        alternatives = [f"(?i:{'|'.join(words)})"] if words else []
+        if letters:
+            alternatives.append("|".join(letters))
+        token_pattern = f"(?:{'|'.join(alternatives)})"
+        standalone = rf"(?<!\w)({token_pattern})(?!\w)"
+        text = raw_completion.strip()
+
+        def verdict(found: str) -> tuple[str, float]:
+            token = by_upper[found.upper()]
+            return token, self.verdict_scores[token]
+
+        bare = re.fullmatch(rf"\W*({token_pattern})\W*", text.upper())
+        if bare:
+            return verdict(bare.group(1))
+        marked = re.findall(
+            rf"(?i:\b(?:verdict|answer|grade|rating)\b(?:\s+is)?)\W*{standalone}", text
+        )
+        if marked:
+            return verdict(marked[-1])
+        parenthesised = {found.upper() for found in re.findall(rf"\(({token_pattern})\)", text)}
+        if len(parenthesised) == 1:
+            return verdict(parenthesised.pop())
+        leading = re.match(rf"({token_pattern})\s*(?:[.:)\-,]|\n|$)", text)
+        if leading:
+            return verdict(leading.group(1))
+        trailing = re.search(rf"{standalone}\W*$", text)
+        if trailing:
+            return verdict(trailing.group(1))
+        mentioned = {
+            match.group(1).upper()
+            for match in re.finditer(standalone, text)
+            # "A"/"I" opening a clause are ordinary English words, not verdicts.
+            if not (match.group(1) in ("A", "I") and re.match(r"\s+[a-z]", text[match.end() :]))
+        }
+        if len(mentioned) == 1:
+            return verdict(mentioned.pop())
+        raise ValueError(
+            f"could not parse a verdict ({sorted(self.verdict_scores)}) from "
+            f"model output: {raw_completion!r}"
+        )
 
 
 FACTUALITY = RubricTemplate(

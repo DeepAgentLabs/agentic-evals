@@ -16,14 +16,29 @@ def _require_expected_output(context: EvaluationContext, scorer_name: str) -> st
     return expected
 
 
+#: Scorers that grade against a reference via `_require_reference_text`.
+#: When one of these is configured on a case without its own `reference`,
+#: it is grading against `case.expected_output`, so `evaluate_suite` skips
+#: its implicit strict exact-match check for that case.
+REFERENCE_SCORER_NAMES = frozenset(
+    {
+        "levenshtein_similarity",
+        "embedding_similarity",
+        "json_diff",
+        "numeric_diff",
+        "starts_with",
+        "ends_with",
+    }
+)
+
+
 def _require_reference_text(context: EvaluationContext, scorer_name: str) -> str:
     """Reference text for a graded (non-exact) comparison.
 
-    Prefers `EvaluatorConfig.config["reference"]` over `case.expected_output`
-    so a near-miss scorer can be used *without* also triggering
-    `evaluate_suite`'s hardcoded strict exact-match check, which fires
-    whenever `expected_output` is set. Falls back to `expected_output` for
-    the common case where a case has only this one criterion.
+    Prefers `EvaluatorConfig.config["reference"]`, falling back to
+    `case.expected_output`. In the fallback case `evaluate_suite` leaves
+    out its implicit exact-match check (see `REFERENCE_SCORER_NAMES`), so
+    the graded scorer alone decides whether the output is close enough.
     """
     reference = context.config.config.get("reference") or context.case.expected_output
     if reference is None:
@@ -308,7 +323,11 @@ def numeric_range(context: EvaluationContext) -> Score:
 
 
 def numeric_diff(context: EvaluationContext) -> Score:
-    """Tolerance-based numeric comparison; configure via `rel_tol`/`abs_tol` in config."""
+    """Tolerance-based numeric comparison; configure via `rel_tol`/`abs_tol` in config.
+
+    An output within tolerance scores 1.0, so it clears any threshold.
+    Outside tolerance the score is the relative closeness to the reference.
+    """
     expected_raw = _require_reference_text(context, "numeric_diff")
     try:
         actual_value = float(context.sample.output.strip())
@@ -328,7 +347,7 @@ def numeric_diff(context: EvaluationContext) -> Score:
     passed = math.isclose(actual_value, expected_value, rel_tol=rel_tol, abs_tol=abs_tol)
     difference = abs(actual_value - expected_value)
     denominator = max(abs(expected_value), 1e-9)
-    similarity = max(0.0, 1.0 - min(1.0, difference / denominator))
+    similarity = 1.0 if passed else max(0.0, 1.0 - min(1.0, difference / denominator))
     return Score(
         name="numeric_diff",
         value=similarity,

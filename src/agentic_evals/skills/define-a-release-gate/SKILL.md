@@ -13,10 +13,12 @@ just accept the defaults.
 
 ## Do
 
-1. Start from the strictest sensible defaults (`min_pass_rate=1.0`,
-   `min_average_score=1.0`, `max_failed_cases=0`) and loosen deliberately —
-   it's easier to justify relaxing a gate later than to explain why it was
-   never strict.
+1. Start from the strict default (`min_pass_rate=1.0`: every case must
+   pass) and loosen deliberately — it's easier to justify relaxing a gate
+   later than to explain why it was never strict. `min_average_score` and
+   `max_failed_cases` are extra checks that are off until you set them;
+   add `min_average_score` when graded scores must stay above a floor
+   even on cases that pass their own thresholds.
 2. Set `max_average_latency_ms`/`max_total_cost_usd` only when you have a
    real budget in mind; leaving them `None` skips that check entirely
    rather than silently passing with a made-up number.
