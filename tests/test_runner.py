@@ -13,6 +13,7 @@ from agentic_evals import (
     Score,
     TestCase,
     TestSuite,
+    default_registry,
     evaluate_suite,
     run_live_suite,
 )
@@ -327,3 +328,46 @@ def test_run_live_suite_preserves_suite_case_id_when_target_returns_one(tmp_path
     )
 
     assert report.cases[0].case_id == "case-1"
+
+
+def _near_match_case(**evaluator_config: object) -> TestSuite:
+    return TestSuite(
+        name="release",
+        version="1",
+        cases=[
+            TestCase(
+                id="case-1",
+                name="near match",
+                expected_output="The combined total is 42.",
+                evaluators=[
+                    EvaluatorConfig(
+                        name="levenshtein_similarity", threshold=0.9, config=evaluator_config
+                    )
+                ],
+            )
+        ],
+    )
+
+
+def test_reference_scorer_on_expected_output_replaces_the_exact_match_check() -> None:
+    sample = EvaluationSample(
+        case_id="case-1", output="The combined total is 42", trace=make_trace()
+    )
+    report = evaluate_suite(_near_match_case(), [sample], registry=default_registry())
+
+    assert [score.name for score in report.cases[0].scores] == ["levenshtein_similarity"]
+    assert report.cases[0].passed
+
+
+def test_exact_match_check_stays_when_the_scorer_has_its_own_reference() -> None:
+    sample = EvaluationSample(
+        case_id="case-1", output="The combined total is 42", trace=make_trace()
+    )
+    suite = _near_match_case(reference="The combined total is 42!")
+    report = evaluate_suite(suite, [sample], registry=default_registry())
+
+    assert [score.name for score in report.cases[0].scores] == [
+        "exact_match",
+        "levenshtein_similarity",
+    ]
+    assert not report.cases[0].passed

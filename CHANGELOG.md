@@ -4,6 +4,36 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- `GateConfig.min_average_score` and `GateConfig.max_failed_cases` now
+  default to `None` (not checked) instead of `1.0` and `0`. The default
+  gate is still strict -- `min_pass_rate=1.0` requires every case to pass
+  -- but `GateConfig(min_pass_rate=0.95)` now tolerates the failures it
+  names, and a graded score below 1.0 on a passing case no longer fails
+  the gate. Set either field explicitly to keep the previous behaviour.
+- `evaluate_suite` no longer adds its implicit exact-match check when a
+  case configures a reference scorer (`levenshtein_similarity`,
+  `embedding_similarity`, `json_diff`, `numeric_diff`, `starts_with`,
+  `ends_with`) that grades against `expected_output`. The check still
+  runs when the scorer has its own `reference` in its config.
+
+### Fixed
+
+- `numeric_diff` scores 1.0 for an output within `rel_tol`/`abs_tol`.
+  Previously it scored just under 1.0, so the default threshold of 1.0
+  failed every non-identical value and the tolerance had no effect.
+- `tool_call_precision` scores 0.0 and `no_redundant_tool_calls` scores
+  1.0 on a trace with no tool calls, instead of raising and aborting the
+  whole suite run.
+- `RubricTemplate.parse_verdict` reads the verdict a judge states
+  ("Verdict: D", "(D)", a leading or trailing token) instead of the first
+  standalone letter in the completion, which read the article in
+  "A contradiction ... Verdict: D" as verdict A. A completion with no
+  verdict, or several candidates, raises `ValueError`.
+
 ## 0.5.0 - 2026-09-15
 
 ### Added

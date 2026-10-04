@@ -1,8 +1,9 @@
-"""Demonstrates a real gotcha: setting `case.expected_output` also triggers
-a hardcoded, strict exact-match check inside `evaluate_suite`. If you want
-only the graded similarity check, pass the reference text via
-`EvaluatorConfig.config["reference"]` instead -- the same pattern
-`LLMRubricEvaluator` uses -- and leave `expected_output` unset.
+"""Grades a near-match with a similarity scorer instead of a strict
+exact-match check. The reference text goes in
+`EvaluatorConfig.config["reference"]` -- the same pattern
+`LLMRubricEvaluator` uses. Setting `case.expected_output` works too:
+`evaluate_suite` leaves out its exact-match check when a similarity
+scorer is grading against that field.
 
 Run: python examples/near_miss_similarity.py
 """
@@ -27,9 +28,8 @@ def main() -> None:
             TestCase(
                 id="paraphrase",
                 name="Answer is close to the reference, not identical",
-                # No expected_output here -- that would also trigger a
-                # strict exact-match check. The reference text for the
-                # graded scorer lives in the evaluator's own config.
+                # The reference text for the graded scorer lives in the
+                # evaluator's own config.
                 evaluators=[
                     EvaluatorConfig(
                         name="levenshtein_similarity",

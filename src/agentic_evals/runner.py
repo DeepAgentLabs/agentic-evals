@@ -25,6 +25,7 @@ from agentic_evals.models import (
     TestCase,
     TestSuite,
 )
+from agentic_evals.scorers.text import REFERENCE_SCORER_NAMES
 
 TraceAdapter = Callable[[Any], Any]
 
@@ -104,6 +105,14 @@ def _turn_count(sample: EvaluationSample) -> int | None:
     return None
 
 
+def _graded_against_expected_output(case: TestCase) -> bool:
+    """True when a reference scorer on the case grades against `expected_output` itself."""
+    return any(
+        config.name in REFERENCE_SCORER_NAMES and not config.config.get("reference")
+        for config in case.evaluators
+    )
+
+
 def _score_case(
     case: TestCase,
     sample: EvaluationSample,
@@ -111,7 +120,7 @@ def _score_case(
 ) -> list[Score]:
     scores: list[Score] = []
     output = sample.output.strip()
-    if case.expected_output is not None:
+    if case.expected_output is not None and not _graded_against_expected_output(case):
         passed = output == case.expected_output.strip()
         scores.append(
             Score(

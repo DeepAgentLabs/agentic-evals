@@ -4,9 +4,17 @@ from agentic_evals.models import EvaluationReport
 
 
 class GateConfig(BaseModel):
+    """Release thresholds. The default is strict: every case must pass.
+
+    `min_average_score` and `max_failed_cases` are extra checks, skipped
+    when left `None` -- so `min_pass_rate` alone decides how many failures
+    are tolerated, and a graded score below 1.0 on a passing case does not
+    fail the gate unless an average-score floor is set explicitly.
+    """
+
     min_pass_rate: float = Field(default=1.0, ge=0, le=1)
-    min_average_score: float = Field(default=1.0, ge=0, le=1)
-    max_failed_cases: int = Field(default=0, ge=0)
+    min_average_score: float | None = Field(default=None, ge=0, le=1)
+    max_failed_cases: int | None = Field(default=None, ge=0)
     max_average_latency_ms: float | None = Field(default=None, gt=0)
     max_total_cost_usd: float | None = Field(default=None, ge=0)
 
@@ -22,11 +30,11 @@ def evaluate_gate(report: EvaluationReport, config: GateConfig) -> GateDecision:
     reasons: list[str] = []
     if summary.pass_rate < config.min_pass_rate:
         reasons.append(f"Pass rate {summary.pass_rate:.1%} is below {config.min_pass_rate:.1%}.")
-    if summary.average_score < config.min_average_score:
+    if config.min_average_score is not None and summary.average_score < config.min_average_score:
         reasons.append(
             f"Average score {summary.average_score:.3f} is below {config.min_average_score:.3f}."
         )
-    if summary.failed_cases > config.max_failed_cases:
+    if config.max_failed_cases is not None and summary.failed_cases > config.max_failed_cases:
         reasons.append(f"Failed cases {summary.failed_cases} exceed {config.max_failed_cases}.")
     if (
         config.max_average_latency_ms is not None

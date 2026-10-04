@@ -60,5 +60,6 @@ aren't sure whether to reach for a built-in scorer, write a custom
 
 An LLM-graded rubric is only as good as its verdict parsing —
 `RubricTemplate.parse_verdict` raises if the model's completion doesn't
-contain one of the expected tokens. Don't swallow that exception upstream:
+contain one of the expected tokens, or names more than one without saying
+which is the verdict. Don't swallow that exception upstream:
 a silently defaulted score is worse than a visible failure.

@@ -54,9 +54,17 @@ def test_tool_call_precision_uses_explicit_allowed_tools() -> None:
     assert tool_call_precision(context).value == 1.0
 
 
-def test_tool_call_precision_requires_a_tool_call() -> None:
+def test_tool_call_precision_scores_zero_when_no_tool_was_called() -> None:
     context = _context(spans=[], required_tools=["lookup"])
-    with pytest.raises(ValueError, match="at least one tool call"):
+    score = tool_call_precision(context)
+    assert score.value == 0.0
+    assert score.passed is False
+    assert "No tool calls" in score.explanation
+
+
+def test_tool_call_precision_requires_allowed_tools_configured() -> None:
+    context = _context(spans=[EvalSpan(tool_name="lookup")], required_tools=[])
+    with pytest.raises(ValueError, match="allowed_tools"):
         tool_call_precision(context)
 
 
@@ -94,6 +102,12 @@ def test_no_redundant_tool_calls_penalizes_exact_duplicates() -> None:
 def test_no_redundant_tool_calls_perfect_when_all_unique() -> None:
     context = _context(spans=[EvalSpan(tool_name="lookup"), EvalSpan(tool_name="format")])
     assert no_redundant_tool_calls(context).value == 1.0
+
+
+def test_no_redundant_tool_calls_passes_when_no_tool_was_called() -> None:
+    score = no_redundant_tool_calls(_context(spans=[]))
+    assert score.value == 1.0
+    assert score.passed is True
 
 
 def test_trajectory_efficiency_requires_a_baseline() -> None:
