@@ -4,7 +4,7 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.6.0 - 2026-10-03
 
 ### Changed
 
