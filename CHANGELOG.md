@@ -4,6 +4,49 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.7.0 - 2026-10-03
+
+### Added
+
+- `EvaluationSummary.metrics` and `EvaluationSummary.tags`: every report
+  now breaks its results down by metric (`MetricSummary`: checks passed,
+  failed and skipped, pass rate, average score) and by case tag
+  (`TagSummary`: case counts, pass rate, average score).
+- `Score.metric`: a stable key that reports group by. It defaults to
+  `Score.name`; the implicit checks whose names carry a per-case detail
+  (`contains:<text>`, `required_field:<path>`, `required_tool:<tool>`,
+  `forbidden_tool:<tool>`, `tool_args:<tool>`) share the metric named by
+  their prefix. `Score.name` is unchanged.
+- `Score.skip(name, explanation)` and `Score.skipped`: an evaluator can
+  record that a check did not apply to a case. A skipped score never
+  fails the case, is left out of `average_score` and pass rates, and is
+  counted in `MetricSummary.skipped`. `Eval()` ignores a skipped `Score`
+  returned by a scorer.
+- `CaseEvaluation.tags` and `CaseEvaluation.metadata`, copied from the
+  `TestCase`, so a report can be filtered or regrouped on its own.
+- `GateConfig.min_tag_pass_rate` and `GateConfig.min_metric_pass_rate`:
+  pass-rate floors for one tag or one metric, applied on top of
+  `min_pass_rate`. A tag or metric named in the config but absent from
+  the report fails the gate. Observed values are reported under
+  `tag_pass_rate:<tag>` and `metric_pass_rate:<metric>`.
+- `TestCase.expected_tool_arguments`: expected argument values per tool.
+  Passes when one call to the tool carries every listed argument with an
+  equal value (no type coercion). Scored as `tool_arg_values:<tool>`.
+- `TestCase.required_tool_order`: tools whose first calls must come in
+  the listed order. Scored as `tool_order`.
+- `make_rubric(name, criteria, levels=..., with_reference=...)`: builds a
+  `RubricTemplate` from criteria written in plain language, with a
+  pass/fail scale by default or a caller-supplied graded scale.
+
+All of the above are additive: reports saved by earlier versions still
+load, and `schema_version` stays `1.0`.
+
+### Fixed
+
+- `evaluate_suite` no longer raises `ZeroDivisionError` when no case
+  produces a score (for example, every evaluator returned an empty list);
+  `average_score` is reported as `0.0`.
+
 ## 0.6.0 - 2026-10-03
 
 ### Changed

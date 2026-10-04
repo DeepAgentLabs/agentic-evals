@@ -32,18 +32,19 @@ _EVALUATOR_FOR_RULE = {
     "reliability": "reliability",
 }
 
+# Built-in checks, keyed by `Score.metric`, that back a differently named rule.
+_RULE_FOR_BUILTIN_METRIC = {
+    "required_tool": "tool_selection",
+    "contains": "response_quality",
+    "latency_threshold": "latency",
+}
 
-def score_to_rule(name: str) -> str | None:
-    """Map a score name back to its rule key (None = unmapped)."""
-    if name in _EVALUATOR_FOR_RULE:
-        return name
-    if name.startswith("required_tool:"):
-        return "tool_selection"
-    if name.startswith("contains:"):
-        return "response_quality"
-    if name == "latency_threshold":
-        return "latency"
-    return None
+
+def score_to_rule(metric: str) -> str | None:
+    """Map a score's metric back to its rule key (None = unmapped)."""
+    if metric in _EVALUATOR_FOR_RULE:
+        return metric
+    return _RULE_FOR_BUILTIN_METRIC.get(metric)
 
 
 # -----------------------------
@@ -171,7 +172,7 @@ def _metrics(
     """Aggregate case scores into one entry per rule key, in display order."""
     by_rule: dict[str, list[Score]] = {}
     for score in case_eval.scores:
-        key = score_to_rule(score.name)
+        key = score_to_rule(score.metric)
         if key is not None:
             by_rule.setdefault(key, []).append(score)
 

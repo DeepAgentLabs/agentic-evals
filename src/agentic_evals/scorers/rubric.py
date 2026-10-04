@@ -7,8 +7,9 @@ the response against a `RubricTemplate`'s verdict scale.
 """
 
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from string import ascii_uppercase
 from typing import Any
 
 from agentic_evals.evaluators import CallableEvaluator, EvaluationContext
@@ -271,6 +272,70 @@ MODERATION = RubricTemplate(
     ),
     verdict_scores={"A": 1.0, "B": 0.5, "C": 0.0},
 )
+
+
+_DEFAULT_LEVELS: tuple[tuple[str, float], ...] = (
+    ("The output meets the criteria.", 1.0),
+    ("The output does not meet the criteria.", 0.0),
+)
+
+
+def _literal(text: str) -> str:
+    """Escape braces so caller-supplied text survives `str.format` in `render`."""
+    return text.replace("{", "{{").replace("}", "}}")
+
+
+def make_rubric(
+    name: str,
+    criteria: str,
+    *,
+    levels: Sequence[tuple[str, float]] | None = None,
+    with_reference: bool = False,
+) -> RubricTemplate:
+    """Build a `RubricTemplate` from criteria written in plain language.
+
+    `criteria` says what a good output looks like. `levels` is the grading
+    scale, best first: `(description, score)` pairs with scores in [0, 1].
+    Each level is assigned a verdict letter in order (A, B, C, ...), the
+    same form the built-in templates use. The default scale is pass/fail.
+
+    Set `with_reference=True` to show the judge a reference alongside the
+    output; `LLMRubricEvaluator` reads it from
+    `EvaluatorConfig.config["reference"]`.
+    """
+    if not criteria.strip():
+        raise ValueError("make_rubric requires non-empty criteria")
+    scale = list(levels) if levels is not None else list(_DEFAULT_LEVELS)
+    if not 2 <= len(scale) <= len(ascii_uppercase):
+        raise ValueError(f"make_rubric requires between 2 and {len(ascii_uppercase)} levels")
+    for description, score in scale:
+        if not description.strip():
+            raise ValueError("every rubric level needs a description")
+        if not 0.0 <= score <= 1.0:
+            raise ValueError(f"rubric level scores must be within [0, 1], got {score}")
+    letters = ascii_uppercase[: len(scale)]
+    options = "\n".join(
+        f"({letter}) {_literal(description.strip())}"
+        for letter, (description, _) in zip(letters, scale, strict=True)
+    )
+    reference = "Reference: {expected}\n" if with_reference else ""
+    prompt_template = (
+        "You are grading an output against the criteria below. Grade using "
+        "exactly one letter:\n"
+        f"{options}\n\n"
+        f"Criteria: {_literal(criteria.strip())}\n\n"
+        "Input: {input}\n"
+        f"{reference}"
+        "Output: {output}\n\n"
+        "Respond with only the letter."
+    )
+    return RubricTemplate(
+        name=name,
+        prompt_template=prompt_template,
+        verdict_scores={
+            letter: float(score) for letter, (_, score) in zip(letters, scale, strict=True)
+        },
+    )
 
 
 class LLMRubricEvaluator(CallableEvaluator):

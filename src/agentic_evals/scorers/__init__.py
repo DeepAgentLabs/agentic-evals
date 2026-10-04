@@ -30,6 +30,7 @@ from agentic_evals.scorers.rubric import (
     TRANSLATION,
     LLMRubricEvaluator,
     RubricTemplate,
+    make_rubric,
 )
 from agentic_evals.scorers.text import (
     contains_all,
@@ -74,6 +75,7 @@ __all__ = [
     "exact_match",
     "json_diff",
     "levenshtein_similarity",
+    "make_rubric",
     "no_redundant_tool_calls",
     "numeric_diff",
     "numeric_range",

@@ -46,6 +46,8 @@ class TestCase(BaseModel):
     required_tools: list[str] = Field(default_factory=list)
     forbidden_tools: list[str] = Field(default_factory=list)
     required_tool_arguments: dict[str, list[str]] = Field(default_factory=dict)
+    expected_tool_arguments: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    required_tool_order: list[str] = Field(default_factory=list)
     max_latency_ms: float | None = Field(default=None, gt=0)
     max_cost_usd: float | None = Field(default=None, ge=0)
     max_turns: int | None = Field(default=None, gt=0)
@@ -64,6 +66,8 @@ class TestCase(BaseModel):
                 self.required_tools,
                 self.forbidden_tools,
                 self.required_tool_arguments,
+                self.expected_tool_arguments,
+                self.required_tool_order,
                 self.max_latency_ms is not None,
                 self.max_cost_usd is not None,
                 self.max_turns is not None,
@@ -98,13 +102,53 @@ class EvaluationSample(BaseModel):
 
 
 class Score(BaseModel):
+    """A single named judgment.
+
+    `metric` is the stable key reports group by. It defaults to `name`;
+    checks whose name carries a per-case detail (`contains:42`,
+    `required_tool:lookup`) share one metric (`contains`, `required_tool`).
+
+    A `skipped` score records that a check did not apply to a case. It
+    never fails the case and is left out of averages and pass rates --
+    build one with `Score.skip(...)`.
+    """
+
     name: str
+    metric: str = ""
     value: float = Field(ge=0, le=1)
     passed: bool
     required: bool = True
+    skipped: bool = False
     explanation: str
     evaluator_type: str = "deterministic"
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def default_metric_to_name(self) -> "Score":
+        if not self.metric:
+            self.metric = self.name
+        return self
+
+    @classmethod
+    def skip(
+        cls,
+        name: str,
+        explanation: str,
+        *,
+        metric: str = "",
+        metadata: dict[str, Any] | None = None,
+    ) -> "Score":
+        """A score for a check that did not apply; `explanation` says why."""
+        return cls(
+            name=name,
+            metric=metric,
+            value=0.0,
+            passed=False,
+            required=False,
+            skipped=True,
+            explanation=explanation,
+            metadata=metadata or {},
+        )
 
 
 class CaseEvaluation(BaseModel):
@@ -116,6 +160,29 @@ class CaseEvaluation(BaseModel):
     trace_id: str
     latency_ms: float
     cost_usd: float | None = None
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class MetricSummary(BaseModel):
+    """How one metric did across the suite. Skipped scores are counted apart."""
+
+    total: int
+    passed: int
+    failed: int
+    skipped: int = 0
+    pass_rate: float | None = Field(default=None, ge=0, le=1)
+    average_score: float | None = Field(default=None, ge=0, le=1)
+
+
+class TagSummary(BaseModel):
+    """How the cases carrying one tag did."""
+
+    total_cases: int
+    passed_cases: int
+    failed_cases: int
+    pass_rate: float = Field(ge=0, le=1)
+    average_score: float | None = Field(default=None, ge=0, le=1)
 
 
 class EvaluationSummary(BaseModel):
@@ -126,6 +193,8 @@ class EvaluationSummary(BaseModel):
     average_score: float = Field(ge=0, le=1)
     total_cost_usd: float | None = None
     average_latency_ms: float
+    metrics: dict[str, MetricSummary] = Field(default_factory=dict)
+    tags: dict[str, TagSummary] = Field(default_factory=dict)
 
 
 class EvaluationReport(BaseModel):

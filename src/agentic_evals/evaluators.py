@@ -52,7 +52,9 @@ class CallableEvaluator:
         scores = result if isinstance(result, list) else [result]
         return [
             score.model_copy(
-                update={
+                update={"evaluator_type": self._evaluator_type}
+                if score.skipped
+                else {
                     "evaluator_type": self._evaluator_type,
                     "passed": score.value >= context.config.threshold,
                     "required": context.config.required,

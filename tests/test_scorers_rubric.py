@@ -15,6 +15,7 @@ from agentic_evals import (
     EvaluatorConfig,
     LLMRubricEvaluator,
     TestCase,
+    make_rubric,
 )
 
 
@@ -182,3 +183,80 @@ def test_llm_rubric_evaluator_works_with_new_templates() -> None:
     assert score.name == "security"
     assert score.value == 1.0
     assert score.passed is True
+
+
+def test_make_rubric_defaults_to_a_pass_fail_scale() -> None:
+    rubric = make_rubric("concise", "The answer is at most two sentences.")
+
+    assert rubric.name == "concise"
+    assert rubric.verdict_scores == {"A": 1.0, "B": 0.0}
+
+    prompt = rubric.render(output="Short answer.", expected=None, input="Summarise this.")
+    assert "Criteria: The answer is at most two sentences." in prompt
+    assert "(A) The output meets the criteria." in prompt
+    assert "Input: Summarise this." in prompt
+    assert "Output: Short answer." in prompt
+    assert "Reference" not in prompt
+
+
+def test_make_rubric_accepts_a_graded_scale() -> None:
+    rubric = make_rubric(
+        "tone",
+        "The reply is courteous.",
+        levels=[
+            ("Courteous throughout.", 1.0),
+            ("Neutral, neither courteous nor rude.", 0.5),
+            ("Rude or dismissive.", 0.0),
+        ],
+    )
+
+    assert rubric.verdict_scores == {"A": 1.0, "B": 0.5, "C": 0.0}
+    assert "(B) Neutral, neither courteous nor rude." in rubric.prompt_template
+    assert rubric.parse_verdict("(B)") == ("B", 0.5)
+
+
+def test_make_rubric_shows_the_reference_only_when_asked() -> None:
+    rubric = make_rubric("matches", "Agrees with the reference.", with_reference=True)
+    prompt = rubric.render(output="4", expected="four", input="2 + 2")
+
+    assert "Reference: four" in prompt
+
+
+def test_make_rubric_keeps_braces_in_criteria_literal() -> None:
+    rubric = make_rubric("json", 'The output is JSON shaped like {"id": int}.')
+    prompt = rubric.render(output="{}", expected=None, input=None)
+
+    assert 'shaped like {"id": int}.' in prompt
+
+
+@pytest.mark.parametrize(
+    ("criteria", "levels", "message"),
+    [
+        ("  ", None, "non-empty criteria"),
+        ("ok", [("only one", 1.0)], "between 2 and 26 levels"),
+        ("ok", [("good", 1.5), ("bad", 0.0)], r"within \[0, 1\]"),
+        ("ok", [("good", 1.0), (" ", 0.0)], "needs a description"),
+    ],
+)
+def test_make_rubric_rejects_an_unusable_definition(
+    criteria: str, levels: list[tuple[str, float]] | None, message: str
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        make_rubric("r", criteria, levels=levels)
+
+
+def test_make_rubric_template_runs_through_the_evaluator() -> None:
+    prompts: list[str] = []
+
+    def complete(prompt: str) -> str:
+        prompts.append(prompt)
+        return "B"
+
+    rubric = make_rubric("concise", "The answer is at most two sentences.")
+    evaluator = LLMRubricEvaluator("concise", rubric, complete_fn=complete)
+    score = evaluator.evaluate(_context(output="A very long answer...", input_="Summarise."))[0]
+
+    assert score.name == "concise"
+    assert score.value == 0.0
+    assert score.passed is False
+    assert "Output: A very long answer..." in prompts[0]

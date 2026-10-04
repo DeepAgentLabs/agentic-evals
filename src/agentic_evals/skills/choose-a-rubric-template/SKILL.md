@@ -32,10 +32,13 @@ or whether none of them do and you actually need a custom one.
 2. If two templates seem to both apply (e.g. `SECURITY` and `MODERATION` on
    the same output), register both as separate evaluators rather than
    picking one — they grade different things and a report should show both.
-3. If nothing fits, write a new `RubricTemplate` next to the existing ones
-   in `rubric.py` rather than stuffing an unrelated criterion into an
-   existing template's prompt — see `write-a-scorer` for the general rule
-   on one-criterion-per-scorer.
+3. If nothing fits, build a template with `make_rubric(name, criteria)`
+   rather than stuffing an unrelated criterion into an existing
+   template's prompt — see `write-a-scorer` for the general rule on
+   one-criterion-per-scorer. State the criterion as something a reader
+   could check against the output alone, and give `levels` a graded scale
+   only when the middle grades are distinct enough for a judge to tell
+   apart.
 
 ## Avoid
 

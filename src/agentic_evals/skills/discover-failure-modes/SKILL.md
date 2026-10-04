@@ -14,11 +14,13 @@ filing a single vague bug ("agent sometimes gets things wrong").
 ## Do
 
 1. Group failing `CaseEvaluation`s by which scorer failed them
-   (`Score.name`, `passed=False`), not just by case — a suite where ten
+   (`Score.metric`, `passed=False`), not just by case — a suite where ten
    cases fail `tool_call_precision` and two fail `numeric_diff` has two
-   distinct problems, not twelve.
+   distinct problems, not twelve. `report.summary.metrics` already holds
+   the per-metric pass and fail counts; start there.
 2. Cross-reference failures against the tags set in `build-an-eval-dataset`
-   — a failure mode concentrated in one scenario tag points at a specific
+   (`report.summary.tags`, and `CaseEvaluation.tags` on each case) — a
+   failure mode concentrated in one scenario tag points at a specific
    fix; one spread evenly across all tags points at something systemic
    (a prompt regression, a shared tool wrapper).
 3. Read `Score.explanation` on every failure in a candidate cluster before
