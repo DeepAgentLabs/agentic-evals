@@ -294,7 +294,7 @@
           <p>agentic-evals returns:</p>
           <ul>
             <li><strong>Per-case scores</strong> — individual judgments with explanations</li>
-            <li><strong>Summary metrics</strong> — pass rate, average score, cost, latency</li>
+            <li><strong>Summary metrics</strong> — pass rate, average score, cost, latency, broken down by metric and by tag</li>
             <li><strong>Pass/fail gates</strong> — CI-ready exit codes for release decisions</li>
           </ul>
 
@@ -314,7 +314,7 @@ Eval(
         {"input": "France", "expected": "Paris"},
         {"input": "Japan", "expected": "Tokyo"},
     ],
-    task=lambda x: my_agent(x["input"]),
+    task=my_agent,
     scores=[equals],
 )</code></pre>
 
@@ -403,7 +403,17 @@ trace = EvalTrace(
               <tr>
                 <td class="param-name">required_tool_arguments</td>
                 <td>dict[str, list[str]]</td>
-                <td>Specific arguments a tool must receive</td>
+                <td>Argument names a tool call must include</td>
+              </tr>
+              <tr>
+                <td class="param-name">expected_tool_arguments</td>
+                <td>dict[str, dict[str, Any]]</td>
+                <td>Argument values a tool call must carry (compared without type coercion)</td>
+              </tr>
+              <tr>
+                <td class="param-name">required_tool_order</td>
+                <td>list[str]</td>
+                <td>Tools whose first calls must come in this order</td>
               </tr>
               <tr>
                 <td class="param-name">max_latency_ms</td>
@@ -425,6 +435,16 @@ trace = EvalTrace(
                 <td>list[EvaluatorConfig]</td>
                 <td>Custom evaluators to run</td>
               </tr>
+              <tr>
+                <td class="param-name">tags</td>
+                <td>list[str]</td>
+                <td>Labels for grouping results in the report (e.g., "refunds")</td>
+              </tr>
+              <tr>
+                <td class="param-name">metadata</td>
+                <td>dict[str, Any]</td>
+                <td>Free-form data for custom evaluators; copied onto the case result</td>
+              </tr>
             </tbody>
           </table>
 
@@ -440,9 +460,22 @@ suite = TestSuite(
             expected_contains=["Your refund", "processing"],
             required_tools=["lookup_order"],
             max_latency_ms=1000,
+            tags=["refunds"],
         ),
     ],
 )</code></pre>
+
+          <p>Tool expectations can also state what a tool was called with, and in what order. Arguments are read from each span's <code>attributes["tool_args"]</code>:</p>
+
+          <pre><code>TestCase(
+    id="publish-draft",
+    name="Saves the draft before publishing it",
+    required_tools=["save_draft", "publish"],
+    expected_tool_arguments={"publish": {"visibility": "internal"}},
+    required_tool_order=["save_draft", "publish"],
+)</code></pre>
+
+          <p><code>expected_tool_arguments</code> passes when one call to the tool carries every listed value. <code>required_tool_order</code> passes when each listed tool is first called before the next; calls to other tools in between are fine.</p>
 
           <h3 id="evaluators">Evaluators</h3>
           <p>An evaluator is anything with a <code>.name</code> property and an <code>.evaluate(context) -> list[Score]</code> method.</p>
@@ -458,10 +491,12 @@ suite = TestSuite(
           <p>Each evaluation produces a <code>Score</code>:</p>
 
           <pre><code>class Score(BaseModel):
-    name: str                    # e.g., "factuality", "exact_match"
+    name: str                    # e.g., "factuality", "contains:refund"
+    metric: str                  # Grouping key; defaults to name ("contains")
     value: float                 # 0.0 to 1.0
     passed: bool                 # True if value >= threshold
     required: bool = True
+    skipped: bool = False        # True when the check did not apply
     explanation: str             # Why it passed/failed
     evaluator_type: str = "deterministic"  # or "llm_judge"
     metadata: dict[str, Any] = {}</code></pre>
@@ -474,6 +509,56 @@ suite = TestSuite(
     created_at: datetime
     summary: EvaluationSummary  # Pass rate, avg score, cost, latency
     cases: list[CaseEvaluation] # Per-case details</code></pre>
+
+          <h4 id="breakdowns">Breakdowns by metric and tag</h4>
+          <p>An overall pass rate does not show where the failures are. The summary breaks results down two ways:</p>
+
+          <pre><code>report = evaluate_suite(suite, samples)
+
+for tag, stats in report.summary.tags.items():
+    print(f"{tag}: {stats.passed_cases}/{stats.total_cases} cases passed")
+
+for metric, stats in report.summary.metrics.items():
+    print(f"{metric}: {stats.passed}/{stats.total} checks passed")</code></pre>
+
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Contents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="param-name">summary.tags</td>
+                <td>dict[str, TagSummary]</td>
+                <td>Per tag: <code>total_cases</code>, <code>passed_cases</code>, <code>failed_cases</code>, <code>pass_rate</code>, <code>average_score</code></td>
+              </tr>
+              <tr>
+                <td class="param-name">summary.metrics</td>
+                <td>dict[str, MetricSummary]</td>
+                <td>Per metric: <code>total</code>, <code>passed</code>, <code>failed</code>, <code>skipped</code>, <code>pass_rate</code>, <code>average_score</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>Checks whose names carry a per-case detail share one metric: <code>contains:refund</code> and <code>contains:shipped</code> both roll up under <code>contains</code>. Each <code>CaseEvaluation</code> also carries its case's <code>tags</code> and <code>metadata</code>, so a saved report can be filtered or regrouped on its own.</p>
+
+          <h4 id="skipped-scores">Skipped checks</h4>
+          <p>When a check does not apply to a case, return <code>Score.skip(...)</code> instead of a pass. A skipped score never fails the case and stays out of averages and pass rates; it is counted in <code>MetricSummary.skipped</code>.</p>
+
+          <pre><code>def cites_order_id(context: EvaluationContext) -> Score:
+    order_id = context.case.metadata.get("order_id")
+    if order_id is None:
+        return Score.skip("cites_order_id", "Case has no order id to cite.")
+    cited = order_id in context.sample.output
+    return Score(
+        name="cites_order_id",
+        value=float(cited),
+        passed=cited,
+        explanation=f"Order id {order_id} cited: {cited}.",
+    )</code></pre>
         </article>
 
         <article id="eval-api">
@@ -515,7 +600,7 @@ def Eval(
               <tr>
                 <td class="param-name">task</td>
                 <td>callable</td>
-                <td>Function to evaluate, takes input dict, returns string</td>
+                <td>Function under test; called with each row's <code>input</code> value, returns the output</td>
               </tr>
               <tr>
                 <td class="param-name">scores</td>
@@ -551,7 +636,7 @@ def evaluate_suite(
 ) -> EvaluationReport
           </div>
 
-          <p>Returns a full <code>EvaluationReport</code> with per-case scores, summary metrics, pass rates, cost/latency.</p>
+          <p>Returns a full <code>EvaluationReport</code> with per-case scores, summary metrics, pass rates, cost/latency, and <a href="#breakdowns">breakdowns by metric and tag</a>.</p>
 
           <h3 id="scorers-api">Scorers Library</h3>
           <p>Pre-built evaluators organized by type:</p>
@@ -578,6 +663,27 @@ registry.register(
         complete_fn=your_model_call,  # Your function to call LLM
     )
 )</code></pre>
+
+          <p>When no built-in template fits, describe the criterion in plain language. <code>make_rubric()</code> builds the prompt, the verdict letters and their scores:</p>
+
+          <pre><code>from agentic_evals import LLMRubricEvaluator, make_rubric
+
+concise = make_rubric("concise", "The answer is at most two sentences and has no preamble.")
+
+tone = make_rubric(
+    "tone",
+    "The reply is courteous and does not blame the reader.",
+    levels=[                       # best first; scores from 0 to 1
+        ("Courteous throughout.", 1.0),
+        ("Neutral: neither courteous nor rude.", 0.5),
+        ("Rude, dismissive, or blames the reader.", 0.0),
+    ],
+)
+
+registry.register(LLMRubricEvaluator("concise", concise, complete_fn=your_model_call))
+registry.register(LLMRubricEvaluator("tone", tone, complete_fn=your_model_call))</code></pre>
+
+          <p>The default scale is pass/fail. Pass <code>with_reference=True</code> to show the judge a reference next to the output.</p>
 
           <h4>Trajectory Scorers (Trace-Aware)</h4>
           <pre><code>from agentic_evals import scorers
@@ -611,6 +717,16 @@ decision = evaluate_gate(
 if not decision.passed:
     print(f"Release blocked: {decision.reasons}")
     exit(1)</code></pre>
+
+          <p>A gate can hold one slice of the report to a stricter bar than the suite as a whole, keyed by case tag or by <code>Score.metric</code>:</p>
+
+          <pre><code>GateConfig(
+    min_pass_rate=0.95,
+    min_tag_pass_rate={"safety": 1.0},             # Every safety-tagged case passes
+    min_metric_pass_rate={"forbidden_tool": 1.0},  # No forbidden tool call, anywhere
+)</code></pre>
+
+          <p>A tag or metric named in the config but missing from the report fails the gate, so a renamed tag cannot quietly switch a check off.</p>
 
           <h3 id="live-targets">Live Targets</h3>
           <p>Run a suite against a real system (trusted code or HTTP endpoint) instead of pre-recorded samples:</p>
@@ -687,24 +803,35 @@ registry.register(LLMJudgeEvaluator("my_judge", my_judge))</code></pre>
           <p>Bundle a TestSuite with the scorers it needs into one shareable YAML/JSON file:</p>
 
           <pre><code>name: my-eval-pack
-version: 1.0
+description: Checks answers for factual consistency.
 required_scorers:
-  - levenshtein_similarity
   - factuality
 
-cases:
-  - id: case-1
-    name: Check if output is factual
-    expected_output: Paris
-    evaluators:
-      - name: factuality
-        threshold: 0.9</code></pre>
+suite:
+  name: my-eval-pack
+  version: "1"
+  cases:
+    - id: case-1
+      name: Check if output is factual
+      input: What is the capital of France?
+      evaluators:
+        - name: factuality
+          threshold: 0.8
+          config:
+            reference: Paris is the capital of France.</code></pre>
 
           <p>Load and use it:</p>
-          <pre><code>from agentic_evals import load_pack, evaluate_suite, default_registry
+          <pre><code>from pathlib import Path
 
-pack = load_pack("path/to/pack.yaml")
-report = evaluate_suite(pack.to_suite(), samples, registry=default_registry())</code></pre>
+from agentic_evals import (
+    FACTUALITY, LLMRubricEvaluator, default_registry, evaluate_suite, load_pack,
+)
+
+registry = default_registry()
+registry.register(LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=your_model_call))
+
+pack = load_pack(Path("path/to/pack.yaml"), registry=registry)
+report = evaluate_suite(pack.to_suite(), samples, registry=registry)</code></pre>
 
           <p><strong>Built-in packs:</strong></p>
           <ul>
@@ -745,7 +872,7 @@ evaluator = registry.get("my_rule")</code></pre>
           <ul>
             <li>🚀 <a href="#first-eval">Write your first eval</a></li>
             <li>📚 <a href="https://github.com/DeepAgentLabs/agentic-evals#readme">Read the README</a></li>
-            <li>💡 <a href="https://github.com/DeepAgentLabs/agentic-evals/tree/main/agentic-evals/skills">Explore 17 methodology skills</a></li>
+            <li>💡 <a href="https://github.com/DeepAgentLabs/agentic-evals/tree/main/src/agentic_evals/skills">Explore 17 methodology skills</a></li>
             <li>🔊 <a href="https://github.com/DeepAgentLabs/agentic-evals/tree/main/voice-agent-evals">See the voice agent example</a></li>
             <li>🐛 <a href="https://github.com/DeepAgentLabs/agentic-evals/issues">Report issues or request features</a></li>
           </ul>

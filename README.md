@@ -119,20 +119,24 @@ directly -- the engine `Eval()` above is a thin, opinionated front end for.
   arbitrary `attributes`), total latency, estimated cost, and metadata.
   Deliberately not tied to any specific instrumentation format — build one
   from whatever you already have.
-- **`Score`** — a single named judgment (0-1 value, pass/fail, explanation).
+- **`Score`** — a single named judgment (0-1 value, pass/fail, explanation),
+  with a stable `metric` key that reports group by. `Score.skip(...)` records
+  a check that did not apply to a case.
 - **`Evaluator`** — anything with a `.name` and an `.evaluate(context) ->
   list[Score]`. `CallableEvaluator` adapts a plain Python function;
   `LLMJudgeEvaluator` and `BusinessRuleEvaluator` are named convenience
   subclasses for readability/reporting.
 - **`TestCase`/`TestSuite`** — declarative expectations (exact match,
   substring, JSON Schema, required fields, required/forbidden tool calls,
-  required tool arguments, latency/cost/turn-count thresholds, or a named
-  custom evaluator) plus the cases that make up a suite.
+  tool arguments and their values, tool call order, latency/cost/turn-count
+  thresholds, or a named custom evaluator) plus the cases that make up a
+  suite.
 - **`evaluate_suite`** — runs a suite against supplied `EvaluationSample`s
   and returns an `EvaluationReport` (per-case scores plus a pass-rate/cost/
-  latency summary).
+  latency summary, broken down by metric and by tag).
 - **`GateConfig`/`evaluate_gate`** — turn an `EvaluationReport` into a
-  pass/fail release decision on configurable thresholds.
+  pass/fail release decision on configurable thresholds, for the whole
+  suite or for a single tag or metric.
 
 ### TestSuite quickstart
 
@@ -173,6 +177,87 @@ sample = EvaluationSample(
 report = evaluate_suite(suite, [sample])
 print(report.summary.pass_rate)  # 1.0
 ```
+
+### Breakdowns by metric and tag
+
+An overall pass rate hides where the failures are. Tag your cases, and the
+report's summary breaks results down two ways:
+
+```python
+suite = TestSuite(
+    name="support-answers",
+    version="1",
+    cases=[
+        TestCase(
+            id="r1",
+            name="Refund status",
+            tags=["refunds"],
+            expected_contains=["refund"],
+            required_tools=["lookup_order"],
+        ),
+        TestCase(id="t1", name="Order tracking", tags=["tracking"], expected_contains=["shipped"]),
+    ],
+)
+report = evaluate_suite(suite, samples)
+
+for tag, stats in report.summary.tags.items():
+    print(f"{tag}: {stats.passed_cases}/{stats.total_cases} cases passed")
+
+for metric, stats in report.summary.metrics.items():
+    print(f"{metric}: {stats.passed}/{stats.total} checks passed")
+```
+
+- **`summary.tags`** — one `TagSummary` per tag: case counts, pass rate and
+  average score for the cases carrying that tag.
+- **`summary.metrics`** — one `MetricSummary` per metric: how many checks
+  passed, failed or were skipped, plus pass rate and average score. Checks
+  such as `contains:refund` and `contains:shipped` roll up under the single
+  metric `contains`; the detailed name stays on `Score.name`.
+- Each `CaseEvaluation` carries its case's `tags` and `metadata`, so a
+  report can be filtered or regrouped without the original suite.
+
+A custom evaluator can mark a check as not applicable instead of passing or
+failing it. A skipped score never fails the case and stays out of averages
+and pass rates; it is counted separately in `MetricSummary.skipped`:
+
+```python
+def cites_order_id(context: EvaluationContext) -> Score:
+    order_id = context.case.metadata.get("order_id")
+    if order_id is None:
+        return Score.skip("cites_order_id", "Case has no order id to cite.")
+    cited = order_id in context.sample.output
+    return Score(
+        name="cites_order_id",
+        value=float(cited),
+        passed=cited,
+        explanation=f"Order id {order_id} cited: {cited}.",
+    )
+```
+
+### Tool call expectations
+
+Beyond which tools were called, a case can state what they were called
+with and in what order. Tool arguments are read from each span's
+`attributes["tool_args"]`:
+
+```python
+TestCase(
+    id="publish-draft",
+    name="Saves the draft before publishing it",
+    required_tools=["save_draft", "publish"],
+    forbidden_tools=["delete_document"],
+    required_tool_arguments={"publish": ["document_id"]},  # keys present
+    expected_tool_arguments={"publish": {"visibility": "internal"}},  # exact values
+    required_tool_order=["save_draft", "publish"],  # first calls in order
+)
+```
+
+- **`expected_tool_arguments`** passes when at least one call to the tool
+  carries every listed argument with an equal value. Values are compared
+  as given, without type coercion (`5` is not `"5"`).
+- **`required_tool_order`** passes when each listed tool is first called
+  before the next one in the list. Calls to other tools in between are
+  fine; a listed tool that is never called fails the check.
 
 ## LLM-as-judge
 
@@ -221,6 +306,20 @@ if not decision.passed:
     raise SystemExit(f"Release gate failed: {decision.reasons}")
 ```
 
+A gate can hold one slice of the report to a stricter bar than the suite
+as a whole, keyed by case tag or by `Score.metric`:
+
+```python
+GateConfig(
+    min_pass_rate=0.95,
+    min_tag_pass_rate={"safety": 1.0},  # every safety-tagged case must pass
+    min_metric_pass_rate={"forbidden_tool": 1.0},  # no forbidden tool call, anywhere
+)
+```
+
+A tag or metric named in the config but missing from the report fails the
+gate, so a renamed tag cannot quietly switch a check off.
+
 Never fabricates a value it can't back up: `total_cost_usd` on a summary or
 gate decision stays `None` unless every case in scope has a known cost —
 an incomplete cost picture is reported as unavailable, not `$0.00`.
@@ -237,7 +336,8 @@ hand-write a `CallableEvaluator` for common checks:
 - **`scorers.rubric`** (LLM-graded, provider-neutral): `RubricTemplate` +
   `LLMRubricEvaluator`, with built-in templates `FACTUALITY`, `CLOSED_QA`,
   `SUMMARY_QUALITY`, `BATTLE` (pairwise A/B), `MODERATION`, `TRANSLATION`,
-  `SECURITY`, `SQL_CORRECTNESS`, `POSSIBLE`, `PII_LEAKAGE`. Like
+  `SECURITY`, `SQL_CORRECTNESS`, `POSSIBLE`, `PII_LEAKAGE`, plus
+  `make_rubric()` to build one from your own criteria. Like
   `LLMJudgeEvaluator`, this package never calls a model itself -- you pass
   a `complete_fn: Callable[[str], str]`.
 - **`scorers.trajectory`** (reads the trace, not just the output text --
@@ -283,6 +383,33 @@ from agentic_evals import FACTUALITY, LLMRubricEvaluator, default_registry
 registry = default_registry()
 registry.register(LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=call_your_model))
 ```
+
+When no built-in template fits, describe the criterion in plain language
+and `make_rubric()` builds the template — the prompt, the verdict letters
+and their scores:
+
+```python
+from agentic_evals import LLMRubricEvaluator, make_rubric
+
+concise = make_rubric("concise", "The answer is at most two sentences and has no preamble.")
+
+tone = make_rubric(
+    "tone",
+    "The reply is courteous and does not blame the reader.",
+    levels=[  # best first; scores in [0, 1]
+        ("Courteous throughout.", 1.0),
+        ("Neutral: neither courteous nor rude.", 0.5),
+        ("Rude, dismissive, or blames the reader.", 0.0),
+    ],
+)
+
+registry.register(LLMRubricEvaluator("concise", concise, complete_fn=call_your_model))
+registry.register(LLMRubricEvaluator("tone", tone, complete_fn=call_your_model))
+```
+
+The default scale is pass/fail. Pass `with_reference=True` to show the
+judge a reference next to the output; it is read from
+`EvaluatorConfig.config["reference"]`, as with the built-in templates.
 
 ## Live targets
 

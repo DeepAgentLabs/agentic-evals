@@ -24,8 +24,10 @@ from agentic_evals.models import (
     EvaluatorConfig,
     HTTPTarget,
     LiveTarget,
+    MetricSummary,
     PythonTarget,
     Score,
+    TagSummary,
     TestCase,
     TestSuite,
 )
@@ -58,6 +60,7 @@ from agentic_evals.scorers import (
     exact_match,
     json_diff,
     levenshtein_similarity,
+    make_rubric,
     no_redundant_tool_calls,
     numeric_diff,
     numeric_range,
@@ -81,7 +84,7 @@ from agentic_evals.simple import (
     numeric_close,
 )
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 __all__ = [
     "BATTLE",
@@ -117,9 +120,11 @@ __all__ = [
     "LLMJudgeEvaluator",
     "LLMRubricEvaluator",
     "LiveTarget",
+    "MetricSummary",
     "PythonTarget",
     "RubricTemplate",
     "Score",
+    "TagSummary",
     "TestCase",
     "TestSuite",
     "__version__",
@@ -143,6 +148,7 @@ __all__ = [
     "load_pack",
     "load_samples",
     "load_suite",
+    "make_rubric",
     "matches",
     "no_redundant_tool_calls",
     "numeric_close",

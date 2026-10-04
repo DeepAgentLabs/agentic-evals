@@ -33,6 +33,10 @@ aren't sure whether to reach for a built-in scorer, write a custom
    the final text.
 6. If none of the above fit, write a plain `CallableEvaluator(name, fn)` —
    `fn` takes an `EvaluationContext` and returns a `Score` or `list[Score]`.
+7. When the criterion does not apply to a case (no order id to check, no
+   tool expected), return `Score.skip(name, reason)` rather than a pass —
+   a skipped score never fails the case and stays out of the averages,
+   so the metric's pass rate reflects only the cases it actually judged.
 
 ## Avoid
 
@@ -47,9 +51,11 @@ aren't sure whether to reach for a built-in scorer, write a custom
 
 ## Check
 
-- The scorer raises a clear `ValueError` when its required input
-  (`expected_output`, `case.input`, a trace with tool calls) is missing,
-  rather than silently returning a meaningless score.
+- The scorer raises a clear `ValueError` when its configuration
+  (`expected_output`, `case.input`, an `allowed_tools` list) is missing,
+  rather than silently returning a meaningless score. What the agent did
+  or failed to do — an empty trace, a wrong answer — is a result to
+  score, not an error to raise.
 - `Score.value` stays in `[0, 1]`; a hard pass/fail scorer returns exactly
   `0.0` or `1.0`, a graded one returns a genuine gradient.
 - You've tested the scorer directly against at least one passing and one

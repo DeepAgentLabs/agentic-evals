@@ -25,8 +25,6 @@ from agentic_evals import (
 
 MAX_LATENCY_MS = 5000.0
 
-CAT_BY_ID = {tc["id"]: tc["category"] for tc in VOICE_TEST_CASES}
-
 
 # Evaluators moved to evaluators.py (single source of truth).
 registry = build_registry()
@@ -57,6 +55,9 @@ def build_test_suite() -> TestSuite:
             expected_contains=tc.get("expected_response_contains", []),
             required_tools=[tc["expected_tool"]] if "expected_tool" in tc else [],
             required_tool_arguments={tc["expected_tool"]: list(tc["expected_arguments"].keys())}
+            if "expected_arguments" in tc
+            else {},
+            expected_tool_arguments={tc["expected_tool"]: tc["expected_arguments"]}
             if "expected_arguments" in tc
             else {},
             max_latency_ms=MAX_LATENCY_MS,
@@ -135,7 +136,7 @@ def print_scorecard(report: EvaluationReport) -> None:
 
     for case_eval in report.cases:
         status = "PASS" if case_eval.passed else "FAIL"
-        category = CAT_BY_ID.get(case_eval.case_id, "unknown")
+        category = case_eval.tags[0] if case_eval.tags else "unknown"
 
         print(f"{case_eval.case_id:20} {category:18} {status:5} {case_eval.latency_ms:.2f} ms")
 
@@ -148,28 +149,22 @@ def print_scorecard(report: EvaluationReport) -> None:
     print("\nMETRIC PASS RATES:")
     print("-" * 70)
 
-    metric_scores: dict[str, list[float]] = {}
-    metric_passed: dict[str, int] = {}
-    metric_total: dict[str, int] = {}
-
-    for case_eval in report.cases:
-        for score in case_eval.scores:
-            name = score.name
-            if name not in metric_scores:
-                metric_scores[name] = []
-                metric_passed[name] = 0
-                metric_total[name] = 0
-            metric_scores[name].append(score.value)
-            metric_total[name] += 1
-            if score.passed:
-                metric_passed[name] += 1
-
-    for name in sorted(metric_scores.keys()):
-        avg_score = sum(metric_scores[name]) / len(metric_scores[name])
-        pass_rate = (metric_passed[name] / metric_total[name]) * 100
+    for name, metric in report.summary.metrics.items():
+        if metric.pass_rate is None or metric.average_score is None:
+            continue
         print(
-            f"  {name:30}  avg={avg_score:.3f}  "
-            f"pass={metric_passed[name]}/{metric_total[name]} ({pass_rate:.1f}%)"
+            f"  {name:30}  avg={metric.average_score:.3f}  "
+            f"pass={metric.passed}/{metric.total} ({metric.pass_rate:.1%})"
+        )
+
+    print("-" * 70)
+
+    print("\nCATEGORY PASS RATES:")
+    print("-" * 70)
+
+    for tag, tagged in report.summary.tags.items():
+        print(
+            f"  {tag:30}  pass={tagged.passed_cases}/{tagged.total_cases} ({tagged.pass_rate:.1%})"
         )
 
     print("-" * 70)

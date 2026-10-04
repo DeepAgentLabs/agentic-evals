@@ -407,7 +407,7 @@
   <main>
     <div class="hero">
       <div>
-        <p class="eyebrow mono"><span class="status-dot" aria-hidden="true"></span>Agentic Evals · v0.6.0</p>
+        <p class="eyebrow mono"><span class="status-dot" aria-hidden="true"></span>Agentic Evals · v0.7.0</p>
         <h1>Know your agent is <span class="hl">ready</span> before it ships.</h1>
         <p class="hero-lede">
           Score LLM and agent outputs with deterministic checks, LLM-as-judge rubrics and
@@ -467,17 +467,17 @@
           <article class="cell">
             <span class="index">02</span>
             <h3>LLM-as-judge</h3>
-            <p>Rubric scoring with ten built-in templates, from factuality to SQL correctness. You supply <code>complete_fn</code> — any provider works.</p>
+            <p>Rubric scoring with ten built-in templates, from factuality to SQL correctness, or your own criteria in plain language. You supply <code>complete_fn</code> — any provider works.</p>
           </article>
           <article class="cell accent">
             <span class="index">03</span>
             <h3>Trace-aware</h3>
-            <p>Score the path, not just the answer: tool-call precision and recall, redundant calls, trajectory efficiency, latency, cost and turns.</p>
+            <p>Score the path, not just the answer: which tools were called, with what arguments and in what order, plus redundant calls, latency, cost and turns.</p>
           </article>
           <article class="cell">
             <span class="index">04</span>
             <h3>Release gates</h3>
-            <p>Set thresholds on pass rate, average score, latency and total cost. The CLI exits 0 or 1, so CI can block the merge.</p>
+            <p>Set thresholds on pass rate, average score, latency and total cost, for the whole suite or for a single tag or metric. The CLI exits 0 or 1, so CI can block the merge.</p>
           </article>
           <article class="cell">
             <span class="index">05</span>
@@ -552,13 +552,18 @@ suite = TestSuite(
             required_output_fields=[<span class="tok-s">"status"</span>],
             max_latency_ms=<span class="tok-s">2000</span>,
             max_cost_usd=<span class="tok-s">0.02</span>,
+            tags=[<span class="tok-s">"refunds"</span>],
         ),
     ],
 )
 
 report = run_live_suite(suite, PythonTarget(callable_path=<span class="tok-s">"my_app:run_case"</span>))
+<span class="tok-k">for</span> tag, stats <span class="tok-k">in</span> report.summary.tags.items():
+    print(<span class="tok-s">f"</span>{tag}<span class="tok-s">: </span>{stats.passed_cases}<span class="tok-s">/</span>{stats.total_cases}<span class="tok-s"> cases passed"</span>)
+
 decision = evaluate_gate(report, GateConfig(
     min_pass_rate=<span class="tok-s">0.95</span>,
+    min_tag_pass_rate={<span class="tok-s">"refunds"</span>: <span class="tok-s">1.0</span>},
     max_average_latency_ms=<span class="tok-s">1500</span>,
     max_total_cost_usd=<span class="tok-s">0.25</span>,
 ))
@@ -566,7 +571,7 @@ decision = evaluate_gate(report, GateConfig(
     <span class="tok-k">raise</span> SystemExit(<span class="tok-s">f"Release gate failed: </span>{decision.reasons}<span class="tok-s">"</span>)</code></pre>
             <div class="tab-note">
               <strong>Declarative suites</strong>
-              Expectations cover tool calls, output fields, JSON Schema, latency, cost and turn count. Run against a live Python or HTTP target, then gate the release on the report.
+              Expectations cover tool calls, output fields, JSON Schema, latency, cost and turn count. Run against a live Python or HTTP target, read the results by tag and by metric, then gate the release on the report.
             </div>
           </div>
 
@@ -628,7 +633,7 @@ report = evaluate_suite(suite, samples, registry=registry)</code></pre>
           <article class="cell">
             <span class="index">QA</span>
             <h3>Answer quality</h3>
-            <p>Grade answers against references with closed-QA and factuality rubrics, backed by deterministic checks.</p>
+            <p>Grade answers against references with closed-QA and factuality rubrics, backed by deterministic checks. Tag cases to see pass rates per scenario.</p>
           </article>
           <article class="cell">
             <span class="index">Tools</span>

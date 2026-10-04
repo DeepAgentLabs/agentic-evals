@@ -28,6 +28,10 @@ just accept the defaults.
 4. Treat a gate failure on cost/latency as at least as actionable as a
    pass-rate failure — regressions there are often the first sign of a
    prompt or retry-loop change before quality visibly degrades.
+5. When some cases matter more than the overall rate allows for, set
+   `min_tag_pass_rate` or `min_metric_pass_rate` for that slice instead
+   of raising `min_pass_rate` for everything — for example a tag that
+   must pass in full while the suite as a whole tolerates a few misses.
 
 ## Avoid
 

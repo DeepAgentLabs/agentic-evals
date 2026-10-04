@@ -22,7 +22,8 @@ influences a real decision.
    flipping; on a 2,000-case suite it's sixty. Treat the first as noise
    until `build-an-eval-dataset`/`size-a-test-suite` gives you enough
    cases to trust a difference that small.
-3. Break results down by the tags set in `build-an-eval-dataset` — a small
+3. Break results down by the tags set in `build-an-eval-dataset` (compare
+   `report.summary.tags` between the two reports) — a small
    overall improvement that's actually a large improvement on one
    scenario and a regression on another is a different finding (and a
    different decision) than a uniform small gain.

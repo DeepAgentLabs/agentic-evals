@@ -139,7 +139,7 @@ def _call_score_fn(fn: ScoreFn, *, input: Any, output: Any, expected: Any) -> An
 
 def _normalize_score(raw: Any, *, default_name: str) -> dict[str, float]:
     if isinstance(raw, Score):
-        return {raw.name or default_name: raw.value}
+        return {} if raw.skipped else {raw.name or default_name: raw.value}
     if isinstance(raw, bool):
         return {default_name: 1.0 if raw else 0.0}
     if isinstance(raw, int | float):

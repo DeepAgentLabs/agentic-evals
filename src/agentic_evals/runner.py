@@ -20,8 +20,10 @@ from agentic_evals.models import (
     EvaluationSummary,
     HTTPTarget,
     LiveTarget,
+    MetricSummary,
     PythonTarget,
     Score,
+    TagSummary,
     TestCase,
     TestSuite,
 )
@@ -113,6 +115,34 @@ def _graded_against_expected_output(case: TestCase) -> bool:
     )
 
 
+def _score_tool_order(required_order: list[str], sample: EvaluationSample) -> Score:
+    """Each tool in `required_order` is first called before the next one is.
+
+    Calls to other tools in between are fine; what fails is a listed tool
+    that was never called, or one whose first call came ahead of a tool
+    listed before it.
+    """
+    called = [span.tool_name for span in sample.trace.spans if span.tool_name]
+    first_call = {tool: called.index(tool) for tool in required_order if tool in called}
+    missing = [tool for tool in required_order if tool not in first_call]
+    out_of_order = [
+        (earlier, later)
+        for earlier, later in zip(required_order, required_order[1:], strict=False)
+        if earlier in first_call and later in first_call and first_call[earlier] > first_call[later]
+    ]
+    passed = not missing and not out_of_order
+    if passed:
+        explanation = f"Tools were first called in the required order {required_order}."
+    elif missing:
+        explanation = f"Required order {required_order} not met: {missing} never called."
+    else:
+        earlier, later = out_of_order[0]
+        explanation = (
+            f"Required order {required_order} not met: {later!r} was called before {earlier!r}."
+        )
+    return Score(name="tool_order", value=float(passed), passed=passed, explanation=explanation)
+
+
 def _score_case(
     case: TestCase,
     sample: EvaluationSample,
@@ -137,6 +167,7 @@ def _score_case(
         scores.append(
             Score(
                 name=f"contains:{expected}",
+                metric="contains",
                 value=float(passed),
                 passed=passed,
                 explanation=f"Output contains required text: {expected!r}."
@@ -180,6 +211,7 @@ def _score_case(
         scores.append(
             Score(
                 name=f"required_field:{field_path}",
+                metric="required_field",
                 value=float(exists),
                 passed=exists,
                 explanation=f"Output contains required field {field_path!r}."
@@ -199,6 +231,7 @@ def _score_case(
         scores.append(
             Score(
                 name=f"required_tool:{tool}",
+                metric="required_tool",
                 value=float(passed),
                 passed=passed,
                 explanation=f"Required tool {tool!r} was called."
@@ -211,6 +244,7 @@ def _score_case(
         scores.append(
             Score(
                 name=f"forbidden_tool:{tool}",
+                metric="forbidden_tool",
                 value=float(passed),
                 passed=passed,
                 explanation=f"Forbidden tool {tool!r} was not called."
@@ -229,6 +263,7 @@ def _score_case(
         scores.append(
             Score(
                 name=f"tool_args:{tool_name}",
+                metric="tool_args",
                 value=float(args_present),
                 passed=args_present,
                 explanation=f"Tool {tool_name!r} included required arguments {required_args}."
@@ -236,6 +271,36 @@ def _score_case(
                 else f"Tool {tool_name!r} did not include required arguments {required_args}.",
             )
         )
+    for tool_name, expected_args in case.expected_tool_arguments.items():
+        calls = [
+            span.attributes.get("tool_args")
+            for span in sample.trace.spans
+            if span.tool_name == tool_name
+        ]
+        values_match = any(
+            isinstance(tool_args, dict)
+            and all(
+                arg in tool_args and tool_args[arg] == value for arg, value in expected_args.items()
+            )
+            for tool_args in calls
+        )
+        scores.append(
+            Score(
+                name=f"tool_arg_values:{tool_name}",
+                metric="tool_arg_values",
+                value=float(values_match),
+                passed=values_match,
+                explanation=f"Tool {tool_name!r} was called with {expected_args}."
+                if values_match
+                else (
+                    f"Tool {tool_name!r} was called with {calls}, not {expected_args}."
+                    if calls
+                    else f"Tool {tool_name!r} was not called, so {expected_args} was not passed."
+                ),
+            )
+        )
+    if case.required_tool_order:
+        scores.append(_score_tool_order(case.required_tool_order, sample))
     if case.max_latency_ms is not None:
         passed = sample.trace.total_latency_ms <= case.max_latency_ms
         scores.append(
@@ -371,6 +436,54 @@ def run_live_suite(
     return evaluate_suite(suite, samples, registry=registry)
 
 
+def _mean(values: list[float]) -> float | None:
+    return sum(values) / len(values) if values else None
+
+
+def _score_values(results: list[CaseEvaluation]) -> list[float]:
+    """Values of every score that was actually evaluated (skipped ones excluded)."""
+    return [score.value for result in results for score in result.scores if not score.skipped]
+
+
+def _summarize_metrics(results: list[CaseEvaluation]) -> dict[str, MetricSummary]:
+    by_metric: dict[str, list[Score]] = {}
+    for result in results:
+        for score in result.scores:
+            by_metric.setdefault(score.metric, []).append(score)
+    summaries: dict[str, MetricSummary] = {}
+    for metric in sorted(by_metric):
+        scored = [score for score in by_metric[metric] if not score.skipped]
+        passed = sum(score.passed for score in scored)
+        summaries[metric] = MetricSummary(
+            total=len(scored),
+            passed=passed,
+            failed=len(scored) - passed,
+            skipped=len(by_metric[metric]) - len(scored),
+            pass_rate=passed / len(scored) if scored else None,
+            average_score=_mean([score.value for score in scored]),
+        )
+    return summaries
+
+
+def _summarize_tags(results: list[CaseEvaluation]) -> dict[str, TagSummary]:
+    by_tag: dict[str, list[CaseEvaluation]] = {}
+    for result in results:
+        for tag in dict.fromkeys(result.tags):
+            by_tag.setdefault(tag, []).append(result)
+    summaries: dict[str, TagSummary] = {}
+    for tag in sorted(by_tag):
+        tagged = by_tag[tag]
+        passed = sum(result.passed for result in tagged)
+        summaries[tag] = TagSummary(
+            total_cases=len(tagged),
+            passed_cases=passed,
+            failed_cases=len(tagged) - passed,
+            pass_rate=passed / len(tagged),
+            average_score=_mean(_score_values(tagged)),
+        )
+    return summaries
+
+
 def evaluate_suite(
     suite: TestSuite,
     samples: list[EvaluationSample],
@@ -412,6 +525,8 @@ def evaluate_suite(
                     output="",
                     trace_id="",
                     latency_ms=0,
+                    tags=case.tags,
+                    metadata=case.metadata,
                 )
             )
             continue
@@ -420,16 +535,18 @@ def evaluate_suite(
             CaseEvaluation(
                 case_id=case.id,
                 case_name=case.name,
-                passed=all(score.passed or not score.required for score in scores),
+                passed=all(score.passed or not score.required or score.skipped for score in scores),
                 scores=scores,
                 output=sample.output,
                 trace_id=sample.trace.trace_id,
                 latency_ms=sample.trace.total_latency_ms,
                 cost_usd=sample.trace.estimated_cost_usd,
+                tags=case.tags,
+                metadata=case.metadata,
             )
         )
     passed = sum(result.passed for result in results)
-    all_scores = [score.value for result in results for score in result.scores]
+    all_scores = _score_values(results)
     costs = [result.cost_usd for result in results if result.cost_usd is not None]
     return EvaluationReport(
         suite_name=suite.name,
@@ -439,9 +556,11 @@ def evaluate_suite(
             passed_cases=passed,
             failed_cases=len(results) - passed,
             pass_rate=passed / len(results),
-            average_score=sum(all_scores) / len(all_scores),
+            average_score=_mean(all_scores) or 0.0,
             total_cost_usd=sum(costs) if len(costs) == len(results) else None,
             average_latency_ms=sum(result.latency_ms for result in results) / len(results),
+            metrics=_summarize_metrics(results),
+            tags=_summarize_tags(results),
         ),
         cases=results,
     )

@@ -1,6 +1,10 @@
+from typing import Annotated
+
 from pydantic import BaseModel, Field
 
 from agentic_evals.models import EvaluationReport
+
+PassRate = Annotated[float, Field(ge=0, le=1)]
 
 
 class GateConfig(BaseModel):
@@ -10,11 +14,19 @@ class GateConfig(BaseModel):
     when left `None` -- so `min_pass_rate` alone decides how many failures
     are tolerated, and a graded score below 1.0 on a passing case does not
     fail the gate unless an average-score floor is set explicitly.
+
+    `min_tag_pass_rate` and `min_metric_pass_rate` set a floor for one
+    slice of the report, keyed by tag or by `Score.metric`. They apply on
+    top of `min_pass_rate`, so a single tag or metric can be held to a
+    stricter bar than the suite as a whole. A tag or metric named here but
+    absent from the report fails the gate rather than passing unchecked.
     """
 
     min_pass_rate: float = Field(default=1.0, ge=0, le=1)
     min_average_score: float | None = Field(default=None, ge=0, le=1)
     max_failed_cases: int | None = Field(default=None, ge=0)
+    min_tag_pass_rate: dict[str, PassRate] = Field(default_factory=dict)
+    min_metric_pass_rate: dict[str, PassRate] = Field(default_factory=dict)
     max_average_latency_ms: float | None = Field(default=None, gt=0)
     max_total_cost_usd: float | None = Field(default=None, ge=0)
 
@@ -56,14 +68,26 @@ def evaluate_gate(report: EvaluationReport, config: GateConfig) -> GateDecision:
                 f"Total cost ${summary.total_cost_usd:.6f} exceeds "
                 f"${config.max_total_cost_usd:.6f}."
             )
-    return GateDecision(
-        passed=not reasons,
-        reasons=reasons,
-        observed={
-            "pass_rate": summary.pass_rate,
-            "average_score": summary.average_score,
-            "failed_cases": summary.failed_cases,
-            "average_latency_ms": summary.average_latency_ms,
-            "total_cost_usd": summary.total_cost_usd,
-        },
-    )
+    observed: dict[str, float | int | None] = {
+        "pass_rate": summary.pass_rate,
+        "average_score": summary.average_score,
+        "failed_cases": summary.failed_cases,
+        "average_latency_ms": summary.average_latency_ms,
+        "total_cost_usd": summary.total_cost_usd,
+    }
+    for tag, minimum in config.min_tag_pass_rate.items():
+        tagged = summary.tags.get(tag)
+        observed[f"tag_pass_rate:{tag}"] = tagged.pass_rate if tagged else None
+        if tagged is None:
+            reasons.append(f"Tag {tag!r} has no cases in the report.")
+        elif tagged.pass_rate < minimum:
+            reasons.append(f"Tag {tag!r} pass rate {tagged.pass_rate:.1%} is below {minimum:.1%}.")
+    for metric, minimum in config.min_metric_pass_rate.items():
+        measured = summary.metrics.get(metric)
+        rate = measured.pass_rate if measured else None
+        observed[f"metric_pass_rate:{metric}"] = rate
+        if rate is None:
+            reasons.append(f"Metric {metric!r} has no evaluated scores in the report.")
+        elif rate < minimum:
+            reasons.append(f"Metric {metric!r} pass rate {rate:.1%} is below {minimum:.1%}.")
+    return GateDecision(passed=not reasons, reasons=reasons, observed=observed)

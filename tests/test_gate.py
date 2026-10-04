@@ -1,3 +1,5 @@
+import pytest
+
 from agentic_evals import (
     EvalTrace,
     EvaluationReport,
@@ -107,3 +109,66 @@ def test_gate_passes_when_thresholds_are_met() -> None:
     decision = evaluate_gate(report, GateConfig())
     assert decision.passed
     assert decision.reasons == []
+
+
+def _tagged_report() -> EvaluationReport:
+    suite = TestSuite(
+        name="release",
+        version="1",
+        cases=[
+            TestCase(id="s1", name="s1", expected_contains=["no"], tags=["safety"]),
+            TestCase(id="s2", name="s2", expected_contains=["no"], tags=["safety"]),
+            TestCase(id="q1", name="q1", expected_output="ok", tags=["quality"]),
+            TestCase(id="q2", name="q2", expected_output="ok", tags=["quality"]),
+        ],
+    )
+    outputs = {"s1": "no", "s2": "no", "q1": "ok", "q2": "wrong"}
+    samples = [
+        EvaluationSample(case_id=case_id, output=output, trace=make_trace())
+        for case_id, output in outputs.items()
+    ]
+    return evaluate_suite(suite, samples)
+
+
+def test_gate_holds_one_tag_to_a_stricter_bar_than_the_suite() -> None:
+    report = _tagged_report()
+    base = {"min_pass_rate": 0.75}
+
+    assert evaluate_gate(report, GateConfig(**base, min_tag_pass_rate={"safety": 1.0})).passed
+
+    decision = evaluate_gate(report, GateConfig(**base, min_tag_pass_rate={"quality": 1.0}))
+    assert decision.reasons == ["Tag 'quality' pass rate 50.0% is below 100.0%."]
+    assert decision.observed["tag_pass_rate:quality"] == 0.5
+
+
+def test_gate_checks_metric_pass_rates() -> None:
+    report = _tagged_report()
+    base = {"min_pass_rate": 0.75}
+
+    assert evaluate_gate(report, GateConfig(**base, min_metric_pass_rate={"contains": 1.0})).passed
+
+    decision = evaluate_gate(report, GateConfig(**base, min_metric_pass_rate={"exact_match": 0.9}))
+    assert decision.reasons == ["Metric 'exact_match' pass rate 50.0% is below 90.0%."]
+    assert decision.observed["metric_pass_rate:exact_match"] == 0.5
+
+
+def test_gate_fails_on_a_tag_or_metric_missing_from_the_report() -> None:
+    decision = evaluate_gate(
+        _tagged_report(),
+        GateConfig(
+            min_pass_rate=0.75,
+            min_tag_pass_rate={"billing": 0.5},
+            min_metric_pass_rate={"groundedness": 0.5},
+        ),
+    )
+
+    assert decision.reasons == [
+        "Tag 'billing' has no cases in the report.",
+        "Metric 'groundedness' has no evaluated scores in the report.",
+    ]
+    assert decision.observed["tag_pass_rate:billing"] is None
+
+
+def test_gate_rejects_an_out_of_range_slice_threshold() -> None:
+    with pytest.raises(ValueError):
+        GateConfig(min_tag_pass_rate={"safety": 1.5})
