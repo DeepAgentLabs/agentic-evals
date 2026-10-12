@@ -2,6 +2,7 @@ import json
 import urllib.error
 import urllib.request
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
@@ -12,6 +13,7 @@ from jsonschema import Draft202012Validator, SchemaError
 from referencing import Registry
 from referencing.exceptions import Unresolvable
 
+from agentic_evals._version import __version__
 from agentic_evals.evaluators import EvaluationContext, EvaluatorRegistry
 from agentic_evals.models import (
     CaseEvaluation,
@@ -30,6 +32,22 @@ from agentic_evals.models import (
 from agentic_evals.scorers.text import REFERENCE_SCORER_NAMES
 
 TraceAdapter = Callable[[Any], Any]
+
+#: `Score.evaluator` for the checks `evaluate_suite` runs itself (exact match,
+#: contains, tool and threshold checks). Their `evaluator_version` is this
+#: package's version, since that is what defines their logic.
+BUILTIN_EVALUATOR = "agentic_evals.builtin"
+
+
+def _stamp_builtin(scores: list[Score]) -> list[Score]:
+    return [
+        score
+        if score.evaluator
+        else score.model_copy(
+            update={"evaluator": BUILTIN_EVALUATOR, "evaluator_version": __version__}
+        )
+        for score in scores
+    ]
 
 
 def _load_data(path: Path) -> Any:
@@ -349,6 +367,7 @@ def _score_case(
                 ),
             )
         )
+    scores = _stamp_builtin(scores)
     for evaluator_config in case.evaluators:
         if registry is None:
             raise ValueError(
@@ -359,7 +378,17 @@ def _score_case(
         custom_scores = evaluator.evaluate(
             EvaluationContext(case=case, sample=sample, config=evaluator_config)
         )
-        scores.extend(custom_scores)
+        declared_version = getattr(evaluator, "version", None)
+        scores.extend(
+            score.model_copy(
+                update={
+                    "evaluator": score.evaluator or evaluator_config.name,
+                    "evaluator_version": score.evaluator_version
+                    or (declared_version if isinstance(declared_version, str) else None),
+                }
+            )
+            for score in custom_scores
+        )
     return scores
 
 
@@ -393,12 +422,28 @@ def _sample_from_payload(
     return EvaluationSample.model_validate({**payload, "case_id": case_id})
 
 
+def _http_payload(target: HTTPTarget, case: TestCase) -> dict[str, Any]:
+    request = urllib.request.Request(
+        target.url,
+        data=json.dumps({"input": case.input, "case_id": case.id}).encode("utf-8"),
+        headers={"Content-Type": "application/json", **target.headers},
+        method=target.method.upper(),
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=target.timeout_seconds) as response:
+            payload: dict[str, Any] = json.loads(response.read().decode("utf-8"))
+    except urllib.error.URLError as exc:
+        raise ValueError(f"HTTP target request failed for case {case.id!r}: {exc}") from exc
+    return payload
+
+
 def run_live_suite(
     suite: TestSuite,
     target: LiveTarget,
     *,
     registry: EvaluatorRegistry | None = None,
     trace_adapter: TraceAdapter | None = None,
+    max_workers: int = 1,
 ) -> EvaluationReport:
     """Run a trusted live target against every case in a suite.
 
@@ -410,29 +455,40 @@ def run_live_suite(
     before validation -- callers whose target implementations return trace
     payloads that don't match `EvalTrace`'s shape can normalize them here
     instead of having them silently validate with defaulted-out fields.
+
+    `max_workers` above 1 calls the target for several cases at once on a
+    thread pool. Results keep the suite's case order either way, so the
+    report matches a sequential run that produced the same outputs. Only
+    raise it for targets that are safe to call concurrently.
     """
-    samples: list[EvaluationSample] = []
+    if max_workers < 1:
+        raise ValueError("max_workers must be at least 1")
+    call_case: Callable[[TestCase], dict[str, Any]]
     if isinstance(target, PythonTarget):
         callable_target = _load_python_callable(target.callable_path)
-        for case in suite.cases:
-            result = callable_target(case.input, case=case)
-            samples.append(_sample_from_payload(result, case.id, trace_adapter))
+
+        def call_case(case: TestCase) -> dict[str, Any]:
+            result: dict[str, Any] = callable_target(case.input, case=case)
+            return result
+
     elif isinstance(target, HTTPTarget):
-        for case in suite.cases:
-            request = urllib.request.Request(
-                target.url,
-                data=json.dumps({"input": case.input, "case_id": case.id}).encode("utf-8"),
-                headers={"Content-Type": "application/json", **target.headers},
-                method=target.method.upper(),
-            )
-            try:
-                with urllib.request.urlopen(request, timeout=target.timeout_seconds) as response:
-                    payload = json.loads(response.read().decode("utf-8"))
-            except urllib.error.URLError as exc:
-                raise ValueError(f"HTTP target request failed for case {case.id!r}: {exc}") from exc
-            samples.append(_sample_from_payload(payload, case.id, trace_adapter))
+        http_target = target
+
+        def call_case(case: TestCase) -> dict[str, Any]:
+            return _http_payload(http_target, case)
+
     else:
         raise ValueError(f"Unsupported live target kind: {target.kind}")
+
+    if max_workers == 1:
+        payloads = [call_case(case) for case in suite.cases]
+    else:
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            payloads = list(pool.map(call_case, suite.cases))
+    samples = [
+        _sample_from_payload(payload, case.id, trace_adapter)
+        for case, payload in zip(suite.cases, payloads, strict=True)
+    ]
     return evaluate_suite(suite, samples, registry=registry)
 
 
@@ -463,6 +519,16 @@ def _summarize_metrics(results: list[CaseEvaluation]) -> dict[str, MetricSummary
             average_score=_mean([score.value for score in scored]),
         )
     return summaries
+
+
+def _count_cost_sources(results: list[CaseEvaluation]) -> dict[str, int]:
+    """Priced cases per cost provenance; `unspecified` when the trace did not say."""
+    counts: dict[str, int] = {}
+    for result in results:
+        if result.cost_usd is not None:
+            key = result.cost_source or "unspecified"
+            counts[key] = counts.get(key, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _summarize_tags(results: list[CaseEvaluation]) -> dict[str, TagSummary]:
@@ -508,14 +574,16 @@ def evaluate_suite(
     for case in suite.cases:
         sample = by_case.get(case.id)
         if sample is None:
-            scores = [
-                Score(
-                    name="sample_available",
-                    value=0,
-                    passed=False,
-                    explanation="No evaluation sample was supplied for this test case.",
-                )
-            ]
+            scores = _stamp_builtin(
+                [
+                    Score(
+                        name="sample_available",
+                        value=0,
+                        passed=False,
+                        explanation="No evaluation sample was supplied for this test case.",
+                    )
+                ]
+            )
             results.append(
                 CaseEvaluation(
                     case_id=case.id,
@@ -525,6 +593,7 @@ def evaluate_suite(
                     output="",
                     trace_id="",
                     latency_ms=0,
+                    sample_available=False,
                     tags=case.tags,
                     metadata=case.metadata,
                 )
@@ -541,6 +610,11 @@ def evaluate_suite(
                 trace_id=sample.trace.trace_id,
                 latency_ms=sample.trace.total_latency_ms,
                 cost_usd=sample.trace.estimated_cost_usd,
+                cost_source=(
+                    sample.trace.cost_source
+                    if sample.trace.estimated_cost_usd is not None
+                    else None
+                ),
                 tags=case.tags,
                 metadata=case.metadata,
             )
@@ -558,6 +632,8 @@ def evaluate_suite(
             pass_rate=passed / len(results),
             average_score=_mean(all_scores) or 0.0,
             total_cost_usd=sum(costs) if len(costs) == len(results) else None,
+            priced_cases=len(costs),
+            cost_sources=_count_cost_sources(results),
             average_latency_ms=sum(result.latency_ms for result in results) / len(results),
             metrics=_summarize_metrics(results),
             tags=_summarize_tags(results),
