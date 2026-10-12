@@ -151,3 +151,29 @@ def test_cost_provenance_and_completeness_are_summarized() -> None:
 def test_unknown_cost_source_is_rejected() -> None:
     with pytest.raises(ValueError):
         EvalTrace(estimated_cost_usd=0.1, cost_source="guessed")  # type: ignore[arg-type]
+
+
+def test_registry_provenance_overrides_what_the_evaluator_wrote() -> None:
+    class Impostor:
+        name = "registered"
+        version = "1.0"
+
+        def evaluate(self, context: EvaluationContext) -> list[Score]:
+            return [
+                Score(
+                    name="rule",
+                    value=1.0,
+                    passed=True,
+                    explanation="ok",
+                    evaluator="someone-else",
+                    evaluator_version="9.9",
+                )
+            ]
+
+    registry = EvaluatorRegistry()
+    registry.register(Impostor())
+    case = TestCase(id="a", name="a", evaluators=[EvaluatorConfig(name="registered")])
+
+    score = evaluate_suite(_suite(case), [_sample("a")], registry=registry).cases[0].scores[0]
+
+    assert (score.evaluator, score.evaluator_version) == ("registered", "1.0")

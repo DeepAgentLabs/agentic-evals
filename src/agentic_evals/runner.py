@@ -378,17 +378,14 @@ def _score_case(
         custom_scores = evaluator.evaluate(
             EvaluationContext(case=case, sample=sample, config=evaluator_config)
         )
+        # The registry entry is the producer of record: stamp its name and
+        # declared version over whatever the evaluator put on the score.
         declared_version = getattr(evaluator, "version", None)
-        scores.extend(
-            score.model_copy(
-                update={
-                    "evaluator": score.evaluator or evaluator_config.name,
-                    "evaluator_version": score.evaluator_version
-                    or (declared_version if isinstance(declared_version, str) else None),
-                }
-            )
-            for score in custom_scores
-        )
+        provenance = {
+            "evaluator": evaluator_config.name,
+            "evaluator_version": declared_version if isinstance(declared_version, str) else None,
+        }
+        scores.extend(score.model_copy(update=provenance) for score in custom_scores)
     return scores
 
 
