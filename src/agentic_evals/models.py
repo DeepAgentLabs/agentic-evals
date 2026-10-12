@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -18,13 +18,24 @@ class EvalSpan(BaseModel):
     attributes: dict[str, Any] = Field(default_factory=dict)
 
 
+CostSource = Literal["measured", "estimated"]
+
+
 class EvalTrace(BaseModel):
-    """The minimal per-run shape the evaluation engine actually inspects."""
+    """The minimal per-run shape the evaluation engine actually inspects.
+
+    `cost_source` records where `estimated_cost_usd` came from: `measured`
+    (billed or provider-reported) or `estimated` (computed from token counts
+    and a price table). Leave it `None` when the producer does not know;
+    reports then count the cost as having unknown provenance rather than
+    guessing.
+    """
 
     trace_id: str = ""
     spans: list[EvalSpan] = Field(default_factory=list)
     total_latency_ms: float = 0.0
     estimated_cost_usd: float | None = None
+    cost_source: CostSource | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -111,6 +122,12 @@ class Score(BaseModel):
     A `skipped` score records that a check did not apply to a case. It
     never fails the case and is left out of averages and pass rates --
     build one with `Score.skip(...)`.
+
+    `evaluator` and `evaluator_version` identify what produced the score.
+    `evaluate_suite` stamps them: built-in checks are attributed to
+    `BUILTIN_EVALUATOR` at this package's version, and registered
+    evaluators to their registry name and their `version` attribute, if
+    any. A `None` version means the evaluator did not declare one.
     """
 
     name: str
@@ -121,6 +138,8 @@ class Score(BaseModel):
     skipped: bool = False
     explanation: str
     evaluator_type: str = "deterministic"
+    evaluator: str = ""
+    evaluator_version: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -152,6 +171,12 @@ class Score(BaseModel):
 
 
 class CaseEvaluation(BaseModel):
+    """One case's result.
+
+    `sample_available` is `False` when no sample was supplied for the case;
+    its empty `trace_id` then means "no trace exists", not "trace ID lost".
+    """
+
     case_id: str
     case_name: str
     passed: bool
@@ -160,6 +185,8 @@ class CaseEvaluation(BaseModel):
     trace_id: str
     latency_ms: float
     cost_usd: float | None = None
+    cost_source: CostSource | None = None
+    sample_available: bool = True
     tags: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -192,6 +219,8 @@ class EvaluationSummary(BaseModel):
     pass_rate: float = Field(ge=0, le=1)
     average_score: float = Field(ge=0, le=1)
     total_cost_usd: float | None = None
+    priced_cases: int = Field(default=0, ge=0)
+    cost_sources: dict[str, int] = Field(default_factory=dict)
     average_latency_ms: float
     metrics: dict[str, MetricSummary] = Field(default_factory=dict)
     tags: dict[str, TagSummary] = Field(default_factory=dict)
