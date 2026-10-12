@@ -4,6 +4,29 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.7.1 - 2026-10-12
+
+### Added
+
+- `Score.evaluator` and `Score.evaluator_version`: every score in a report
+  names what produced it. Built-in checks are stamped with
+  `BUILTIN_EVALUATOR` (`"agentic_evals.builtin"`) and this package's
+  version; registered evaluators with their registry name and their
+  `version` attribute. `CallableEvaluator`, `LLMJudgeEvaluator`,
+  `BusinessRuleEvaluator` and `LLMRubricEvaluator` accept `version=`.
+- `EvalTrace.cost_source` (`"measured"` or `"estimated"`), carried onto
+  `CaseEvaluation.cost_source`, plus `EvaluationSummary.priced_cases` and
+  `EvaluationSummary.cost_sources` so a report states how complete its
+  cost data is and where the numbers came from.
+- `CaseEvaluation.sample_available`: `False` when no sample was supplied
+  for a case, so an empty `trace_id` is distinguishable from a lost one.
+- `run_live_suite(..., max_workers=N)`: call a live target for several
+  cases at once. Reports keep suite case order.
+
+### Tests
+
+- Python/HTTP live-target parity on one suite, against a local HTTP server.
+
 ## 0.7.0 - 2026-10-03
 
 ### Added

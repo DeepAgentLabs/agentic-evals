@@ -85,7 +85,8 @@ Releases are automated via GitHub Actions when a version tag is pushed.
 
 1. Update the version string in all three locations:
    - `pyproject.toml` → `version = "X.Y.Z"`
-   - `src/agentic_evals/__init__.py` → `__version__ = "X.Y.Z"`
+   - `src/agentic_evals/_version.py` → `__version__ = "X.Y.Z"` (re-exported by
+     `agentic_evals.__version__` and stamped on built-in scores)
    - `CHANGELOG.md` → add a `## X.Y.Z - YYYY-MM-DD` section
 2. Commit: `git commit -am "release: vX.Y.Z"`
 3. Tag: `git tag vX.Y.Z`

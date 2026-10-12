@@ -284,7 +284,7 @@ def judge(context: EvaluationContext) -> Score:
 
 
 registry = EvaluatorRegistry()
-registry.register(LLMJudgeEvaluator("answer_quality_judge", judge))
+registry.register(LLMJudgeEvaluator("answer_quality_judge", judge, version="quality-prompt-v2"))
 
 case = TestCase(
     id="case-1",
@@ -292,6 +292,20 @@ case = TestCase(
     evaluators=[EvaluatorConfig(name="answer_quality_judge", threshold=0.8)],
 )
 ```
+
+### Which evaluator produced each score
+
+Every `Score` in a report names what produced it. `evaluate_suite` stamps
+`Score.evaluator` and `Score.evaluator_version`:
+
+| Score source | `evaluator` | `evaluator_version` |
+| --- | --- | --- |
+| Built-in checks (exact match, contains, tools, thresholds) | `"agentic_evals.builtin"` (`BUILTIN_EVALUATOR`) | this package's `__version__` |
+| A registered evaluator | its registry name | its `version` attribute (`version=` on `CallableEvaluator`, `LLMJudgeEvaluator`, `BusinessRuleEvaluator`, `LLMRubricEvaluator`) |
+
+A `None` version means the evaluator did not declare one. Version a judge
+whenever its prompt or model changes, so two reports can be compared only
+when they were graded by the same judge.
 
 ## Release gates
 
@@ -323,6 +337,14 @@ gate, so a renamed tag cannot quietly switch a check off.
 Never fabricates a value it can't back up: `total_cost_usd` on a summary or
 gate decision stays `None` unless every case in scope has a known cost —
 an incomplete cost picture is reported as unavailable, not `$0.00`.
+
+Cost provenance travels with the numbers. Set `EvalTrace.cost_source` to
+`"measured"` (billed or provider-reported) or `"estimated"` (computed from
+token counts and a price table); each `CaseEvaluation.cost_source` carries
+it, and the summary reports `priced_cases` and `cost_sources` (priced cases
+per provenance, with `"unspecified"` for traces that did not say). A case
+with no sample at all has `sample_available=False`, so its empty `trace_id`
+reads as "no trace exists" rather than "trace ID lost".
 
 ## Built-in scorers
 
@@ -421,6 +443,13 @@ from agentic_evals import PythonTarget, run_live_suite
 
 report = run_live_suite(suite, PythonTarget(callable_path="my_module:run_case"))
 ```
+
+`run_live_suite(..., max_workers=4)` calls the target for several cases at
+once on a thread pool. The report keeps suite case order, so it matches a
+sequential run that produced the same outputs. Only raise `max_workers` for
+targets that are safe to call concurrently. Python and HTTP targets go
+through the same scoring path; the test suite checks that both produce the
+same report for the same outputs.
 
 Live targets are intentionally powerful developer-facing integrations —
 Python targets execute local code and HTTP targets can reach arbitrary

@@ -5,6 +5,7 @@ this package has no dependency on any specific tracing/observability tool.
 Extracted from AgenticLens's evaluation module (github.com/DeepAgentLabs/agenticlens).
 """
 
+from agentic_evals._version import __version__
 from agentic_evals.evaluators import (
     BusinessRuleEvaluator,
     CallableEvaluator,
@@ -33,6 +34,7 @@ from agentic_evals.models import (
 )
 from agentic_evals.packs import EvalPack, list_builtin_packs, load_builtin_pack, load_pack
 from agentic_evals.runner import (
+    BUILTIN_EVALUATOR,
     evaluate_suite,
     load_samples,
     load_suite,
@@ -84,10 +86,9 @@ from agentic_evals.simple import (
     numeric_close,
 )
 
-__version__ = "0.7.0"
-
 __all__ = [
     "BATTLE",
+    "BUILTIN_EVALUATOR",
     "CLOSED_QA",
     "FACTUALITY",
     "MODERATION",
