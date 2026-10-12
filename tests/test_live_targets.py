@@ -137,3 +137,27 @@ def test_max_workers_must_be_positive() -> None:
 def test_http_target_failure_names_the_case() -> None:
     with pytest.raises(ValueError, match="case-1"):
         run_live_suite(SUITE, HTTPTarget(url="http://127.0.0.1:9/unreachable", timeout_seconds=1))
+
+
+def test_sequential_run_stops_calling_the_target_after_an_invalid_payload(
+    tmp_path: Path,
+) -> None:
+    calls = tmp_path / "calls.log"
+    target = tmp_path / "bad_target.py"
+    target.write_text(
+        "\n".join(
+            [
+                f"LOG = {str(calls)!r}",
+                "def run_case(payload, *, case):",
+                "    with open(LOG, 'a', encoding='utf-8') as fh:",
+                "        fh.write(case.id + '\\n')",
+                "    return {'output': 'missing trace'}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError):
+        run_live_suite(SUITE, PythonTarget(callable_path=f"{target}:run_case"))
+
+    assert calls.read_text(encoding="utf-8").splitlines() == ["case-1"]

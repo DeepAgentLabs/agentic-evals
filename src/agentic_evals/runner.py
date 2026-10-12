@@ -478,14 +478,18 @@ def run_live_suite(
         raise ValueError(f"Unsupported live target kind: {target.kind}")
 
     if max_workers == 1:
-        payloads = [call_case(case) for case in suite.cases]
+        # Validate each result before calling the target for the next case, so
+        # an invalid payload stops the run without further target side effects.
+        samples = [
+            _sample_from_payload(call_case(case), case.id, trace_adapter) for case in suite.cases
+        ]
     else:
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
             payloads = list(pool.map(call_case, suite.cases))
-    samples = [
-        _sample_from_payload(payload, case.id, trace_adapter)
-        for case, payload in zip(suite.cases, payloads, strict=True)
-    ]
+        samples = [
+            _sample_from_payload(payload, case.id, trace_adapter)
+            for case, payload in zip(suite.cases, payloads, strict=True)
+        ]
     return evaluate_suite(suite, samples, registry=registry)
 
 
