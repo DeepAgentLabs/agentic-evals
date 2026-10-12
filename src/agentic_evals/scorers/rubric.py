@@ -349,7 +349,12 @@ class LLMRubricEvaluator(CallableEvaluator):
     """
 
     def __init__(
-        self, name: str, template: RubricTemplate, complete_fn: Callable[[str], str]
+        self,
+        name: str,
+        template: RubricTemplate,
+        complete_fn: Callable[[str], str],
+        *,
+        version: str | None = None,
     ) -> None:
         def _judge(context: EvaluationContext) -> Score:
             prompt = template.render(
@@ -372,4 +377,4 @@ class LLMRubricEvaluator(CallableEvaluator):
                 },
             )
 
-        super().__init__(name, _judge, evaluator_type="llm_rubric")
+        super().__init__(name, _judge, evaluator_type="llm_rubric", version=version)
