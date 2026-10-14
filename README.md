@@ -516,7 +516,10 @@ an `EvalTrace`. This package has no dependency in the other direction.
 
 Dataset versioning/splitting, judge calibration, and HTML report rendering
 stay in AgenticLens for now — those are product features built *on top of*
-this engine, not the engine.
+this engine, not the engine. So do trace-aware evaluators (tool trajectory,
+handoffs, retrieval groundedness), failure diagnosis, and the analysis of
+judge cost and evaluator disagreement that AgenticLens 0.7.0 runs over this
+package's `EvaluationReport`.
 
 ## License
 

@@ -49,7 +49,7 @@ did not observe.
 
 | Project | Relationship | Releases |
 |---|---|---|
-| `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. | v0.7.x, v0.9 |
+| `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. Lens 0.7.0 registers its trace-aware evaluators next to Evals' built-in scorers and reports judge cost and evaluator disagreement from Evals `Score` metadata. | v0.7.x, v0.9 |
 | `agenticops-control-tower` | Reads evaluation reports and gate decisions through its native artifact readers (Tower v0.5). Needs a stable, published report contract. | v0.7.x, v1.0 |
 | `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports must follow | v0.10 |
 | `deep-agentic-core-mcp` | Validates exported evidence through `spec.validate_artifact`; no dedicated Evals MCP tools today | v0.10 |
@@ -212,7 +212,11 @@ for.
 
 **Coordinate with:** `agenticlens` (its v0.5 judge cost recording and
 calibration consume these fields). Scoring stays in Evals; Lens owns
-calibration.
+calibration. Lens 0.7.0 already records judge usage on `Score.metadata`
+(`judge_cost_usd`, `judge_cost_source`, `judge_input_tokens`,
+`judge_output_tokens`, `judge_latency_ms`, `judge_model`, `judge_provider`)
+and sums it in `analyze_scores()`; adopting the same keys here keeps one
+contract instead of two.
 **Validate in:** Lens calibration and experiment tests against the new fields.
 
 ### v0.10 — AI Operations Specification evaluation evidence export
