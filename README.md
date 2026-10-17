@@ -570,3 +570,22 @@ investigation, exact-preview human approval and verified deterministic staging
 recovery. Native producer outcomes and package ownership remain unchanged.
 See [compatibility, examples and dependency matrix](docs/control-tower-0.6.md).
 This is documentation alignment; no package release or dependency bump is needed.
+
+## Published report and gate contract
+
+As of **0.7.2**, native `EvaluationReport` (schema version `1.0`) and
+`GateDecision` JSON Schemas ship in the package and are available offline:
+
+```python
+from jsonschema import Draft202012Validator
+from agentic_evals import report_schema, gate_decision_schema
+
+# report and decision are the results of evaluate_suite/evaluate_gate.
+Draft202012Validator(report_schema()).validate(report.model_dump(mode="json"))
+Draft202012Validator(gate_decision_schema()).validate(decision.model_dump(mode="json"))
+```
+
+Contract `1.x` changes are additive only; readers must tolerate unknown fields.
+See [contract policy and sibling compatibility](docs/report-contract.md) and
+[validated JSON examples](examples/report-contract/). The quickstart `EvalResult`
+is a separate format. Native schema validation does not establish AIOS conformance.

@@ -4,6 +4,22 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.7.2 - 2026-10-17
+
+### Added
+
+- Published Draft 2020-12 report/gate schemas as package data with offline
+  `report_schema()` and `gate_decision_schema()` public accessors.
+- Frozen 0.7.1 fixtures and wire-shape compatibility checks, model/schema drift
+  detection, invalid-artifact tests and installed-wheel contract checks.
+- Runnable passing/missing-evidence report and failing gate examples, contract
+  evolution policy and ecosystem compatibility documentation.
+
+### Compatibility
+
+- Existing native model fields and serialization remain unchanged. Contract
+  1.x evolves additively; no sibling dependency floors are increased.
+
 ## 0.7.1 - 2026-10-12
 
 ### Added

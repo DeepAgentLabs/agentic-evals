@@ -32,6 +32,10 @@ analysis — a PR description, a release note, a Slack update.
 5. State what didn't change too, when relevant — "no regression on the
    red-team suite" is worth reporting explicitly, not only regressions.
 
+6. Validate native JSON artifacts with `report_schema()` and
+   `gate_decision_schema()` (Evals 0.7.2+). Keep the native gate verdict;
+   structural validation is not evidence of a passing gate or AIOS conformance.
+
 ## Avoid
 
 - Don't round a nuanced finding into a single adjective ("looks good") if

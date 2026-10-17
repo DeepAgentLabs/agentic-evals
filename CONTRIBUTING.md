@@ -95,6 +95,14 @@ Releases are automated via GitHub Actions when a version tag is pushed.
 The `release-pypi.yml` workflow triggers on the tag push and publishes to
 PyPI via Trusted Publishing (OIDC) — no stored API token needed.
 
+## Report contract changes
+
+See [the contract policy](docs/report-contract.md). Regenerate packaged schemas
+with `uv run python scripts/generate_schemas.py`; never edit the historical
+`tests/fixtures/v0.7.1/` baselines to make compatibility checks pass. Run the
+report-contract example and tests before building. CI installs the built wheel
+and verifies resource access without importing from the source checkout.
+
 ## Security
 
 See [SECURITY.md](SECURITY.md) for how to report a vulnerability.

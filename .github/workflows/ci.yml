@@ -34,6 +34,12 @@ jobs:
       - name: Type check (mypy)
         run: uv run mypy
 
+      - name: Check generated contracts and examples
+        run: |
+          uv run python scripts/generate_schemas.py
+          uv run python examples/report-contract/generate.py
+          git diff --exit-code -- src/agentic_evals/schemas examples/report-contract
+
       - name: Test (pytest)
         run: uv run pytest
 
@@ -54,3 +60,9 @@ jobs:
         run: |
           uv run python -m build
           uv run python -m twine check dist/*
+
+      - name: Validate installed wheel contract and source distribution resources
+        run: |
+          for wheel in dist/*.whl; do
+            uv run --no-project --with "$wheel" python -I scripts/check_installed_contract.py
+          done
