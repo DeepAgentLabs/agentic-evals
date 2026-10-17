@@ -596,3 +596,22 @@ MCP 0.3.8 adds `evals.validate_artifact` and validates Lens report inputs and
 produced SLO gates. Control Tower 0.6.1 validates complete reports and supplied
 gates before evidence projection. Both bundle exact Evals 0.7.2 schemas for
 offline, sibling-independent validation. See [the consumer matrix](docs/report-contract.md).
+
+## AgenticLens 0.8.0 suite management
+
+AgenticLens 0.8.0 delivers its v0.6 milestone: `agenticlens.suites` and
+`agenticlens suite` build regression suites from CSV/JSON imports, production
+traces and user feedback. It masks PII before storage, detects duplicates and
+conflicting labels, adds synthetic variations and stable splits, records
+reviews, and approves suites into immutable, hash-verified versions that CI
+verifies, exports and evaluates. Suites stay plain agentic-evals `TestSuite`
+files.
+
+Evals runs these suites unchanged with `evaluate_suite` and `run_live_suite`.
+Lens keeps management state (lineage, review status, domain, split) in
+`TestCase.metadata` and `tags`, and an exported approved version adds
+`metadata.agenticlens_suite_version` (name, version, SHA-256, approver).
+Suite approval is not a release gate: scoring and gate computation stay in
+Evals. No Evals change or release is needed.
+
+See the [suite management guide](https://github.com/DeepAgentLabs/agenticlens/blob/v0.8.0/docs/suite-management.md).
