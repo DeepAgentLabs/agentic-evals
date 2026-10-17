@@ -589,3 +589,10 @@ Contract `1.x` changes are additive only; readers must tolerate unknown fields.
 See [contract policy and sibling compatibility](docs/report-contract.md) and
 [validated JSON examples](examples/report-contract/). The quickstart `EvalResult`
 is a separate format. Native schema validation does not establish AIOS conformance.
+
+## Native consumer validation
+
+MCP 0.3.8 adds `evals.validate_artifact` and validates Lens report inputs and
+produced SLO gates. Control Tower 0.6.1 validates complete reports and supplied
+gates before evidence projection. Both bundle exact Evals 0.7.2 schemas for
+offline, sibling-independent validation. See [the consumer matrix](docs/report-contract.md).

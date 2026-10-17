@@ -345,3 +345,10 @@ investigation, exact-preview human approval and verified deterministic staging
 recovery. Native producer outcomes and package ownership remain unchanged.
 See [compatibility, examples and dependency matrix](docs/control-tower-0.6.md).
 This is documentation alignment; no package release or dependency bump is needed.
+
+## Native consumer validation
+
+MCP 0.3.8 adds `evals.validate_artifact` and validates Lens report inputs and
+produced SLO gates. Control Tower 0.6.1 validates complete reports and supplied
+gates before evidence projection. Both bundle exact Evals 0.7.2 schemas for
+offline, sibling-independent validation. See [the consumer matrix](docs/report-contract.md).
