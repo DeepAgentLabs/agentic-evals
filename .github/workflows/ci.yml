@@ -54,3 +54,9 @@ jobs:
         run: |
           uv run python -m build
           uv run python -m twine check dist/*
+
+      - name: Validate installed wheel contract and source distribution resources
+        run: |
+          for wheel in dist/*.whl; do
+            uv run --no-project --with "$wheel" python -I scripts/check_installed_contract.py
+          done
