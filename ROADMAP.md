@@ -54,7 +54,7 @@ did not observe.
 | `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports must follow | v0.10 |
 | `deep-agentic-core-mcp` | Validates exported evidence through `spec.validate_artifact`; no dedicated Evals MCP tools today | v0.10 |
 | `agentic-sidecar` | Its v0.9 compares Agent Alone vs. Agent + Sidecar and uses Evals for generic scoring. Sidecar keeps supervision scenarios. | v0.11 |
-| `agentic-chaos` | Its adversarial containment work scores with Evals, and attacks run on isolated targets | v0.11 |
+| `agentic-chaos` | Its adversarial containment work scores with Evals, and attacks run on isolated targets. Chaos 0.6.0 contracts (`pytest --chaos`) are per-run resilience checks over a `ChaosReport`, not scores or release gates; gate computation stays here. | v0.11 |
 
 Each release below records its links as:
 
