@@ -17,6 +17,6 @@ def gate_decision_schema() -> dict[str, Any]:
 
 def _load(name: str) -> dict[str, Any]:
     schema: dict[str, Any] = json.loads(
-        files("agentic_evals").joinpath("schemas", name).read_text(encoding="utf-8")
+        files("agentic_evals").joinpath("schemas").joinpath(name).read_text(encoding="utf-8")
     )
     return schema
