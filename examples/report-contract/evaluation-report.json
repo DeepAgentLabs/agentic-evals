@@ -57,7 +57,7 @@
           "explanation": "Output exactly matches the reference.",
           "evaluator_type": "deterministic",
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.7.1",
+          "evaluator_version": "0.7.2",
           "metadata": {}
         }
       ],
@@ -87,7 +87,7 @@
           "explanation": "No evaluation sample was supplied for this test case.",
           "evaluator_type": "deterministic",
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.7.1",
+          "evaluator_version": "0.7.2",
           "metadata": {}
         }
       ],
