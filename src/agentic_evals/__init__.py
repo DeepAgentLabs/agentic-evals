@@ -33,6 +33,7 @@ from agentic_evals.models import (
     TestSuite,
 )
 from agentic_evals.packs import EvalPack, list_builtin_packs, load_builtin_pack, load_pack
+from agentic_evals.report_contract import gate_decision_schema, report_schema
 from agentic_evals.runner import (
     BUILTIN_EVALUATOR,
     evaluate_suite,
@@ -140,6 +141,8 @@ __all__ = [
     "evaluate_gate",
     "evaluate_suite",
     "exact_match",
+    "gate_decision_schema",
+    "report_schema",
     "icontains",
     "json_diff",
     "levenshtein",
