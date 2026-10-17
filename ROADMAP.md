@@ -50,9 +50,9 @@ did not observe.
 | Project | Relationship | Releases |
 |---|---|---|
 | `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. Lens 0.7.0 registers its trace-aware evaluators next to Evals' built-in scorers and reports judge cost and evaluator disagreement from Evals `Score` metadata. | v0.7.x, v0.9 |
-| `agenticops-control-tower` | Reads native reports/gates and verifies staging recovery in Tower 0.6.0. Published native report/gate schemas ship in Evals 0.7.2; normative AIOS mappings remain future work. | v0.7.x, v1.0 |
+| `agenticops-control-tower` | Tower 0.6.1 validates complete native reports/gates against published Evals 0.7.2 schemas before evidence projection and staging recovery verification. Normative AIOS mappings remain future work. | v0.7.x, v1.0 |
 | `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports must follow | v0.10 |
-| `deep-agentic-core-mcp` | Validates exported evidence through `spec.validate_artifact`; no dedicated Evals MCP tools today | v0.10 |
+| `deep-agentic-core-mcp` | MCP 0.3.8 exposes native `evals.validate_artifact` and validates Lens report consumers. `spec.validate_artifact` remains the separate AIOS evidence validator. | v0.10 |
 | `agentic-sidecar` | Its v0.9 compares Agent Alone vs. Agent + Sidecar and uses Evals for generic scoring. Sidecar keeps supervision scenarios. | v0.11 |
 | `agentic-chaos` | Its adversarial containment work scores with Evals, and attacks run on isolated targets. Chaos 0.6.0 contracts (`pytest --chaos`) are per-run resilience checks over a `ChaosReport`, not scores or release gates; gate computation stays here. | v0.11 |
 
@@ -345,3 +345,10 @@ investigation, exact-preview human approval and verified deterministic staging
 recovery. Native producer outcomes and package ownership remain unchanged.
 See [compatibility, examples and dependency matrix](docs/control-tower-0.6.md).
 This is documentation alignment; no package release or dependency bump is needed.
+
+## Native consumer validation
+
+MCP 0.3.8 adds `evals.validate_artifact` and validates Lens report inputs and
+produced SLO gates. Control Tower 0.6.1 validates complete reports and supplied
+gates before evidence projection. Both bundle exact Evals 0.7.2 schemas for
+offline, sibling-independent validation. See [the consumer matrix](docs/report-contract.md).
