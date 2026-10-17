@@ -15,14 +15,14 @@ deliverables, acceptance criteria and sibling dependencies.
 - **v0.5** ✅ Complete — Expanded scorers, rubric templates and the full skills lifecycle (`0.5.0`)
 - **v0.6** ✅ Complete — Gate defaults and scorer correctness fixes (`0.6.0`)
 - **v0.7** ✅ Complete — Metric/tag breakdowns, tool-argument expectations, score provenance and concurrent live runs (`0.7.0`, `0.7.1`)
-- **v0.7.x** 🚧 Planned — Published report and gate contract (JSON Schema)
+- **v0.7.x** ✅ Complete — Published report and gate contract (JSON Schema, `0.7.2`)
 - **v0.8** 🚧 Planned — Suite, pack and gate CLI for CI
 - **v0.9** 🚧 Planned — Judge reliability, cost and live-target resilience
 - **v0.10** 🚧 Planned — AI Operations Specification evaluation evidence export
 - **v0.11** ⛔ Blocked — Adversarial containment scoring (needs Sidecar, Chaos, MCP and Lens evidence)
 - **v1.0** 🚧 Planned — Stable API and report schema
 
-Current release: `0.7.1` (2026-10-12). See [CHANGELOG.md](CHANGELOG.md) for
+Current release: `0.7.2` (2026-10-17). See [CHANGELOG.md](CHANGELOG.md) for
 what each version shipped.
 
 ## Scope
@@ -50,7 +50,7 @@ did not observe.
 | Project | Relationship | Releases |
 |---|---|---|
 | `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. Lens 0.7.0 registers its trace-aware evaluators next to Evals' built-in scorers and reports judge cost and evaluator disagreement from Evals `Score` metadata. | v0.7.x, v0.9 |
-| `agenticops-control-tower` | Reads native reports/gates and verifies staging recovery in Tower 0.6.0. Stable normative report contracts remain future work. | v0.7.x, v1.0 |
+| `agenticops-control-tower` | Reads native reports/gates and verifies staging recovery in Tower 0.6.0. Published native report/gate schemas ship in Evals 0.7.2; normative AIOS mappings remain future work. | v0.7.x, v1.0 |
 | `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports must follow | v0.10 |
 | `deep-agentic-core-mcp` | Validates exported evidence through `spec.validate_artifact`; no dedicated Evals MCP tools today | v0.10 |
 | `agentic-sidecar` | Its v0.9 compares Agent Alone vs. Agent + Sidecar and uses Evals for generic scoring. Sidecar keeps supervision scenarios. | v0.11 |
@@ -135,20 +135,20 @@ simulated voice support agent evaluated end to end.
 
 ## Planned
 
-### v0.7.x — Published report and gate contract
+### v0.7.x — Published report and gate contract ✅ (`0.7.2`)
 
 **Goal:** let consumers such as Control Tower, Lens and MCP validate Evals
 output against a published contract instead of mirroring the pydantic models.
 
 **Deliverables:**
 
-- [ ] JSON Schema documents for `EvaluationReport` (`schema_version` `1.0`) and
+- [x] JSON Schema documents for `EvaluationReport` (`schema_version` `1.0`) and
       `GateDecision`, generated from the models and shipped as package data
-- [ ] `agentic_evals.report_schema()` / `gate_decision_schema()` accessors
-- [ ] tests that fail if the models and the shipped schemas drift
-- [ ] a checked-in sample report and gate decision under `examples/` that
+- [x] `agentic_evals.report_schema()` / `gate_decision_schema()` accessors
+- [x] tests that fail if the models and the shipped schemas drift
+- [x] a checked-in sample report and gate decision under `examples/` that
       validate against the schemas
-- [ ] README section describing the report contract and its additive-only
+- [x] README section describing the report contract and its additive-only
       change policy within `1.x`
 
 **Acceptance criteria:**
@@ -158,6 +158,8 @@ output against a published contract instead of mirroring the pydantic models.
 
 **Coordinate with:** `agenticops-control-tower` (native report reader).
 **Validate in:** Tower's Evals reader tests and Lens's `agentic-evals` integration.
+
+Implemented in [report-contract.md](docs/report-contract.md); the wire shape is unchanged.
 
 ### v0.8 — Suite, pack and gate CLI for CI
 
