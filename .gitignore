@@ -11,3 +11,4 @@ htmlcov/
 dist/
 build/
 .env
+voice-agent-evals/cli-output/

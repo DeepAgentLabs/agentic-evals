@@ -1,5 +1,22 @@
 # Voice Agent Evaluation with Agentic Evals
 
+## Declarative CLI (0.8.0)
+
+From this directory with agentic-evals 0.8.0 installed:
+
+```bash
+python export_cli.py
+agentic-evals evaluate cli-output/suite.json cli-output/samples.jsonl --registry evaluators --out cli-output/report.json
+agentic-evals gate cli-output/report.json --config cli-output/gate.json
+agentic-evals evaluate cli-output/suite.json cli-output/samples.jsonl --registry evaluators --format junit --out cli-output/results.xml
+```
+
+This exports the same dataset and samples used by `run_evals.py`, including
+transcript, intent, tool-argument and groundedness checks. It uses the
+`evaluators.build_registry()` factory. A failed case is saved in the report;
+`gate` returns 1 when the strict release policy fails. Generated files stay in
+the ignored `cli-output/` directory.
+
 ## Overview
 
 This project demonstrates how **Agentic Evals** can be used to evaluate a simulated voice-based customer support agent.

@@ -48,6 +48,12 @@ just accept the defaults.
 
 ## Check
 
+- For declarative CI, run `agentic-evals evaluate SUITE SAMPLES --out report.json`
+  then `agentic-evals gate report.json --config gate.yaml`. Evaluation success
+  only means evidence was produced; gate exits 0 (pass), 1 (policy failed), or
+  2 (input/usage error). Keep JSON evidence even when using JUnit or Markdown
+  presentations. Exercise a deliberately failing fixture in CI.
+
 - `evaluate_gate`'s cost check treats an incomplete cost picture
   (`summary.total_cost_usd is None`, or any case missing `cost_usd`) as
   "unavailable," never as `$0.00` — confirm your traces actually populate

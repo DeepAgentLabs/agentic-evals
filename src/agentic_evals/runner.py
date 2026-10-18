@@ -62,15 +62,26 @@ def load_suite(path: Path) -> TestSuite:
 def load_samples(
     path: Path, *, trace_adapter: TraceAdapter | None = None
 ) -> list[EvaluationSample]:
-    """Load samples from a JSON/YAML file.
+    """Load samples from a JSON, JSONL or YAML file.
 
     `trace_adapter`, if given, is applied to each sample's raw `trace` value
     before validation -- callers whose trace payloads predate or otherwise
     don't match `EvalTrace`'s shape can normalize them here instead of
     having them silently validate with defaulted-out fields.
     """
-    data = _load_data(path)
+    if path.suffix.lower() == ".jsonl":
+        data = []
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if line.strip():
+                try:
+                    data.append(json.loads(line))
+                except ValueError as exc:
+                    raise ValueError(f"{path}: invalid JSON on line {number}: {exc}") from exc
+    else:
+        data = _load_data(path)
     items = data["samples"] if isinstance(data, dict) and "samples" in data else data
+    if not isinstance(items, list):
+        raise ValueError("samples must be a list or an object containing a samples list")
     if trace_adapter is not None:
         items = [
             {**item, "trace": trace_adapter(item["trace"])} if "trace" in item else item

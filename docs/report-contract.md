@@ -73,3 +73,10 @@ the packaged schemas; CI exercises accessors from an installed wheel.
 
 No sibling minimum versions change merely because Evals publishes schemas.
 Use `agentic-evals>=0.7.2` only when directly importing the new accessors.
+
+## Evals 0.8.0 CLI
+
+`evaluate` and `live` emit this same native report with `--format json`;
+`gate` emits the same gate decision. Schema 1.0 is unchanged. JUnit/Markdown
+are presentations only, not inputs for native schema validation or gating.
+See [the CLI guide](cli.md) for exit codes, examples and sibling compatibility.

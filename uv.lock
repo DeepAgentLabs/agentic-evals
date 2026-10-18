@@ -9,7 +9,7 @@ resolution-markers = [
 
 [[package]]
 name = "agentic-evals"
-version = "0.7.2"
+version = "0.8.0"
 source = { editable = "." }
 dependencies = [
     { name = "jsonschema" },
@@ -21,6 +21,7 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "build" },
+    { name = "junitparser" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -39,6 +40,7 @@ requires-dist = [
     { name = "build", marker = "extra == 'dev'", specifier = ">=1.2" },
     { name = "fastapi", marker = "extra == 'voice'", specifier = ">=0.115" },
     { name = "jsonschema", specifier = ">=4.23" },
+    { name = "junitparser", marker = "extra == 'dev'", specifier = ">=3" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "pydantic", specifier = ">=2.0,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
@@ -764,6 +766,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/19/74/a633ee74eb36c44aa6d1095e7cc5569bebf04342ee146178e2d36600708b/jsonschema_specifications-2025.9.1.tar.gz", hash = "sha256:b540987f239e745613c7a9176f3edb72b832a4ac465cf02712288397832b5e8d", size = 32855, upload-time = "2025-09-08T01:34:59.186Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl", hash = "sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe", size = 18437, upload-time = "2025-09-08T01:34:57.871Z" },
+]
+
+[[package]]
+name = "junitparser"
+version = "5.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6c/c9/edeb58b0565b74ba0ffedf822d63aa40368bb4ff2da49751768eea696f5a/junitparser-5.0.3.tar.gz", hash = "sha256:f824ec1b7afbf2fd3b6813b87967b02fcda750e135d27be17cae497147419a04", size = 12120, upload-time = "2026-09-01T06:13:00.32Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fc/36/dbb6f74621890e5daa831c5f474b81e8b773298adf5ea835c03215a9359c/junitparser-5.0.3-py3-none-any.whl", hash = "sha256:553535b8cd1672a9c8bd2c7326ae1ae69279267fbc562106b5aa44d3c5f769af", size = 15000, upload-time = "2026-09-01T06:12:58.01Z" },
 ]
 
 [[package]]

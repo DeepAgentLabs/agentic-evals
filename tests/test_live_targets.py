@@ -11,6 +11,7 @@ from typing import Any
 import pytest
 
 from agentic_evals import HTTPTarget, PythonTarget, TestCase, TestSuite, run_live_suite
+from agentic_evals.cli import main as cli_main
 
 SUITE = TestSuite(
     name="parity",
@@ -102,6 +103,34 @@ def test_concurrent_http_run_matches_sequential_run(http_url: str) -> None:
     concurrent = run_live_suite(SUITE, HTTPTarget(url=http_url), max_workers=4)
 
     assert _comparable(sequential) == _comparable(concurrent)
+
+
+def test_cli_http_matches_python_api(http_url: str, tmp_path: Path) -> None:
+    suite_path, report_path = tmp_path / "suite.json", tmp_path / "report.json"
+    suite_path.write_text(SUITE.model_dump_json(), encoding="utf-8")
+    assert (
+        cli_main(
+            [
+                "live",
+                str(suite_path),
+                "--target",
+                http_url,
+                "--max-workers",
+                "3",
+                "--timeout-seconds",
+                "5",
+                "--out",
+                str(report_path),
+            ]
+        )
+        == 0
+    )
+    actual = json.loads(report_path.read_text())
+    expected = run_live_suite(SUITE, HTTPTarget(url=http_url)).model_dump(mode="json")
+    actual.pop("created_at")
+    expected.pop("created_at")
+    assert actual == expected
+    assert cli_main(["gate", str(report_path)]) == 1
 
 
 def test_concurrent_python_run_overlaps_calls_and_keeps_case_order(tmp_path: Path) -> None:

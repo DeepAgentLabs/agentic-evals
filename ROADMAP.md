@@ -16,13 +16,13 @@ deliverables, acceptance criteria and sibling dependencies.
 - **v0.6** ✅ Complete — Gate defaults and scorer correctness fixes (`0.6.0`)
 - **v0.7** ✅ Complete — Metric/tag breakdowns, tool-argument expectations, score provenance and concurrent live runs (`0.7.0`, `0.7.1`)
 - **v0.7.x** ✅ Complete — Published report and gate contract (JSON Schema, `0.7.2`)
-- **v0.8** 🚧 Planned — Suite, pack and gate CLI for CI
+- **v0.8** ✅ Complete — Suite, pack and gate CLI for CI (`0.8.0`)
 - **v0.9** 🚧 Planned — Judge reliability, cost and live-target resilience
 - **v0.10** 🚧 Planned — AI Operations Specification evaluation evidence export
 - **v0.11** ⛔ Blocked — Adversarial containment scoring (needs Sidecar, Chaos, MCP and Lens evidence)
 - **v1.0** 🚧 Planned — Stable API and report schema
 
-Current release: `0.7.2` (2026-10-17). See [CHANGELOG.md](CHANGELOG.md) for
+Current release: `0.8.0` (2026-10-17). See [CHANGELOG.md](CHANGELOG.md) for
 what each version shipped.
 
 ## Scope
@@ -161,23 +161,23 @@ output against a published contract instead of mirroring the pydantic models.
 
 Implemented in [report-contract.md](docs/report-contract.md); the wire shape is unchanged.
 
-### v0.8 — Suite, pack and gate CLI for CI
+### v0.8 — Suite, pack and gate CLI for CI ✅ (`0.8.0`)
 
 **Goal:** make the declarative `TestSuite` and gate path usable from CI without
-writing Python. Today the CLI only has `run`, which covers `Eval()` files.
+writing Python, alongside `run`, which covers `Eval()` files.
 
 **Deliverables:**
 
-- [ ] `agentic-evals evaluate SUITE SAMPLES --out report.json` (YAML/JSON suites,
+- [x] `agentic-evals evaluate SUITE SAMPLES --out report.json` (YAML/JSON suites,
       JSON/JSONL samples, optional `--registry` module for custom evaluators)
-- [ ] `agentic-evals live SUITE --target ...` wrapping `run_live_suite`,
+- [x] `agentic-evals live SUITE --target ...` wrapping `run_live_suite`,
       including `--max-workers`
-- [ ] `agentic-evals gate REPORT --config gate.yaml` with documented exit codes
+- [x] `agentic-evals gate REPORT --config gate.yaml` with documented exit codes
       (0 pass, 1 gate failed, 2 usage or input error)
-- [ ] `agentic-evals pack list` / `pack show NAME` for the built-in packs
-- [ ] CI output formats: JUnit XML and a Markdown summary
+- [x] `agentic-evals pack list` / `pack show NAME` for the built-in packs
+- [x] CI output formats: JUnit XML and a Markdown summary
       (`--format junit|markdown|json`)
-- [ ] a GitHub Actions example under `examples/ci/`
+- [x] a GitHub Actions example under `examples/ci/`
 
 **Acceptance criteria:**
 
@@ -187,6 +187,10 @@ writing Python. Today the CLI only has `run`, which covers `Eval()` files.
 
 **Depends on:** v0.7.x report schema (for `--format json` output).
 **Validate in:** the `voice-agent-evals/` example converted to the CLI path.
+
+Implemented in [the CLI guide](docs/cli.md), with passing and failing CI fixtures,
+Python/HTTP parity tests and the voice example exercised by tests. Native schema
+1.0 is unchanged; no sibling runtime dependency floor increase is required.
 
 ### v0.9 — Judge reliability, cost and live-target resilience
 
