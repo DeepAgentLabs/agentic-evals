@@ -664,3 +664,5 @@ Evals retains scoring and native report/gate decisions. Bulk execution does not 
 Existing optional dependency ranges remain sufficient. No sibling runtime or
 native evidence schema changes are required; this documentation alignment needs
 no patch release. See the [operator guide](https://github.com/DeepAgentLabs/agenticops-control-tower/blob/v0.7.0/docs/fleet-operations.md).
+
+See the [local Tower compatibility guide](docs/tower-0.7-fleet-operations.md) for the operator workflow and package boundaries.
