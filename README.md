@@ -635,6 +635,24 @@ Evals. No Evals change or release is needed.
 
 See the [suite management guide](https://github.com/DeepAgentLabs/agenticlens/blob/v0.8.0/docs/suite-management.md).
 
+## AgenticLens 0.9.0 ModelFit
+
+AgenticLens 0.9.0 delivers its v0.7 milestone: `agenticlens.modelfit` and
+`agenticlens modelfit` recommend a model per task category from recorded
+experiment reports, under hard quality, cost, latency, safety, provider and
+deployment constraints that fail closed. Each recommendation carries a
+confidence level with reasons, an explanation, alternatives, a fallback
+(on a different provider when one is feasible), savings against a reference variant tied to the
+experiment evidence, and quality risks, plus a task-level model matrix.
+
+Evals is unchanged. ModelFit reads the native evaluation reports that Lens
+experiments embed per trial (`cases[].passed`, `latency_ms`, `cost_usd`,
+`tags`, `metadata`) and computes no release gate; scoring and gate
+computation stay in Evals. Lens keeps its `agentic-evals>=0.7.1,<1`
+dependency. No Evals change or release is needed.
+
+See the [ModelFit guide](https://github.com/DeepAgentLabs/agenticlens/blob/v0.9.0/docs/modelfit.md).
+
 ## Chaos 0.7.0 interoperability
 
 Chaos 0.7.0 adds sequential fault cascades, deterministic monotonic breaking-point
