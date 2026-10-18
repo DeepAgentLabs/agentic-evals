@@ -393,3 +393,16 @@ schema, automatic adapter, hosted execution capability or containment guarantee
 is introduced.
 
 Scores and release gates remain owned by Evals; Chaos contracts and threshold trials are per-campaign evidence. Convert observations to native EvaluationSamples explicitly. No runtime dependency or patch release is needed.
+
+## Control Tower 0.7.0 fleet operations
+
+Tower 0.7.0 adds frozen environment/capability targeting, bulk desired settings,
+separate approval, durable per-target results and bounded stop/MCP-revocation
+acknowledgement through Python, HTTP and CLI. No fleet atomicity or automatic
+rollback/resume is claimed. Timed-out/requested commands need host reconciliation.
+
+Evals retains scoring and native report/gate decisions. Bulk execution does not recompute gates or equate passing evaluation with deployment health or containment.
+
+Existing optional dependency ranges remain sufficient. No sibling runtime or
+native evidence schema changes are required; this documentation alignment needs
+no patch release. See the [operator guide](https://github.com/DeepAgentLabs/agenticops-control-tower/blob/v0.7.0/docs/fleet-operations.md).
