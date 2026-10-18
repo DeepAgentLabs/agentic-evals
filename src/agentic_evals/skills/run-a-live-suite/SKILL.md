@@ -48,6 +48,12 @@ endpoint via `HTTPTarget`.
 
 ## Check
 
+- CLI equivalent: `agentic-evals live suite.yaml --target module:function
+  --max-workers 4 --out report.json`. Use `--registry module` for a trusted
+  `build_registry()` factory. HTTP URLs use `--timeout-seconds`; that option
+  does not interrupt Python targets. Target exceptions exit 2 without a report;
+  scoring failures are written normally and must be checked by `gate`.
+
 - The suite file and the target's `callable_path`/`url` both came from a
   reviewed source, not an arbitrary input.
 - `timeout_seconds` reflects the target's real p99 latency, not a guess.

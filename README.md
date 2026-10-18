@@ -23,6 +23,24 @@ quickstart API, and the `agentic-evals` CLI) is real, tested code — see the
 still move between minor versions ahead of a 1.0; pin a version in
 production and read the changelog before upgrading.
 
+## Declarative CLI (0.8.0)
+
+Run saved suites and samples, then apply an explicit release gate:
+
+```bash
+agentic-evals evaluate examples/ci/suite.yaml examples/ci/samples.jsonl --out report.json
+agentic-evals gate report.json --config examples/ci/gate.yaml
+agentic-evals pack list
+agentic-evals live examples/ci/suite.yaml --target my_agent:run --max-workers 4 --out live.json
+```
+
+`evaluate` and `live` exit 0 when a report is produced, including failing cases.
+`gate` exits 0 for pass, 1 for a failed gate, and 2 for input or usage errors.
+Use `--format json|junit|markdown` for native evidence, JUnit or job summaries.
+See the [CLI guide](docs/cli.md), [CI workflow](examples/ci/evaluate.yml), and
+[voice-agent CLI example](voice-agent-evals/README.md#declarative-cli-080).
+The native report and gate contracts remain compatible with 0.7.2 consumers.
+
 ## Why a separate package
 
 AgenticLens's evaluation module was never actually AgenticLens-specific —

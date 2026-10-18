@@ -4,6 +4,28 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.8.0 - 2026-10-17
+
+### Added
+
+- Declarative `evaluate`, Python/HTTP `live`, and `gate` commands with explicit
+  exit codes, custom registry imports, concurrency and JSONL samples.
+- Built-in `pack list` and `pack show`, including plain suite export without
+  requiring judge credentials for inspection.
+- Native JSON, JUnit XML and escaped Markdown output for reports and gates.
+- Passing/failing CI fixtures, a GitHub Actions workflow, CLI documentation and
+  voice-agent dataset export with the same custom evaluators as the Python path.
+- CLI parity, process exit-code, malformed-input and presentation tests.
+
+### Compatibility
+
+- Existing `run` behavior and Python scoring/gating APIs are preserved. Native
+  report schema 1.0 and gate wire shapes are unchanged from 0.7.2.
+- `evaluate`/`live` return 0 when evidence is produced; use `gate` to fail CI
+  according to policy (0 pass, 1 failed gate, 2 input/usage error).
+- Sibling runtime dependency floors are unchanged; Lens, MCP and Tower consume
+  native JSON. AIOS evidence export remains future work.
+
 ## 0.7.2 - 2026-10-17
 
 ### Added

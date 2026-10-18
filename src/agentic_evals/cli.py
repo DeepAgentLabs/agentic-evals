@@ -23,6 +23,7 @@ import sys
 from pathlib import Path
 
 from agentic_evals import simple
+from agentic_evals.cli_commands import add_commands, execute
 
 DEFAULT_PATTERNS = ("*_eval.py", "eval_*.py", "*.eval.py")
 
@@ -87,11 +88,15 @@ def main(argv: list[str] | None = None) -> int:
         help="files or directories to search (default: current directory)",
     )
 
+    add_commands(subparsers)
     args = parser.parse_args(argv)
     if args.command == "run":
         return run(args.paths)
-    parser.print_help()
-    return 1
+    try:
+        return execute(args)
+    except Exception as exc:
+        print(f"agentic-evals: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

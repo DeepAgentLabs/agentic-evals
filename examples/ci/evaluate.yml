@@ -1,0 +1,30 @@
+name: Evaluation release gate
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install agentic-evals==0.8.0
+      - name: Produce native evidence
+        run: agentic-evals evaluate examples/ci/suite.yaml examples/ci/samples.jsonl --out report.json
+      - name: JUnit case results
+        run: agentic-evals evaluate examples/ci/suite.yaml examples/ci/samples.jsonl --format junit --out results.xml
+      - name: Apply release policy
+        run: agentic-evals gate report.json --config examples/ci/gate.yaml --out gate.json
+      - name: Job summary
+        if: always()
+        run: agentic-evals gate report.json --config examples/ci/gate.yaml --format markdown >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evaluation-evidence
+          path: |
+            report.json
+            gate.json
+            results.xml
