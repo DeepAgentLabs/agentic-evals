@@ -163,9 +163,19 @@ def test_max_workers_must_be_positive() -> None:
         )
 
 
-def test_http_target_failure_names_the_case() -> None:
-    with pytest.raises(ValueError, match="case-1"):
-        run_live_suite(SUITE, HTTPTarget(url="http://127.0.0.1:9/unreachable", timeout_seconds=1))
+def test_http_target_failure_is_reported_on_each_case() -> None:
+    report = run_live_suite(
+        SUITE, HTTPTarget(url="http://127.0.0.1:9/unreachable", timeout_seconds=1)
+    )
+
+    first = report.cases[0]
+    assert not first.passed
+    assert first.target_status == "error"
+    assert first.target_attempts == 1
+    assert "case-1" in (first.target_error or "")
+    assert [score.name for score in first.scores] == ["target_call"]
+    assert report.summary.live is not None
+    assert report.summary.live.error_cases == len(SUITE.cases)
 
 
 def test_sequential_run_stops_calling_the_target_after_an_invalid_payload(
