@@ -4,6 +4,68 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.9.0 - 2026-10-19
+
+### Added
+
+- Judge cost and latency on every judge score, under the `judge_*` metadata
+  keys AgenticLens already reads (`judge_cost_usd`, `judge_cost_source`,
+  `judge_input_tokens`, `judge_output_tokens`, `judge_latency_ms`,
+  `judge_model`, `judge_provider`), plus `judge_status` and `judge_attempts`.
+  A rubric `complete_fn` reports usage by returning a `JudgeResponse`.
+- `EvaluationSummary.judge` (`JudgeSummary`): judge scores, unavailable scores
+  and the cases they belong to, retries, cost total (only when every judge score
+  is priced), cost sources, tokens, latency and sampling agreement. Judge spend
+  stays separate from the evaluated system's `total_cost_usd`.
+- `RetryPolicy`: bounded attempts with capped exponential backoff, used by
+  judges (`retry=` on `LLMJudgeEvaluator`/`LLMRubricEvaluator`) and live
+  targets (`retry=` on `run_live_suite`/`arun_live_suite`).
+- An explicit unavailable judge outcome: when every attempt fails, the score
+  has value 0, never passes at any threshold, and records `judge_error`.
+- Repeated judging with `samples=N`: mean value, most common verdict (ties go
+  to the lower verdict), `judge_verdicts` and `judge_agreement` per score, and
+  `min_agreement`/`case_agreement` in `summary.judge`.
+- Live-target outcomes per case: `CaseEvaluation.target_status` (`ok`,
+  `timed_out`, `error`), `target_attempts` and `target_error`, a `target_call`
+  score, and `EvaluationSummary.live` (`LiveSummary`).
+- Python target timeouts when `timeout_seconds` is set explicitly; `async def`
+  targets are cancelled, synchronous ones are abandoned in daemon threads.
+- Async evaluation: `aevaluate_suite`, `arun_live_suite`, `aevaluate()` on
+  `CallableEvaluator` and its subclasses, the `AsyncEvaluator` protocol, and
+  `async def` judges, rubric `complete_fn`s and Python targets (also accepted
+  by the sync APIs outside a running event loop).
+- Gate checks: `max_judge_unavailable_scores` (default 0), `max_judge_cost_usd`,
+  `min_judge_agreement`, `max_timed_out_cases` and `max_target_error_cases`.
+  Reasons name the affected cases.
+- CLI `live --retries`, `--retry-backoff`, and `--timeout-seconds` for Python
+  targets. JUnit reports timed-out/errored live cases as `<error>`; Markdown
+  shows `TIMEOUT`/`ERROR` and judge/live summaries.
+- `docs/judge-reliability.md`, offline `examples/judge_reliability.py` and
+  `examples/async_live_target.py`, a judged live contract example, and
+  updated skills for flaky judges, live suites and release gates.
+
+### Changed
+
+- A judge that raises, or a rubric completion with no parseable verdict, now
+  yields an unavailable score instead of raising out of `evaluate_suite`.
+- A live-target call that raises or times out (including an unreachable HTTP
+  target) is reported on its case instead of aborting `run_live_suite`;
+  `agentic-evals live` writes the report and exits 0. An invalid target payload
+  still stops the run (exit 2).
+- The default gate fails when any judge score is unavailable, even for an
+  optional evaluator. Set `max_judge_unavailable_scores: null` to opt out.
+- `LLMRubricEvaluator` now subclasses `LLMJudgeEvaluator`.
+
+### Compatibility
+
+- Report schema 1.0 gains optional fields only (`summary.judge`, `summary.live`,
+  `cases[].target_*`); packaged schema IDs now point at `v0.9.0`. Reports saved
+  by earlier versions load unchanged, and 0.9.0 reports validate against the
+  frozen 0.7.1 schemas, so readers bundling 0.7.2 schemas keep working.
+- Lens's `agentic-evals>=0.7.1,<1` range already covers 0.9.0 and its tests pass
+  unchanged. MCP and Control Tower sync their bundled schemas and test pins to
+  0.9.0 in patch releases. AIOS evidence export remains v0.10.
+
 ## 0.8.0 - 2026-10-17
 
 ### Added
