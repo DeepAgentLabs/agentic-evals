@@ -19,6 +19,7 @@ class EvalSpan(BaseModel):
 
 
 CostSource = Literal["measured", "estimated"]
+TargetStatus = Literal["ok", "error", "timed_out"]
 
 
 class EvalTrace(BaseModel):
@@ -175,6 +176,13 @@ class CaseEvaluation(BaseModel):
 
     `sample_available` is `False` when no sample was supplied for the case;
     its empty `trace_id` then means "no trace exists", not "trace ID lost".
+
+    `target_status` is set only by live runs: `ok` when the target answered,
+    `timed_out` when every attempt exceeded the case timeout, and `error`
+    when the target raised or failed otherwise. A timed-out or errored case
+    never passes, and is distinguishable from a case that answered wrongly.
+    `target_attempts` counts the calls made, including retries, and
+    `target_error` records the last failure.
     """
 
     case_id: str
@@ -187,6 +195,9 @@ class CaseEvaluation(BaseModel):
     cost_usd: float | None = None
     cost_source: CostSource | None = None
     sample_available: bool = True
+    target_status: TargetStatus | None = None
+    target_attempts: int | None = Field(default=None, ge=1)
+    target_error: str | None = None
     tags: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -212,6 +223,52 @@ class TagSummary(BaseModel):
     average_score: float | None = Field(default=None, ge=0, le=1)
 
 
+class JudgeSummary(BaseModel):
+    """What the suite's LLM judges cost, and how dependable they were.
+
+    Counts cover evaluated (non-skipped) scores from `llm_judge` and
+    `llm_rubric` evaluators. `unavailable_scores` are judgments the judge
+    could not deliver after its retries; they never count as passes and
+    `unavailable_cases` names the cases they belong to.
+
+    `total_cost_usd` is the sum of `judge_cost_usd` over every judge score,
+    and is `None` unless all of them recorded a cost (`priced_scores`
+    says how many did). Judge cost is kept apart from the cost of the system
+    under evaluation in `EvaluationSummary.total_cost_usd`.
+
+    `sampled_scores` were judged more than once (`samples=N`).
+    `case_agreement` holds, per case, the lowest agreement among its sampled
+    judge scores: the share of samples that returned the most common verdict.
+    """
+
+    judge_scores: int = Field(default=0, ge=0)
+    unavailable_scores: int = Field(default=0, ge=0)
+    unavailable_cases: list[str] = Field(default_factory=list)
+    retried_scores: int = Field(default=0, ge=0)
+    priced_scores: int = Field(default=0, ge=0)
+    total_cost_usd: float | None = Field(default=None, ge=0)
+    cost_sources: dict[str, int] = Field(default_factory=dict)
+    input_tokens: int = Field(default=0, ge=0)
+    output_tokens: int = Field(default=0, ge=0)
+    total_latency_ms: float = Field(default=0.0, ge=0)
+    sampled_scores: int = Field(default=0, ge=0)
+    min_agreement: float | None = Field(default=None, ge=0, le=1)
+    average_agreement: float | None = Field(default=None, ge=0, le=1)
+    case_agreement: dict[str, float] = Field(default_factory=dict)
+
+
+class LiveSummary(BaseModel):
+    """How a live target behaved across the suite (live runs only)."""
+
+    total_cases: int = Field(ge=0)
+    ok_cases: int = Field(ge=0)
+    retried_cases: int = Field(default=0, ge=0)
+    timed_out_cases: int = Field(default=0, ge=0)
+    error_cases: int = Field(default=0, ge=0)
+    timed_out_case_ids: list[str] = Field(default_factory=list)
+    error_case_ids: list[str] = Field(default_factory=list)
+
+
 class EvaluationSummary(BaseModel):
     total_cases: int
     passed_cases: int
@@ -224,6 +281,8 @@ class EvaluationSummary(BaseModel):
     average_latency_ms: float
     metrics: dict[str, MetricSummary] = Field(default_factory=dict)
     tags: dict[str, TagSummary] = Field(default_factory=dict)
+    judge: JudgeSummary | None = None
+    live: LiveSummary | None = None
 
 
 class EvaluationReport(BaseModel):
@@ -236,6 +295,15 @@ class EvaluationReport(BaseModel):
 
 
 class LiveTarget(BaseModel):
+    """Where `run_live_suite` sends each case.
+
+    `timeout_seconds` bounds one call. HTTP targets always apply it (default
+    30 s). Python targets apply it only when it is set explicitly: an
+    `async def` target is cancelled at the timeout, while a synchronous one
+    keeps running in its worker thread, but its result is discarded and the
+    case is reported as `timed_out`.
+    """
+
     kind: str = Field(pattern="^(python|http)$")
     timeout_seconds: float = Field(default=30.0, gt=0)
 
