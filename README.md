@@ -23,6 +23,37 @@ quickstart API, and the `agentic-evals` CLI) is real, tested code — see the
 still move between minor versions ahead of a 1.0; pin a version in
 production and read the changelog before upgrading.
 
+## Judge reliability and live resilience (0.9.0)
+
+LLM-judged and live evaluations now say what they cost and whether they
+actually happened:
+
+```python
+from agentic_evals import FACTUALITY, JudgeResponse, LLMRubricEvaluator, RetryPolicy
+
+judge = LLMRubricEvaluator(
+    "factuality",
+    FACTUALITY,
+    complete_fn,                      # may return JudgeResponse(text=..., cost_usd=...)
+    retry=RetryPolicy(max_attempts=3, backoff_seconds=0.5),
+    samples=3,                        # judge three times, report agreement
+)
+```
+
+- Judge cost, tokens and latency are recorded on each judge `Score` under the
+  `judge_*` keys AgenticLens already reads, and totalled in `summary.judge`.
+- A judge that fails after its retries yields an explicit **unavailable** score
+  that never passes; the default gate fails and names the cases.
+- `samples=N` reports per-case agreement; `GateConfig(min_judge_agreement=...)`
+  catches a flaky judge.
+- Live targets retry with backoff and report `timed_out` separately from failed
+  (`CaseEvaluation.target_status`, `summary.live`, JUnit `<error>`).
+- `aevaluate_suite` / `arun_live_suite` await `async def` evaluators and targets.
+
+See the [judge reliability guide](docs/judge-reliability.md) and the offline
+[judge](examples/judge_reliability.py) and [async target](examples/async_live_target.py)
+examples. Report schema 1.0 gains optional fields only.
+
 ## Declarative CLI (0.8.0)
 
 Run saved suites and samples, then apply an explicit release gate:
@@ -325,6 +356,20 @@ A `None` version means the evaluator did not declare one. Version a judge
 whenever its prompt or model changes, so two reports can be compared only
 when they were graded by the same judge.
 
+### Judge cost, retries and agreement
+
+`LLMJudgeEvaluator` and `LLMRubricEvaluator` take `retry=RetryPolicy(...)` and
+`samples=N`. Every judge score records `judge_status` (`ok` or
+`unavailable`), `judge_attempts` and `judge_latency_ms`, plus any usage the
+judge reported (`judge_cost_usd`, `judge_cost_source`, tokens, model,
+provider). A rubric `complete_fn` reports usage by returning a
+`JudgeResponse`. A judge that raises, or a rubric completion that cannot be parsed,
+no longer aborts the suite. After the last attempt it becomes an unavailable score:
+value 0 and never passing, with the error recorded.
+`summary.judge` totals judge cost apart from the agent's cost, and lists
+unavailable cases and per-case agreement. See the
+[judge reliability guide](docs/judge-reliability.md).
+
 ## Release gates
 
 ```python
@@ -351,6 +396,18 @@ GateConfig(
 
 A tag or metric named in the config but missing from the report fails the
 gate, so a renamed tag cannot quietly switch a check off.
+
+Judge and live-target checks (0.9.0):
+
+```python
+GateConfig(
+    max_judge_unavailable_scores=0,  # the default: an unavailable judge fails the gate
+    min_judge_agreement=0.8,         # every case judged with samples=N
+    max_judge_cost_usd=2.50,         # fails when any judge score has no cost
+    max_timed_out_cases=0,           # live runs: timeouts, apart from wrong answers
+    max_target_error_cases=0,
+)
+```
 
 Never fabricates a value it can't back up: `total_cost_usd` on a summary or
 gate decision stays `None` unless every case in scope has a known cost —
@@ -468,6 +525,15 @@ sequential run that produced the same outputs. Only raise `max_workers` for
 targets that are safe to call concurrently. Python and HTTP targets go
 through the same scoring path; the test suite checks that both produce the
 same report for the same outputs.
+
+`retry=RetryPolicy(max_attempts=3, backoff_seconds=1)` retries a call that
+raises or times out. A case whose calls all fail is reported on the case
+(`target_status` `timed_out` or `error`, `target_attempts`, `target_error`)
+instead of aborting the run, and `summary.live` counts each outcome. HTTP
+targets always apply `timeout_seconds`; Python targets apply it when it is set
+explicitly, cancelling `async def` targets. `arun_live_suite(...,
+max_concurrency=N)` awaits async targets and evaluators; `aevaluate_suite`
+does the same for saved samples.
 
 Live targets are intentionally powerful developer-facing integrations —
 Python targets execute local code and HTTP targets can reach arbitrary
