@@ -295,7 +295,7 @@ evidence rather than claims.
 
 - `agentic-sidecar` v0.9: lifecycle and dispatch evidence, and revoked-authority fixtures
 - `agentic-chaos` adversarial workflows on isolated targets
-- `deep-agentic-core-mcp` revocation and dispatch evidence (its Phase 4 access-containment items)
+- `deep-agentic-core-mcp` revocation and dispatch evidence (its Phase 5 hosted access-control items, moved from Phase 4)
 - `agenticlens` integrity verification, still open on its roadmap
 
 **Validate in:** Control Tower's zero-violation gate checks and Sidecar's
