@@ -260,3 +260,97 @@ def test_live_gate_checks_need_a_live_report(tmp_path: Path) -> None:
     decision = evaluate_gate(report, GateConfig(max_target_error_cases=0))
     assert not decision.passed
     assert "not a live run" in decision.reasons[0]
+
+
+MIXED = """
+def run_case(payload, *, case):
+    import pathlib
+    state = pathlib.Path(__file__).with_suffix(".calls")
+    calls = int(state.read_text()) + 1 if state.exists() else 1
+    state.write_text(str(calls))
+    if calls == 1:
+        raise ConnectionError("reset")
+    raise TimeoutError("slow")
+"""
+
+
+def test_a_mix_of_errors_and_timeouts_is_an_error_not_a_timeout(tmp_path: Path) -> None:
+    suite = TestSuite(name="mixed", version="1", cases=[SUITE.cases[0]])
+    report = run_live_suite(
+        suite,
+        PythonTarget(callable_path=_target(tmp_path, MIXED)),
+        retry=RetryPolicy(max_attempts=2),
+    )
+    case = report.cases[0]
+    assert case.target_status == "error"
+    assert case.target_error == "TimeoutError: slow"
+    assert report.summary.live is not None
+    assert report.summary.live.timed_out_cases == 0
+
+
+class _NotJsonHandler(BaseHTTPRequestHandler):
+    calls = 0
+
+    def do_POST(self) -> None:  # noqa: N802 - http.server naming
+        type(self).calls += 1
+        self.rfile.read(int(self.headers["Content-Length"]))
+        body = b"<html>not json</html>"
+        self.send_response(200)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format: str, *args: Any) -> None:  # noqa: A002
+        return
+
+
+def test_a_non_json_http_body_stops_the_run_without_retrying() -> None:
+    server = ThreadingHTTPServer(("127.0.0.1", 0), _NotJsonHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        url = f"http://127.0.0.1:{server.server_address[1]}/run"
+        with pytest.raises(ValueError, match="not JSON for case 'case-1'"):
+            run_live_suite(SUITE, HTTPTarget(url=url), retry=RetryPolicy(max_attempts=3))
+        assert _NotJsonHandler.calls == 1
+        with pytest.raises(ValueError, match="not JSON"):
+            asyncio.run(arun_live_suite(SUITE, HTTPTarget(url=url)))
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+CANCELLABLE = """
+import asyncio, pathlib
+MARK = pathlib.Path(__file__).with_suffix(".finished")
+
+async def run_case(payload, *, case):
+    try:
+        await asyncio.sleep(1.0)
+    except asyncio.CancelledError:
+        MARK.write_text("cancelled")
+        raise
+    MARK.write_text("completed")
+    return {"output": "ok", "trace": {}}
+"""
+
+
+def test_sync_api_cancels_an_async_target_at_its_timeout(tmp_path: Path) -> None:
+    suite = TestSuite(name="cancel", version="1", cases=[SUITE.cases[0]])
+    target = PythonTarget(callable_path=_target(tmp_path, CANCELLABLE), timeout_seconds=0.1)
+    report = run_live_suite(suite, target)
+    assert report.cases[0].target_status == "timed_out"
+    mark = tmp_path / "target.finished"
+    deadline = time.monotonic() + 2
+    while not mark.exists() and time.monotonic() < deadline:
+        time.sleep(0.02)
+    assert mark.read_text() == "cancelled"
+
+
+def test_sync_api_inside_a_running_loop_raises_for_an_async_target(tmp_path: Path) -> None:
+    target = PythonTarget(callable_path=_target(tmp_path, ASYNC))
+
+    async def misuse() -> None:
+        run_live_suite(SUITE, target, retry=RetryPolicy(max_attempts=3))
+
+    with pytest.raises(RuntimeError, match="arun_live_suite"):
+        asyncio.run(misuse())

@@ -342,3 +342,61 @@ def test_reports_without_judges_have_no_judge_summary() -> None:
     report = evaluate_suite(suite, [EvaluationSample(case_id="c", output="x", trace=EvalTrace())])
     assert report.summary.judge is None
     assert "judge_unavailable_scores" not in evaluate_gate(report, GateConfig()).observed
+
+
+def test_event_loop_misuse_is_raised_not_scored_as_unavailable() -> None:
+    async def judge(context: EvaluationContext) -> Score:
+        return Score(name="q", value=1.0, passed=True, explanation="ok")
+
+    case = TestCase(id="c", name="c", evaluators=[EvaluatorConfig(name="q")])
+    sample = EvaluationSample(case_id="c", output="x", trace=EvalTrace())
+    evaluator = LLMJudgeEvaluator("q", judge, retry=RetryPolicy(max_attempts=3))
+
+    async def misuse() -> None:
+        evaluator.evaluate(EvaluationContext(case=case, sample=sample, config=case.evaluators[0]))
+
+    with pytest.raises(RuntimeError, match="aevaluate_suite"):
+        asyncio.run(misuse())
+
+
+def test_usage_of_unparseable_completions_is_kept() -> None:
+    suite = _suite(cases=1)
+    evaluator = LLMRubricEvaluator(
+        "factuality",
+        FACTUALITY,
+        _scripted([_priced("no verdict here", 0.002), _priced("A", 0.001)]),
+        retry=RetryPolicy(max_attempts=2),
+    )
+    report = evaluate_suite(suite, _samples(suite), registry=_registry(evaluator))
+    [score] = report.cases[0].scores
+    assert score.passed
+    assert score.metadata["judge_cost_usd"] == pytest.approx(0.003)
+    assert score.metadata["judge_input_tokens"] == 200
+
+
+def test_unavailable_scores_record_usage_of_failed_answers() -> None:
+    suite = _suite(cases=1)
+    evaluator = LLMRubricEvaluator(
+        "factuality",
+        FACTUALITY,
+        _scripted([_priced("unclear", 0.002), ConnectionError("down")]),
+        retry=RetryPolicy(max_attempts=2),
+    )
+    report = evaluate_suite(suite, _samples(suite), registry=_registry(evaluator))
+    [score] = report.cases[0].scores
+    assert score.metadata["judge_status"] == "unavailable"
+    # Only the answered attempt reported usage; the connection error adds nothing.
+    assert score.metadata["judge_cost_usd"] == pytest.approx(0.002)
+    assert score.metadata["judge_cost_source"] == "measured"
+
+
+def test_failed_usage_is_not_attached_to_an_unpriced_success() -> None:
+    suite = _suite(cases=1)
+    evaluator = LLMRubricEvaluator(
+        "factuality",
+        FACTUALITY,
+        _scripted([_priced("unclear", 0.002), "A"]),
+        retry=RetryPolicy(max_attempts=2),
+    )
+    report = evaluate_suite(suite, _samples(suite), registry=_registry(evaluator))
+    assert "judge_cost_usd" not in report.cases[0].scores[0].metadata
