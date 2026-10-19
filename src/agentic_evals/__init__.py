@@ -33,6 +33,7 @@ from agentic_evals.models import (
     TestSuite,
 )
 from agentic_evals.packs import EvalPack, list_builtin_packs, load_builtin_pack, load_pack
+from agentic_evals.reliability import RetryPolicy
 from agentic_evals.report_contract import gate_decision_schema, report_schema
 from agentic_evals.runner import (
     BUILTIN_EVALUATOR,
@@ -124,6 +125,7 @@ __all__ = [
     "LiveTarget",
     "MetricSummary",
     "PythonTarget",
+    "RetryPolicy",
     "RubricTemplate",
     "Score",
     "TagSummary",
