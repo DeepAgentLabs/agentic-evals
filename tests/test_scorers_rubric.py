@@ -132,12 +132,16 @@ def test_llm_rubric_evaluator_applies_threshold_from_config() -> None:
     assert score.passed is False  # threshold is 0.8 in _context()
 
 
-def test_llm_rubric_evaluator_propagates_unparseable_completion() -> None:
+def test_llm_rubric_evaluator_reports_unparseable_completion_as_unavailable() -> None:
     evaluator = LLMRubricEvaluator("factuality", FACTUALITY, complete_fn=lambda prompt: "unclear")
     context = _context(output="Paris", reference="Paris is the capital of France")
 
-    with pytest.raises(ValueError, match="could not parse a verdict"):
-        evaluator.evaluate(context)
+    [score] = evaluator.evaluate(context)
+
+    assert not score.passed
+    assert score.value == 0.0
+    assert score.metadata["judge_status"] == "unavailable"
+    assert "could not parse a verdict" in score.metadata["judge_error"]
 
 
 def test_translation_template_parses_verdict() -> None:
