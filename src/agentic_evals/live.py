@@ -19,6 +19,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from typing import Any
 
+from agentic_evals import _async
 from agentic_evals.models import HTTPTarget, LiveTarget, PythonTarget, TargetStatus, TestCase
 from agentic_evals.reliability import (
     Attempted,
@@ -27,6 +28,18 @@ from agentic_evals.reliability import (
     call_with_retry,
     describe_error,
 )
+
+
+class InvalidPayloadError(ValueError):
+    """A target answered with something that is not a sample payload.
+
+    This is a target bug that retrying will not fix, so it stops the run
+    instead of being recorded as a per-case `error`.
+    """
+
+
+#: Exceptions a live call raises instead of recording on the case.
+PROPAGATED = (InvalidPayloadError, _async.EventLoopMisuseError)
 
 
 @dataclass
@@ -43,8 +56,12 @@ class LiveCall:
         if outcome.ok:
             return cls(status="ok", attempts=outcome.attempts, payload=outcome.value)
         error = outcome.error
+        # Timed out only if every attempt did: a mix of errors is an error.
+        timed_out = bool(outcome.failures) and all(
+            isinstance(failure, TimeoutError) for failure in outcome.failures
+        )
         return cls(
-            status="timed_out" if isinstance(error, TimeoutError) else "error",
+            status="timed_out" if timed_out else "error",
             attempts=outcome.attempts,
             error=describe_error(error) if error is not None else "unknown error",
         )
@@ -87,13 +104,19 @@ def http_payload(target: HTTPTarget, case: TestCase) -> Any:
     )
     try:
         with urllib.request.urlopen(request, timeout=target.timeout_seconds) as response:
-            return json.loads(response.read().decode("utf-8"))
+            body = response.read()
     except (urllib.error.URLError, TimeoutError) as exc:
         if _is_timeout(exc):
             raise TimeoutError(
                 f"HTTP target timed out after {target.timeout_seconds:g} s for case {case.id!r}"
             ) from exc
         raise ValueError(f"HTTP target request failed for case {case.id!r}: {exc}") from exc
+    try:
+        return json.loads(body.decode("utf-8"))
+    except ValueError as exc:
+        raise InvalidPayloadError(
+            f"HTTP target returned a body that is not JSON for case {case.id!r}: {exc}"
+        ) from exc
 
 
 def python_timeout(target: PythonTarget) -> float | None:
@@ -163,12 +186,13 @@ def sync_caller(target: LiveTarget) -> Callable[[TestCase], Any]:
             def invoke() -> Any:
                 result = function(case.input, case=case)
                 if inspect.isawaitable(result):
-                    # An async target called from a sync run: give it its own loop.
-                    return asyncio.run(_wait_for(result, None))
+                    # An async target in a sync run gets its own loop in this
+                    # worker thread, and is cancelled there at the timeout.
+                    return asyncio.run(_wait_for(result, timeout))
                 return result
 
             if timeout is None:
-                return invoke()
+                return _async.resolve(function(case.input, case=case))
             try:
                 return _in_daemon_thread(invoke, timeout)
             except TimeoutError as exc:
@@ -225,7 +249,7 @@ def async_caller(target: LiveTarget) -> Callable[[TestCase], Any]:
 
 
 def call_target(call: Callable[[TestCase], Any], case: TestCase, retry: RetryPolicy) -> LiveCall:
-    return LiveCall.from_outcome(call_with_retry(lambda: call(case), retry))
+    return LiveCall.from_outcome(call_with_retry(lambda: call(case), retry, propagate=PROPAGATED))
 
 
 async def acall_target(
@@ -234,4 +258,4 @@ async def acall_target(
     async def attempt() -> Any:
         return await call(case)
 
-    return LiveCall.from_outcome(await acall_with_retry(attempt, retry))
+    return LiveCall.from_outcome(await acall_with_retry(attempt, retry, propagate=PROPAGATED))
