@@ -5,7 +5,7 @@ import re
 from xml.etree import ElementTree as ET
 
 from agentic_evals.gate import GateDecision
-from agentic_evals.models import EvaluationReport
+from agentic_evals.models import CaseEvaluation, EvaluationReport
 
 
 def _xml_text(value: str) -> str:
@@ -19,6 +19,46 @@ def _markdown(value: str) -> str:
     return escaped.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "<br>")
 
 
+def _target_failed(case: CaseEvaluation) -> bool:
+    return case.target_status in ("timed_out", "error")
+
+
+def _result(case: CaseEvaluation) -> str:
+    if case.target_status == "timed_out":
+        return "TIMEOUT"
+    if case.target_status == "error":
+        return "ERROR"
+    return "PASS" if case.passed else "FAIL"
+
+
+def _markdown_extras(report: EvaluationReport) -> list[str]:
+    lines: list[str] = []
+    judge, live = report.summary.judge, report.summary.live
+    if judge is not None and judge.judge_scores:
+        cost = (
+            f"${judge.total_cost_usd:.6f}"
+            if judge.total_cost_usd is not None
+            else f"incomplete ({judge.priced_scores}/{judge.judge_scores} priced)"
+        )
+        text = (
+            f"Judges: {judge.judge_scores} score(s), {judge.unavailable_scores} unavailable, "
+            f"cost {cost}"
+        )
+        if judge.min_agreement is not None:
+            text += f", lowest agreement {judge.min_agreement:.0%}"
+        lines += ["", _markdown(text + ".")]
+    if live is not None:
+        lines += [
+            "",
+            _markdown(
+                f"Live target: {live.ok_cases}/{live.total_cases} answered, "
+                f"{live.timed_out_cases} timed out, {live.error_cases} errored, "
+                f"{live.retried_cases} retried."
+            ),
+        ]
+    return lines
+
+
 def render_report(report: EvaluationReport, output_format: str) -> str:
     """Render JSON, Markdown or one JUnit testcase per evaluation case."""
     if output_format == "json":
@@ -30,6 +70,7 @@ def render_report(report: EvaluationReport, output_format: str) -> str:
             "",
             f"{summary.passed_cases}/{summary.total_cases} cases passed "
             f"({summary.pass_rate:.1%}); average score {summary.average_score:.3f}.",
+            *_markdown_extras(report),
             "",
             "| Case | Result | Details |",
             "| --- | --- | --- |",
@@ -40,10 +81,7 @@ def render_report(report: EvaluationReport, output_format: str) -> str:
                 for s in case.scores
                 if s.skipped or not s.passed
             )
-            lines.append(
-                f"| {_markdown(case.case_id)} | {'PASS' if case.passed else 'FAIL'} "
-                f"| {_markdown(details)} |"
-            )
+            lines.append(f"| {_markdown(case.case_id)} | {_result(case)} | {_markdown(details)} |")
         return "\n".join(lines) + "\n"
     if output_format != "junit":
         raise ValueError(f"unknown output format: {output_format}")
@@ -51,8 +89,8 @@ def render_report(report: EvaluationReport, output_format: str) -> str:
         "testsuite",
         name=_xml_text(report.suite_name),
         tests=str(len(report.cases)),
-        failures=str(sum(not case.passed for case in report.cases)),
-        errors="0",
+        failures=str(sum(not case.passed and not _target_failed(case) for case in report.cases)),
+        errors=str(sum(_target_failed(case) for case in report.cases)),
         skipped="0",
         time=f"{sum(max(0, case.latency_ms) for case in report.cases) / 1000:.6f}",
     )
@@ -64,7 +102,13 @@ def render_report(report: EvaluationReport, output_format: str) -> str:
             classname=_xml_text(report.suite_name),
             time=f"{max(0, case.latency_ms) / 1000:.6f}",
         )
-        if not case.passed:
+        if _target_failed(case):
+            # A target that never answered is an error, not a wrong answer.
+            details = f"{_result(case)}: {case.target_error or 'target call failed'}"
+            ET.SubElement(
+                node, "error", message=_xml_text(details), type=case.target_status or "error"
+            ).text = _xml_text(details)
+        elif not case.passed:
             details = (
                 "; ".join(
                     f"{s.name}: {s.explanation}"
