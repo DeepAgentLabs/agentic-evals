@@ -50,8 +50,11 @@ This project follows [Semantic Versioning](https://semver.org/).
   yields an unavailable score instead of raising out of `evaluate_suite`.
 - A live-target call that raises or times out (including an unreachable HTTP
   target) is reported on its case instead of aborting `run_live_suite`;
-  `agentic-evals live` writes the report and exits 0. An invalid target payload
-  still stops the run (exit 2).
+  `agentic-evals live` writes the report and exits 0. A case is `timed_out` only
+  when every attempt timed out. An invalid target payload, including a non-JSON
+  HTTP body, still stops the run without retrying (exit 2).
+- Usage reported by a rubric attempt with no parseable verdict is added to the
+  score's judge cost and tokens.
 - The default gate fails when any judge score is unavailable, even for an
   optional evaluator. Set `max_judge_unavailable_scores: null` to opt out.
 - `LLMRubricEvaluator` now subclasses `LLMJudgeEvaluator`.

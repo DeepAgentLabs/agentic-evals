@@ -52,6 +52,9 @@ there is one contract instead of two:
 
 `LLMJudgeEvaluator` judges set the usage keys themselves on the `Score` they
 return. Measured latency is added only when the judge did not record its own.
+A rubric attempt that answered but had no parseable verdict still adds its
+reported cost and tokens. Attempts that failed without reporting usage, such as
+connection errors, add nothing: their cost is unknown, not zero.
 
 `EvaluationReport.summary.judge` (a `JudgeSummary`, `None` when the suite has
 no judge scores) totals them: `judge_scores`, `priced_scores`,
@@ -128,7 +131,8 @@ report = run_live_suite(
 
 A target call that raises or times out is retried under `retry`. A case whose
 calls all fail is **reported, not raised**: it fails with
-`CaseEvaluation.target_status` `"timed_out"` or `"error"`, `target_attempts`,
+`CaseEvaluation.target_status` `"timed_out"` (every attempt timed out) or
+`"error"` (any other failure, including a mix of errors and timeouts), `target_attempts`,
 `target_error`, and a single `target_call` score. Cases the target answered
 have `target_status: "ok"`. `summary.live` (a `LiveSummary`, live runs only)
 counts `ok_cases`, `retried_cases`, `timed_out_cases` and `error_cases` and
@@ -143,11 +147,14 @@ Timeouts:
 
 - HTTP targets always use `timeout_seconds` (default 30 s).
 - Python targets use it only when it is set explicitly, so existing long-running
-  targets are not cut off. An `async def` target is cancelled at the timeout. A
-  synchronous target keeps running in a daemon thread; its result is discarded.
+  targets are not cut off. An `async def` target is cancelled at the timeout,
+  from both the async and the sync APIs. A synchronous target keeps running in a
+  daemon thread; its result is discarded.
 
-A payload that is not a valid sample still stops the run: that is a target bug
-that retrying will not fix. Target-side failures are still exposed; retries never
+A payload that is not a valid sample, including an HTTP body that is not
+JSON, still stops the run without retrying: that is a target bug that
+retrying will not fix. So does calling a sync API with an async judge or target
+inside a running event loop; that error is raised, not recorded as a failure. Target-side failures are still exposed; retries never
 replace a failed answer with a guess.
 
 > **Changed in 0.9.0:** a target exception (including an unreachable HTTP
