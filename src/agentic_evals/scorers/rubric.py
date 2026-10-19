@@ -14,7 +14,7 @@ from string import ascii_uppercase
 from typing import Any
 
 from agentic_evals.evaluators import EvaluationContext, LLMJudgeEvaluator
-from agentic_evals.judging import JudgeResponse
+from agentic_evals.judging import JudgeAttemptError, JudgeResponse
 from agentic_evals.models import Score
 from agentic_evals.reliability import RetryPolicy
 
@@ -386,7 +386,11 @@ class LLMRubricEvaluator(LLMJudgeEvaluator):
                 if isinstance(completion, JudgeResponse)
                 else JudgeResponse(text=completion)
             )
-            verdict, value = template.parse_verdict(response.text)
+            try:
+                verdict, value = template.parse_verdict(response.text)
+            except ValueError as exc:
+                # The judge answered and may have billed for it: keep the usage.
+                raise JudgeAttemptError(str(exc), usage=response.usage_metadata()) from exc
             return Score(
                 name=name,
                 value=value,

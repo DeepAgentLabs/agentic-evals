@@ -43,6 +43,18 @@ JUDGE_UNAVAILABLE = "unavailable"
 _MAX_RECORDED_ERRORS = 5
 
 
+class JudgeAttemptError(ValueError):
+    """A judge call that answered but could not be used, with what it consumed.
+
+    Raised for a rubric completion with no parseable verdict, so the usage
+    of that attempt is still added to the score's judge cost and tokens.
+    """
+
+    def __init__(self, message: str, *, usage: dict[str, Any]) -> None:
+        super().__init__(message)
+        self.usage = usage
+
+
 class JudgeResponse(BaseModel):
     """A judge completion plus what the call consumed.
 
@@ -98,6 +110,55 @@ def _summed(samples: list[Score], key: str) -> float | None:
     return sum(value for value in values if value is not None)
 
 
+_USAGE_TOTALS = ("judge_cost_usd", "judge_input_tokens", "judge_output_tokens")
+
+
+def _failed_usage(outcomes: list[Attempted[Any]]) -> dict[str, Any]:
+    """Usage reported by attempts that answered but failed (`JudgeAttemptError`).
+
+    Attempts that raised without reporting usage, such as connection errors,
+    add nothing: their cost is unknown, not zero.
+    """
+    totals: dict[str, Any] = {}
+    sources: set[Any] = set()
+    for outcome in outcomes:
+        for failure in outcome.failures:
+            usage = getattr(failure, "usage", None)
+            if not isinstance(usage, dict):
+                continue
+            for key in _USAGE_TOTALS:
+                value = _number(usage.get(key))
+                if value is not None:
+                    totals[key] = totals.get(key, 0) + value
+            if "judge_cost_usd" in usage:
+                sources.add(usage.get("judge_cost_source"))
+    if "judge_cost_usd" in totals:
+        totals["judge_cost_source"] = "measured" if sources == {"measured"} else "estimated"
+    for key in ("judge_input_tokens", "judge_output_tokens"):
+        if key in totals:
+            totals[key] = int(totals[key])
+    return totals
+
+
+def _add_usage(metadata: dict[str, Any], wasted: dict[str, Any]) -> dict[str, Any]:
+    """Add failed-attempt usage to a delivered score's own usage.
+
+    Only totals the score already records are increased, so a score whose
+    successful call reported no cost never shows a cost covering only the
+    failed attempts.
+    """
+    merged = dict(metadata)
+    for key in _USAGE_TOTALS:
+        current = _number(merged.get(key))
+        if key in wasted and current is not None:
+            total = current + wasted[key]
+            merged[key] = int(total) if key != "judge_cost_usd" else total
+    if "judge_cost_usd" in wasted and _number(metadata.get("judge_cost_usd")) is not None:
+        both = {metadata.get("judge_cost_source"), wasted["judge_cost_source"]}
+        merged["judge_cost_source"] = "measured" if both == {"measured"} else "estimated"
+    return merged
+
+
 def _verdict_key(score: Score) -> Any:
     return score.metadata.get("verdict", score.value)
 
@@ -127,7 +188,9 @@ class JudgeRunner:
         outcomes: list[Attempted[Any]] = []
         for _ in range(self.samples):
             outcome = call_with_retry(
-                lambda: self._single(_async.resolve(function(context))), self.retry
+                lambda: self._single(_async.resolve(function(context))),
+                self.retry,
+                propagate=(_async.EventLoopMisuseError,),
             )
             outcomes.append(outcome)
             if not outcome.ok:
@@ -139,7 +202,10 @@ class JudgeRunner:
             return self._single(await _async.call(function, context))
 
         outcomes = await asyncio.gather(
-            *(acall_with_retry(attempt, self.retry) for _ in range(self.samples))
+            *(
+                acall_with_retry(attempt, self.retry, propagate=(_async.EventLoopMisuseError,))
+                for _ in range(self.samples)
+            )
         )
         return self._finish(list(outcomes))
 
@@ -147,27 +213,33 @@ class JudgeRunner:
         attempts = sum(outcome.attempts for outcome in outcomes)
         elapsed = round(sum(outcome.elapsed_ms for outcome in outcomes), 3)
         failed = [outcome for outcome in outcomes if not outcome.ok]
+        wasted = _failed_usage(outcomes)
         if failed:
-            return self._unavailable(outcomes, failed, attempts, elapsed)
+            score = self._unavailable(outcomes, failed, attempts, elapsed)
+            return score.model_copy(update={"metadata": {**score.metadata, **wasted}})
         if self.samples == 1:
             result: Any = outcomes[0].value
             scores: list[Score] = result if isinstance(result, list) else [result]
             stamped = [
                 score.model_copy(
                     update={
-                        "metadata": {
-                            "judge_latency_ms": elapsed,
-                            **score.metadata,
-                            "judge_status": JUDGE_OK,
-                            "judge_attempts": attempts,
-                        }
+                        "metadata": _add_usage(
+                            {
+                                "judge_latency_ms": elapsed,
+                                **score.metadata,
+                                "judge_status": JUDGE_OK,
+                                "judge_attempts": attempts,
+                            },
+                            wasted,
+                        )
                     }
                 )
                 for score in scores
             ]
             return stamped if isinstance(result, list) else stamped[0]
         samples: list[Score] = [cast(Score, outcome.value) for outcome in outcomes]
-        return self._aggregate(samples, attempts, elapsed)
+        aggregate = self._aggregate(samples, attempts, elapsed)
+        return aggregate.model_copy(update={"metadata": _add_usage(aggregate.metadata, wasted)})
 
     def _unavailable(
         self,
