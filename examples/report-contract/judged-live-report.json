@@ -1,0 +1,219 @@
+{
+  "schema_version": "1.0",
+  "suite_name": "judged-live-contract",
+  "suite_version": "1",
+  "created_at": "2026-10-17T00:00:00Z",
+  "summary": {
+    "total_cases": 3,
+    "passed_cases": 2,
+    "failed_cases": 1,
+    "pass_rate": 0.6666666666666666,
+    "average_score": 0.6,
+    "total_cost_usd": null,
+    "priced_cases": 0,
+    "cost_sources": {},
+    "average_latency_ms": 0.0,
+    "metrics": {
+      "exact_match": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "pass_rate": 1.0,
+        "average_score": 1.0
+      },
+      "quality": {
+        "total": 2,
+        "passed": 1,
+        "failed": 1,
+        "skipped": 0,
+        "pass_rate": 0.5,
+        "average_score": 0.5
+      },
+      "target_call": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "pass_rate": 0.0,
+        "average_score": 0.0
+      }
+    },
+    "tags": {},
+    "judge": {
+      "judge_scores": 2,
+      "unavailable_scores": 1,
+      "unavailable_cases": [
+        "judge-down"
+      ],
+      "retried_scores": 1,
+      "priced_scores": 1,
+      "total_cost_usd": null,
+      "cost_sources": {
+        "measured": 1
+      },
+      "input_tokens": 120,
+      "output_tokens": 2,
+      "total_latency_ms": 85.0,
+      "sampled_scores": 0,
+      "min_agreement": null,
+      "average_agreement": null,
+      "case_agreement": {}
+    },
+    "live": {
+      "total_cases": 3,
+      "ok_cases": 2,
+      "retried_cases": 1,
+      "timed_out_cases": 0,
+      "error_cases": 1,
+      "timed_out_case_ids": [],
+      "error_case_ids": [
+        "outage"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "case_id": "answered",
+      "case_name": "Judged answer",
+      "passed": true,
+      "scores": [
+        {
+          "name": "exact_match",
+          "metric": "exact_match",
+          "value": 1.0,
+          "passed": true,
+          "required": true,
+          "skipped": false,
+          "explanation": "Output exactly matches the reference.",
+          "evaluator_type": "deterministic",
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.8.0",
+          "metadata": {}
+        },
+        {
+          "name": "quality",
+          "metric": "quality",
+          "value": 1.0,
+          "passed": true,
+          "required": false,
+          "skipped": false,
+          "explanation": "The answer names the capital.",
+          "evaluator_type": "llm_judge",
+          "evaluator": "quality",
+          "evaluator_version": "1",
+          "metadata": {
+            "judge_latency_ms": 85.0,
+            "verdict": "A",
+            "judge_cost_usd": 0.0004,
+            "judge_cost_source": "measured",
+            "judge_input_tokens": 120,
+            "judge_output_tokens": 2,
+            "judge_model": "example-judge",
+            "judge_status": "ok",
+            "judge_attempts": 1
+          }
+        }
+      ],
+      "output": "Paris",
+      "trace_id": "live-answered",
+      "latency_ms": 0.0,
+      "cost_usd": null,
+      "cost_source": null,
+      "sample_available": true,
+      "target_status": "ok",
+      "target_attempts": 1,
+      "target_error": null,
+      "tags": [],
+      "metadata": {}
+    },
+    {
+      "case_id": "judge-down",
+      "case_name": "Judge outage",
+      "passed": true,
+      "scores": [
+        {
+          "name": "exact_match",
+          "metric": "exact_match",
+          "value": 1.0,
+          "passed": true,
+          "required": true,
+          "skipped": false,
+          "explanation": "Output exactly matches the reference.",
+          "evaluator_type": "deterministic",
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.8.0",
+          "metadata": {}
+        },
+        {
+          "name": "quality",
+          "metric": "quality",
+          "value": 0.0,
+          "passed": false,
+          "required": false,
+          "skipped": false,
+          "explanation": "Judge unavailable after 2 attempt(s): TimeoutError: judge provider timed out",
+          "evaluator_type": "llm_judge",
+          "evaluator": "quality",
+          "evaluator_version": "1",
+          "metadata": {
+            "judge_status": "unavailable",
+            "judge_attempts": 2,
+            "judge_error": "TimeoutError: judge provider timed out",
+            "judge_errors": [
+              "TimeoutError: judge provider timed out",
+              "TimeoutError: judge provider timed out"
+            ],
+            "judge_latency_ms": 0.0
+          }
+        }
+      ],
+      "output": "Paris",
+      "trace_id": "live-judge-down",
+      "latency_ms": 0.0,
+      "cost_usd": null,
+      "cost_source": null,
+      "sample_available": true,
+      "target_status": "ok",
+      "target_attempts": 1,
+      "target_error": null,
+      "tags": [],
+      "metadata": {}
+    },
+    {
+      "case_id": "outage",
+      "case_name": "Target outage",
+      "passed": false,
+      "scores": [
+        {
+          "name": "target_call",
+          "metric": "target_call",
+          "value": 0.0,
+          "passed": false,
+          "required": true,
+          "skipped": false,
+          "explanation": "Live target failed after 2 attempt(s): ConnectionError: backend unavailable",
+          "evaluator_type": "deterministic",
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.8.0",
+          "metadata": {
+            "status": "error",
+            "attempts": 2,
+            "error": "ConnectionError: backend unavailable"
+          }
+        }
+      ],
+      "output": "",
+      "trace_id": "",
+      "latency_ms": 0.0,
+      "cost_usd": null,
+      "cost_source": null,
+      "sample_available": false,
+      "target_status": "error",
+      "target_attempts": 2,
+      "target_error": "ConnectionError: backend unavailable",
+      "tags": [],
+      "metadata": {}
+    }
+  ]
+}

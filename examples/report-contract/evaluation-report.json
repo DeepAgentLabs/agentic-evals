@@ -39,7 +39,9 @@
         "pass_rate": 1.0,
         "average_score": 1.0
       }
-    }
+    },
+    "judge": null,
+    "live": null
   },
   "cases": [
     {
@@ -67,6 +69,9 @@
       "cost_usd": null,
       "cost_source": null,
       "sample_available": true,
+      "target_status": null,
+      "target_attempts": null,
+      "target_error": null,
       "tags": [
         "smoke"
       ],
@@ -97,6 +102,9 @@
       "cost_usd": null,
       "cost_source": null,
       "sample_available": false,
+      "target_status": null,
+      "target_attempts": null,
+      "target_error": null,
       "tags": [],
       "metadata": {}
     }
