@@ -141,3 +141,55 @@ def test_live_models_produce_valid_contracts() -> None:
     assert gate.passed is False
     assert gate.observed["metric_pass_rate:missing"] is None
     Draft202012Validator(gate_decision_schema()).validate(gate.model_dump(mode="json"))
+
+
+V09_EXAMPLES = [
+    ("judged-live-report", report_schema, "evaluation-report"),
+    ("judged-live-gate-decision", gate_decision_schema, "gate-decision"),
+]
+
+
+@pytest.mark.parametrize("example,accessor,legacy", V09_EXAMPLES)
+def test_v09_artifacts_validate_against_current_and_071_schemas(example, accessor, legacy) -> None:
+    artifact = json.loads((ROOT / "examples/report-contract" / f"{example}.json").read_text())
+    Draft202012Validator(accessor(), format_checker=FormatChecker()).validate(artifact)
+    # Readers still bundling the 0.7.1/0.7.2 schemas accept the additive fields.
+    frozen = json.loads((LEGACY / f"{legacy}.schema.json").read_text())
+    Draft202012Validator(frozen, format_checker=FormatChecker()).validate(artifact)
+
+
+def test_v09_example_records_judge_and_live_outcomes() -> None:
+    report = EvaluationReport.model_validate_json(
+        (ROOT / "examples/report-contract/judged-live-report.json").read_text()
+    )
+    assert report.summary.judge is not None
+    assert report.summary.judge.unavailable_cases == ["judge-down"]
+    assert report.summary.live is not None
+    assert report.summary.live.error_case_ids == ["outage"]
+    assert [case.target_status for case in report.cases] == ["ok", "ok", "error"]
+
+
+@pytest.mark.parametrize(
+    "path,value",
+    [
+        (("cases", 2, "target_status"), "crashed"),
+        (("cases", 2, "target_attempts"), 0),
+        (("summary", "judge", "min_agreement"), 1.5),
+        (("summary", "live", "timed_out_cases"), -1),
+    ],
+)
+def test_v09_fields_reject_invalid_values(path, value) -> None:
+    artifact = json.loads((ROOT / "examples/report-contract/judged-live-report.json").read_text())
+    node = artifact
+    for key in path[:-1]:
+        node = node[key]
+    node[path[-1]] = value
+    with pytest.raises(ValidationError):
+        Draft202012Validator(report_schema()).validate(artifact)
+
+
+def test_reports_saved_before_v09_load_without_judge_or_live_summaries() -> None:
+    report = EvaluationReport.model_validate_json((LEGACY / "evaluation-report.json").read_text())
+    assert report.summary.judge is None
+    assert report.summary.live is None
+    assert all(case.target_status is None for case in report.cases)
