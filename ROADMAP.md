@@ -479,3 +479,11 @@ They are not scores, release gates or proof of containment. No new shared
 schema, automatic adapter or hosted execution capability is introduced.
 
 Workflow statuses and per-step contracts are per-run resilience checks, not Evals scores or release gates. Convert observed outputs to native EvaluationSamples explicitly. No adapter, runtime dependency or Evals patch release is needed.
+
+## MCP 0.4.0 unified release checks
+
+MCP 0.4.0's `core.release_check` uses `evaluate_gate` and `GateConfig` unchanged,
+rejecting unknown threshold keys on its side. No Evals runtime change or release.
+AIOS evaluation evidence export (v0.10) remains the next Evals milestone.
+See [the compatibility guide](docs/mcp-0.4-unified-workflows.md)
+and the [MCP guide](https://github.com/DeepAgentLabs/mcp-server/blob/v0.4.0/docs/unified-workflows.md).
