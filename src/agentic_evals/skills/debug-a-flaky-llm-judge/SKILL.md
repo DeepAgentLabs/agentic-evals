@@ -32,7 +32,12 @@ prompt, or the system being evaluated.
    occasionally wrapping the verdict in a format the regex misses (e.g.
    `**A**` vs `(A)`) — fix by tightening the prompt's "respond with only
    the letter" instruction, not by loosening the parser's token matching.
-5. If the underlying system under test is itself nondeterministic (a live
+5. Measure it instead of guessing: register the judge with `samples=3`
+   (or more) and read `judge_verdicts` / `judge_agreement` on each score
+   and `summary.judge.case_agreement` in the report. Agreement below 1.0
+   on the same recorded output is judge flakiness by definition; gate it
+   with `GateConfig(min_judge_agreement=...)`.
+6. If the underlying system under test is itself nondeterministic (a live
    agent target with real tool calls), separate that from judge flakiness
    by re-scoring the *same recorded output* twice — same input to
    `LLMRubricEvaluator`, two judge calls — before blaming the agent.
@@ -44,8 +49,10 @@ prompt, or the system being evaluated.
   the flaky one.
 - Don't retry a failed judge call silently inside a custom wrapper around
   `complete_fn` and keep only the passing result — that's p-hacking the
-  eval; if you need retry-and-vote, implement it explicitly (e.g. majority
-  of 3 calls) so the report shows what actually happened.
+  eval. Use the built-in `retry=RetryPolicy(...)` (which only retries
+  errors and unparseable completions, records `judge_attempts`, and
+  reports an unavailable score when attempts run out) and `samples=N`
+  (which records every verdict), so the report shows what happened.
 - Don't conclude "the eval is broken" from one flaky case — check whether
   it's isolated to one template/model pairing or every rubric-graded case
   in the suite before treating it as a package-level bug.
@@ -56,10 +63,11 @@ prompt, or the system being evaluated.
   directly (bypassing `TestSuite`/`evaluate_suite` entirely) — if it
   doesn't reproduce there, the bug is in how the suite builds the prompt
   or context, not in the model.
-- `RubricTemplate.parse_verdict`'s `ValueError` (unparseable completion)
-  and a genuine verdict flip (parseable, but a different letter) are being
-  treated as two different failure modes in your triage, not lumped
-  together as "the judge is flaky."
+- An unparseable completion (`judge_status: "unavailable"` with a
+  "could not parse a verdict" `judge_error`, or a retry recorded in
+  `judge_attempts`) and a genuine verdict flip (parseable, but a different
+  letter, visible in `judge_verdicts`) are being treated as two different
+  failure modes in your triage, not lumped together as "the judge is flaky."
 
 ## Risk
 

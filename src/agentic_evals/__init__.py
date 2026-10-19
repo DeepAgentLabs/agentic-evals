@@ -7,6 +7,7 @@ Extracted from AgenticLens's evaluation module (github.com/DeepAgentLabs/agentic
 
 from agentic_evals._version import __version__
 from agentic_evals.evaluators import (
+    AsyncEvaluator,
     BusinessRuleEvaluator,
     CallableEvaluator,
     EvaluationContext,
@@ -15,6 +16,7 @@ from agentic_evals.evaluators import (
     LLMJudgeEvaluator,
 )
 from agentic_evals.gate import GateConfig, GateDecision, evaluate_gate
+from agentic_evals.judging import JUDGE_EVALUATOR_TYPES, JudgeResponse
 from agentic_evals.models import (
     CaseEvaluation,
     EvalSpan,
@@ -24,6 +26,8 @@ from agentic_evals.models import (
     EvaluationSummary,
     EvaluatorConfig,
     HTTPTarget,
+    JudgeSummary,
+    LiveSummary,
     LiveTarget,
     MetricSummary,
     PythonTarget,
@@ -33,9 +37,12 @@ from agentic_evals.models import (
     TestSuite,
 )
 from agentic_evals.packs import EvalPack, list_builtin_packs, load_builtin_pack, load_pack
+from agentic_evals.reliability import RetryPolicy
 from agentic_evals.report_contract import gate_decision_schema, report_schema
 from agentic_evals.runner import (
     BUILTIN_EVALUATOR,
+    aevaluate_suite,
+    arun_live_suite,
     evaluate_suite,
     load_samples,
     load_suite,
@@ -92,6 +99,7 @@ __all__ = [
     "BUILTIN_EVALUATOR",
     "CLOSED_QA",
     "FACTUALITY",
+    "JUDGE_EVALUATOR_TYPES",
     "MODERATION",
     "PII_LEAKAGE",
     "POSSIBLE",
@@ -99,6 +107,7 @@ __all__ = [
     "SQL_CORRECTNESS",
     "SUMMARY_QUALITY",
     "TRANSLATION",
+    "AsyncEvaluator",
     "BusinessRuleEvaluator",
     "Case",
     "CallableEvaluator",
@@ -119,17 +128,23 @@ __all__ = [
     "GateConfig",
     "GateDecision",
     "HTTPTarget",
+    "JudgeResponse",
+    "JudgeSummary",
     "LLMJudgeEvaluator",
     "LLMRubricEvaluator",
+    "LiveSummary",
     "LiveTarget",
     "MetricSummary",
     "PythonTarget",
+    "RetryPolicy",
     "RubricTemplate",
     "Score",
     "TagSummary",
     "TestCase",
     "TestSuite",
     "__version__",
+    "aevaluate_suite",
+    "arun_live_suite",
     "builtin_scorer_names",
     "contains",
     "contains_all",

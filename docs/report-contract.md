@@ -12,7 +12,8 @@ fields/defaults for earlier JSON writers. Serialize models with
 `model_dump(mode="json")` or `model_dump_json()`; Python-mode datetime objects
 are not JSON values. Reports carry `schema_version: "1.0"`; gate decisions
 retain their existing unversioned envelope and use the schema document's version.
-The schema IDs point at immutable release-tagged documents.
+The schema IDs point at immutable release-tagged documents (`v0.9.0` since
+Evals 0.9.0, which added optional fields; earlier documents remain at `v0.7.2`).
 
 ```python
 import json
@@ -80,3 +81,28 @@ Use `agentic-evals>=0.7.2` only when directly importing the new accessors.
 `gate` emits the same gate decision. Schema 1.0 is unchanged. JUnit/Markdown
 are presentations only, not inputs for native schema validation or gating.
 See [the CLI guide](cli.md) for exit codes, examples and sibling compatibility.
+
+## Evals 0.9.0 additive fields
+
+Evals 0.9.0 adds optional fields to contract 1.0. `schema_version` stays
+`"1.0"` and no existing field changed:
+
+| Field | Meaning |
+| --- | --- |
+| `summary.judge` | `JudgeSummary`: judge scores, unavailable scores and cases, retries, judge cost/tokens/latency totals, sampling agreement. `null` without judge scores. |
+| `summary.live` | `LiveSummary`: answered, retried, timed-out and errored cases with their IDs. `null` outside live runs. |
+| `cases[].target_status` | `ok`, `timed_out` or `error` for live runs; `null` otherwise. |
+| `cases[].target_attempts`, `cases[].target_error` | calls made (including retries) and the last failure. |
+
+Judge scores also carry `judge_*` metadata keys (`judge_status`,
+`judge_attempts`, `judge_latency_ms`, usage and agreement); `Score.metadata`
+was already an open object. Gate decisions add `observed` keys only for the
+checks that apply (`judge_unavailable_scores`, `judge_total_cost_usd`,
+`min_judge_agreement`, `timed_out_cases`, `target_error_cases`); `observed` was
+already an open map.
+
+`examples/report-contract/judged-live-report.json` and its gate decision show
+every new field, including a judge outage and a target outage. Tests check that
+they validate against both the current schemas and the frozen 0.7.1 schemas,
+so a consumer still bundling 0.7.2 schemas accepts 0.9.0 artifacts. See
+[judge reliability and live resilience](judge-reliability.md).

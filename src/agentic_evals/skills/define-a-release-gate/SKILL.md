@@ -32,6 +32,11 @@ just accept the defaults.
    `min_tag_pass_rate` or `min_metric_pass_rate` for that slice instead
    of raising `min_pass_rate` for everything — for example a tag that
    must pass in full while the suite as a whole tolerates a few misses.
+6. For LLM-judged suites, keep `max_judge_unavailable_scores=0` (the
+   default) so a judge that never delivered a verdict blocks the release,
+   and add `min_judge_agreement` when judges run with `samples=N`. For
+   live runs, add `max_timed_out_cases`/`max_target_error_cases` so a
+   target outage is gated as an outage, not hidden in the pass rate.
 
 ## Avoid
 
@@ -39,6 +44,8 @@ just accept the defaults.
   unavailable for some cases (e.g. a live target that doesn't report
   per-span cost) — the gate will fail every run with "cost is unavailable
   or incomplete," which looks like a real regression but isn't.
+- Don't set `max_judge_unavailable_scores=None` to get a red build green —
+  an unavailable judgment is missing evidence, not a pass.
 - Don't loosen `min_pass_rate` to make a flaky suite pass — fix the
   flaky case or evaluator instead; a gate that's routinely overridden
   stops being trusted.

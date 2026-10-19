@@ -1,0 +1,16 @@
+{
+  "passed": false,
+  "reasons": [
+    "Judge unavailable for 1 score(s), more than 0, in cases 'judge-down'."
+  ],
+  "observed": {
+    "pass_rate": 0.6666666666666666,
+    "average_score": 0.6,
+    "failed_cases": 1,
+    "average_latency_ms": 0.0,
+    "total_cost_usd": null,
+    "judge_unavailable_scores": 1,
+    "timed_out_cases": 0,
+    "target_error_cases": 1
+  }
+}

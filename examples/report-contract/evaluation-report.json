@@ -39,7 +39,9 @@
         "pass_rate": 1.0,
         "average_score": 1.0
       }
-    }
+    },
+    "judge": null,
+    "live": null
   },
   "cases": [
     {
@@ -57,7 +59,7 @@
           "explanation": "Output exactly matches the reference.",
           "evaluator_type": "deterministic",
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.8.0",
+          "evaluator_version": "0.9.0",
           "metadata": {}
         }
       ],
@@ -67,6 +69,9 @@
       "cost_usd": null,
       "cost_source": null,
       "sample_available": true,
+      "target_status": null,
+      "target_attempts": null,
+      "target_error": null,
       "tags": [
         "smoke"
       ],
@@ -87,7 +92,7 @@
           "explanation": "No evaluation sample was supplied for this test case.",
           "evaluator_type": "deterministic",
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.8.0",
+          "evaluator_version": "0.9.0",
           "metadata": {}
         }
       ],
@@ -97,6 +102,9 @@
       "cost_usd": null,
       "cost_source": null,
       "sample_available": false,
+      "target_status": null,
+      "target_attempts": null,
+      "target_error": null,
       "tags": [],
       "metadata": {}
     }

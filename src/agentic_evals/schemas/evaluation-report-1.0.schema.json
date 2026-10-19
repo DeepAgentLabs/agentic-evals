@@ -1,7 +1,7 @@
 {
   "$defs": {
     "CaseEvaluation": {
-      "description": "One case's result.\n\n`sample_available` is `False` when no sample was supplied for the case;\nits empty `trace_id` then means \"no trace exists\", not \"trace ID lost\".",
+      "description": "One case's result.\n\n`sample_available` is `False` when no sample was supplied for the case;\nits empty `trace_id` then means \"no trace exists\", not \"trace ID lost\".\n\n`target_status` is set only by live runs: `ok` when the target answered,\n`timed_out` when every attempt exceeded the case timeout, and `error`\nwhen the target raised or failed otherwise. A timed-out or errored case\nnever passes, and is distinguishable from a case that answered wrongly.\n`target_attempts` counts the calls made, including retries, and\n`target_error` records the last failure.",
       "properties": {
         "case_id": {
           "title": "Case Id",
@@ -75,6 +75,48 @@
           "title": "Tags",
           "type": "array"
         },
+        "target_attempts": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Attempts"
+        },
+        "target_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Error"
+        },
+        "target_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "ok",
+                "error",
+                "timed_out"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Status"
+        },
         "trace_id": {
           "title": "Trace Id",
           "type": "string"
@@ -114,6 +156,28 @@
         "failed_cases": {
           "title": "Failed Cases",
           "type": "integer"
+        },
+        "judge": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JudgeSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "live": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LiveSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "metrics": {
           "additionalProperties": {
@@ -171,6 +235,176 @@
         "average_latency_ms"
       ],
       "title": "EvaluationSummary",
+      "type": "object"
+    },
+    "JudgeSummary": {
+      "description": "What the suite's LLM judges cost, and how dependable they were.\n\nCounts cover evaluated (non-skipped) scores from `llm_judge` and\n`llm_rubric` evaluators. `unavailable_scores` are judgments the judge\ncould not deliver after its retries; they never count as passes and\n`unavailable_cases` names the cases they belong to.\n\n`total_cost_usd` is the sum of `judge_cost_usd` over every judge score,\nand is `None` unless all of them recorded a cost (`priced_scores`\nsays how many did). Judge cost is kept apart from the cost of the system\nunder evaluation in `EvaluationSummary.total_cost_usd`.\n\n`sampled_scores` were judged more than once (`samples=N`).\n`case_agreement` holds, per case, the lowest agreement among its sampled\njudge scores: the share of samples that returned the most common verdict.",
+      "properties": {
+        "average_agreement": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Average Agreement"
+        },
+        "case_agreement": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Case Agreement",
+          "type": "object"
+        },
+        "cost_sources": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Cost Sources",
+          "type": "object"
+        },
+        "input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "judge_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Judge Scores",
+          "type": "integer"
+        },
+        "min_agreement": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Agreement"
+        },
+        "output_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "priced_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Priced Scores",
+          "type": "integer"
+        },
+        "retried_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Retried Scores",
+          "type": "integer"
+        },
+        "sampled_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Sampled Scores",
+          "type": "integer"
+        },
+        "total_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Cost Usd"
+        },
+        "total_latency_ms": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Total Latency Ms",
+          "type": "number"
+        },
+        "unavailable_cases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unavailable Cases",
+          "type": "array"
+        },
+        "unavailable_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Unavailable Scores",
+          "type": "integer"
+        }
+      },
+      "title": "JudgeSummary",
+      "type": "object"
+    },
+    "LiveSummary": {
+      "description": "How a live target behaved across the suite (live runs only).",
+      "properties": {
+        "error_case_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Error Case Ids",
+          "type": "array"
+        },
+        "error_cases": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Error Cases",
+          "type": "integer"
+        },
+        "ok_cases": {
+          "minimum": 0,
+          "title": "Ok Cases",
+          "type": "integer"
+        },
+        "retried_cases": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Retried Cases",
+          "type": "integer"
+        },
+        "timed_out_case_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Timed Out Case Ids",
+          "type": "array"
+        },
+        "timed_out_cases": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Timed Out Cases",
+          "type": "integer"
+        },
+        "total_cases": {
+          "minimum": 0,
+          "title": "Total Cases",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_cases",
+        "ok_cases"
+      ],
+      "title": "LiveSummary",
       "type": "object"
     },
     "MetricSummary": {
@@ -349,7 +583,7 @@
       "type": "object"
     }
   },
-  "$id": "https://raw.githubusercontent.com/DeepAgentLabs/agentic-evals/v0.7.2/src/agentic_evals/schemas/evaluation-report-1.0.schema.json",
+  "$id": "https://raw.githubusercontent.com/DeepAgentLabs/agentic-evals/v0.9.0/src/agentic_evals/schemas/evaluation-report-1.0.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "properties": {
     "cases": {

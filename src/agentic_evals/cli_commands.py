@@ -18,6 +18,7 @@ from agentic_evals.formatting import render_gate, render_report
 from agentic_evals.gate import GateConfig, evaluate_gate
 from agentic_evals.models import EvaluationReport, HTTPTarget, PythonTarget
 from agentic_evals.packs import EvalPack, list_builtin_packs
+from agentic_evals.reliability import RetryPolicy
 from agentic_evals.report_contract import report_schema
 from agentic_evals.runner import evaluate_suite, load_samples, load_suite, run_live_suite
 from agentic_evals.scorers import default_registry
@@ -79,7 +80,21 @@ def add_commands(subparsers: Any) -> None:
     )
     live.add_argument("--max-workers", type=int, default=1)
     live.add_argument(
-        "--timeout-seconds", type=float, default=30.0, help="HTTP timeout (default: 30)"
+        "--timeout-seconds",
+        type=float,
+        help="per-call timeout (HTTP default: 30; Python targets: none unless set)",
+    )
+    live.add_argument(
+        "--retries",
+        type=int,
+        default=0,
+        help="extra attempts for a target call that raises or times out (default: 0)",
+    )
+    live.add_argument(
+        "--retry-backoff",
+        type=float,
+        default=0.0,
+        help="seconds before the first retry, doubling after each (default: 0)",
     )
     live.add_argument("--registry", help="trusted module[:factory_or_registry]")
     _output_options(live)
@@ -134,12 +149,20 @@ def execute(args: argparse.Namespace) -> int:
         if args.command == "evaluate":
             report = evaluate_suite(suite, load_samples(Path(args.samples)), registry=registry)
         else:
-            target = (
-                HTTPTarget(url=args.target, timeout_seconds=args.timeout_seconds)
-                if args.target.startswith(("http://", "https://"))
-                else PythonTarget(callable_path=args.target)
+            if args.retries < 0:
+                raise ValueError("--retries must not be negative")
+            timeout = (
+                {} if args.timeout_seconds is None else {"timeout_seconds": args.timeout_seconds}
             )
-            report = run_live_suite(suite, target, registry=registry, max_workers=args.max_workers)
+            target = (
+                HTTPTarget(url=args.target, **timeout)
+                if args.target.startswith(("http://", "https://"))
+                else PythonTarget(callable_path=args.target, **timeout)
+            )
+            retry = RetryPolicy(max_attempts=args.retries + 1, backoff_seconds=args.retry_backoff)
+            report = run_live_suite(
+                suite, target, registry=registry, max_workers=args.max_workers, retry=retry
+            )
     _emit(render_report(report, args.format), args.out)
     # Evaluation writes evidence; the separate gate command decides release policy.
     return 0

@@ -25,13 +25,16 @@ endpoint via `HTTPTarget`.
    production, especially for the first run of a new suite — a case with
    a destructive side effect (a `required_tools` check that actually
    triggers a real action) will really trigger it.
-4. Check what `run_live_suite` does with a target-side exception (network
-   error, non-2xx response, Python exception) versus a scoring failure —
-   they should not be conflated in the report; a target outage isn't the
-   same finding as the system giving a wrong answer.
-5. Re-run flaky-looking live cases before concluding the system regressed
-   — a live target reintroduces real network/latency variance that a
-   pre-recorded `EvaluationSample` doesn't have.
+4. Keep target-side failures apart from scoring failures — a target outage
+   isn't the same finding as the system giving a wrong answer. Since 0.9.0
+   `run_live_suite` reports a case whose calls all raised or timed out with
+   `target_status` `error` or `timed_out` (and `summary.live` counts them),
+   instead of aborting the run.
+5. Use `retry=RetryPolicy(max_attempts=..., backoff_seconds=...)` for
+   transient target errors rather than re-running the whole suite by hand,
+   and read `target_attempts` to see which cases needed it — a live target
+   reintroduces real network/latency variance that a pre-recorded
+   `EvaluationSample` doesn't have.
 
 ## Avoid
 
@@ -49,16 +52,20 @@ endpoint via `HTTPTarget`.
 ## Check
 
 - CLI equivalent: `agentic-evals live suite.yaml --target module:function
-  --max-workers 4 --out report.json`. Use `--registry module` for a trusted
-  `build_registry()` factory. HTTP URLs use `--timeout-seconds`; that option
-  does not interrupt Python targets. Target exceptions exit 2 without a report;
-  scoring failures are written normally and must be checked by `gate`.
+  --max-workers 4 --retries 2 --timeout-seconds 20 --out report.json`. Use
+  `--registry module` for a trusted `build_registry()` factory.
+  `--timeout-seconds` bounds HTTP calls (default 30) and, when given, Python
+  targets (an `async def` target is cancelled; a sync one is abandoned in a
+  daemon thread). Timed-out and errored cases are written to the report and
+  gated with `max_timed_out_cases`/`max_target_error_cases`; an invalid
+  payload still exits 2 without a report.
 
 - The suite file and the target's `callable_path`/`url` both came from a
   reviewed source, not an arbitrary input.
 - `timeout_seconds` reflects the target's real p99 latency, not a guess.
 - Target-side failures (timeout, non-2xx, exception) are visibly distinct
-  in the report from scoring failures.
+  in the report from scoring failures: `target_status`, `summary.live`,
+  and JUnit `<error>` rather than `<failure>`.
 
 ## Risk
 

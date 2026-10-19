@@ -21,7 +21,7 @@ An empty array records all cases as missing, rather than passing them.
 
 | Command | 0 | 1 | 2 |
 | --- | --- | --- | --- |
-| `evaluate`, `live` | Report produced, even if cases failed | Unused | Usage, input, target, evaluator or output error |
+| `evaluate`, `live` | Report produced, even if cases failed or a live target timed out | Unused | Usage, input, invalid target payload, evaluator or output error |
 | `gate` | Gate passed | Gate failed (decision still written) | Usage, input or output error |
 | `pack list/show` | Success | Unused | Usage, input or output error |
 | `run` | All discovered evals passed | Failure, import error or no evals | Argument parsing error |
@@ -35,7 +35,8 @@ JUnit and Markdown are presentations, not native evidence inputs.
 `--out FILE` writes UTF-8; omitted or `--out -` writes stdout. Parent directories
 must exist. Diagnostics go to stderr, including prints from imported evaluators
 or live targets. JUnit uses one testcase per case and marks failed required
-checks as failures. Optional failures and skipped checks appear in `system-out`;
+checks as failures; since 0.9.0 a live case whose target timed out or errored is
+an `<error>` instead. Optional failures and skipped checks appear in `system-out`;
 they do not invent suite failures or change the engine's pass decision. Gate
 JUnit has one testcase for the release decision. Markdown escapes report text
 for tables and can be appended to `GITHUB_STEP_SUMMARY`.
@@ -63,10 +64,27 @@ agentic-evals live examples/ci/suite.yaml --target https://your-service.example/
 Python targets accept `(input, *, case)` and return a sample payload containing
 `output` and `trace`; the runner assigns `case_id`. File targets also accept
 `path.py:function`. HTTP targets receive POST JSON `{input, case_id}` and return
-the same payload. `--timeout-seconds` applies only to HTTP requests; Python
-targets are not interrupted. `--max-workers` defaults to 1 and must be positive;
-larger values require thread-safe targets. Use only trusted suites and targets.
-The CLI adds no retry behavior; target errors exit 2 without a partial report.
+the same payload. `--max-workers` defaults to 1 and must be positive; larger
+values require thread-safe targets. Use only trusted suites and targets.
+
+Since 0.9.0:
+
+- `--timeout-seconds` applies to HTTP requests (default 30) and, when given,
+  to Python targets. An `async def` target is cancelled at the timeout. A
+  synchronous one keeps running in a daemon thread and its result is discarded.
+- `--retries N` allows N extra attempts for a call that raises or times out;
+  `--retry-backoff SECONDS` is the first wait, doubling after each retry.
+- A case whose calls all fail is written to the report with `target_status`
+  `timed_out` or `error` instead of exiting 2, and the command still exits 0.
+  Gate on it with `max_timed_out_cases` / `max_target_error_cases`. An invalid
+  target payload or an unloadable target still exits 2.
+
+```bash
+agentic-evals live examples/ci/suite.yaml --target target:answer \
+  --retries 2 --retry-backoff 1 --timeout-seconds 20 --out report.json
+```
+
+See [judge reliability and live resilience](judge-reliability.md).
 
 ## Discover packs
 
@@ -90,7 +108,10 @@ its suite and samples and uses its own custom registry with this CLI.
 
 ## Sibling compatibility
 
-Report schema 1.0 and gate wire shapes are unchanged from Evals 0.7.2. Lens
+Evals 0.9.0 adds optional judge and live-target fields to report schema 1.0
+(see [judge reliability](judge-reliability.md)); they validate against the
+0.7.2 schemas as well. For 0.8.0: report schema 1.0 and gate wire shapes were
+unchanged from Evals 0.7.2. Lens
 0.8.0 approved-suite exports run unchanged; suite approval and release gates
 remain separate. MCP 0.3.9 and Tower 0.6.1 can validate these native JSON
 artifacts against their bundled 0.7.2 schemas. JUnit and Markdown must not be

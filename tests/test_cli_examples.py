@@ -56,3 +56,18 @@ assert main(["gate", "report.json"]) == (0 if expected["summary"]["pass_rate"] =
         [sys.executable, "-c", script], cwd=tmp_path, capture_output=True, text=True
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_v09_reliability_examples_run() -> None:
+    for script, expected in (
+        ("judge_reliability.py", "Judge unavailable for 1 score(s)"),
+        ("async_live_target.py", "timed out: ['hangs']"),
+    ):
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "examples" / script)],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=60,
+        )
+        assert expected in result.stdout

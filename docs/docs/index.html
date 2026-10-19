@@ -728,6 +728,14 @@ if not decision.passed:
 
           <p>A tag or metric named in the config but missing from the report fails the gate, so a renamed tag cannot quietly switch a check off.</p>
 
+          <p>Since 0.9.0 the gate also reads judge and live-target outcomes. A judge that never delivered a verdict fails the default gate (<code>max_judge_unavailable_scores=0</code>):</p>
+
+          <pre><code>GateConfig(
+    min_judge_agreement=0.8,   # every case judged with samples=N
+    max_judge_cost_usd=2.50,   # fails when any judge score has no cost
+    max_timed_out_cases=0,     # live runs: timeouts, apart from wrong answers
+)</code></pre>
+
           <h3 id="live-targets">Live Targets</h3>
           <p>Run a suite against a real system (trusted code or HTTP endpoint) instead of pre-recorded samples:</p>
 
@@ -735,7 +743,11 @@ if not decision.passed:
 def run_live_suite(
     suite: TestSuite,
     target: LiveTarget,
+    *,
     registry: EvaluatorRegistry | None = None,
+    trace_adapter: TraceAdapter | None = None,
+    max_workers: int = 1,
+    retry: RetryPolicy | None = None,
 ) -> EvaluationReport
           </div>
 
@@ -759,6 +771,18 @@ report = run_live_suite(
         headers={"Authorization": "Bearer token"},
     ),
 )</code></pre>
+
+          <p><strong>Retries, timeouts and async (0.9.0):</strong> a call that raises or times out is retried under <code>retry</code>; a case whose calls all fail is reported with <code>target_status</code> <code>"timed_out"</code> or <code>"error"</code> instead of aborting the run. <code>arun_live_suite</code> awaits <code>async def</code> targets and cancels them at an explicit <code>timeout_seconds</code>.</p>
+          <pre><code>import asyncio
+from agentic_evals import PythonTarget, RetryPolicy, arun_live_suite
+
+report = asyncio.run(arun_live_suite(
+    suite,
+    PythonTarget(callable_path="my_module:my_async_agent", timeout_seconds=20),
+    retry=RetryPolicy(max_attempts=3, backoff_seconds=1),
+    max_concurrency=4,
+))
+print(report.summary.live.timed_out_case_ids)</code></pre>
         </article>
 
         <article id="custom-evaluators">

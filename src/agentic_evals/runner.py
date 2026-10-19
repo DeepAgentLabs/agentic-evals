@@ -1,10 +1,7 @@
+import asyncio
 import json
-import urllib.error
-import urllib.request
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from importlib import import_module
-from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from typing import Any
 
@@ -15,20 +12,24 @@ from referencing.exceptions import Unresolvable
 
 from agentic_evals._version import __version__
 from agentic_evals.evaluators import EvaluationContext, EvaluatorRegistry
+from agentic_evals.judging import is_judge_score, is_unavailable
+from agentic_evals.live import LiveCall, acall_target, async_caller, call_target, sync_caller
 from agentic_evals.models import (
     CaseEvaluation,
     EvaluationReport,
     EvaluationSample,
     EvaluationSummary,
-    HTTPTarget,
+    EvaluatorConfig,
+    JudgeSummary,
+    LiveSummary,
     LiveTarget,
     MetricSummary,
-    PythonTarget,
     Score,
     TagSummary,
     TestCase,
     TestSuite,
 )
+from agentic_evals.reliability import RetryPolicy
 from agentic_evals.scorers.text import REFERENCE_SCORER_NAMES
 
 TraceAdapter = Callable[[Any], Any]
@@ -172,11 +173,7 @@ def _score_tool_order(required_order: list[str], sample: EvaluationSample) -> Sc
     return Score(name="tool_order", value=float(passed), passed=passed, explanation=explanation)
 
 
-def _score_case(
-    case: TestCase,
-    sample: EvaluationSample,
-    registry: EvaluatorRegistry | None,
-) -> list[Score]:
+def _builtin_scores(case: TestCase, sample: EvaluationSample) -> list[Score]:
     scores: list[Score] = []
     output = sample.output.strip()
     if case.expected_output is not None and not _graded_against_expected_output(case):
@@ -378,7 +375,13 @@ def _score_case(
                 ),
             )
         )
-    scores = _stamp_builtin(scores)
+    return _stamp_builtin(scores)
+
+
+def _evaluator_calls(
+    case: TestCase, sample: EvaluationSample, registry: EvaluatorRegistry | None
+) -> list[tuple[EvaluatorConfig, Any, EvaluationContext]]:
+    calls = []
     for evaluator_config in case.evaluators:
         if registry is None:
             raise ValueError(
@@ -386,63 +389,80 @@ def _score_case(
                 "but no evaluator registry was supplied"
             )
         evaluator = registry.get(evaluator_config.name)
-        custom_scores = evaluator.evaluate(
-            EvaluationContext(case=case, sample=sample, config=evaluator_config)
+        calls.append(
+            (
+                evaluator_config,
+                evaluator,
+                EvaluationContext(case=case, sample=sample, config=evaluator_config),
+            )
         )
-        # The registry entry is the producer of record: stamp its name and
-        # declared version over whatever the evaluator put on the score.
-        declared_version = getattr(evaluator, "version", None)
-        provenance = {
-            "evaluator": evaluator_config.name,
-            "evaluator_version": declared_version if isinstance(declared_version, str) else None,
-        }
-        scores.extend(score.model_copy(update=provenance) for score in custom_scores)
+    return calls
+
+
+def _with_provenance(
+    evaluator: Any, config: EvaluatorConfig, custom_scores: list[Score]
+) -> list[Score]:
+    # The registry entry is the producer of record: stamp its name and
+    # declared version over whatever the evaluator put on the score.
+    declared_version = getattr(evaluator, "version", None)
+    provenance = {
+        "evaluator": config.name,
+        "evaluator_version": declared_version if isinstance(declared_version, str) else None,
+    }
+    return [score.model_copy(update=provenance) for score in custom_scores]
+
+
+def _score_case(
+    case: TestCase,
+    sample: EvaluationSample,
+    registry: EvaluatorRegistry | None,
+) -> list[Score]:
+    scores = _builtin_scores(case, sample)
+    for config, evaluator, context in _evaluator_calls(case, sample, registry):
+        scores.extend(_with_provenance(evaluator, config, evaluator.evaluate(context)))
     return scores
 
 
-def _load_python_callable(callable_path: str) -> Any:
-    """Load a trusted Python live target from module:function or path.py:function."""
-    module_name, _, attr_path = callable_path.rpartition(":")
-    if not module_name or not attr_path:
-        raise ValueError("python target callable_path must be in module:function format")
-    try:
-        target: Any = import_module(module_name)
-    except ModuleNotFoundError as exc:
-        file_path = Path(module_name)
-        if not file_path.exists():
-            raise
-        spec = spec_from_file_location(file_path.stem, file_path)
-        if spec is None or spec.loader is None:
-            raise ValueError(f"Unable to load Python target from {file_path}") from exc
-        module = module_from_spec(spec)
-        spec.loader.exec_module(module)
-        target = module
-    for part in attr_path.split("."):
-        target = getattr(target, part)
-    return target
+async def _ascore_case(
+    case: TestCase,
+    sample: EvaluationSample,
+    registry: EvaluatorRegistry | None,
+) -> list[Score]:
+    scores = _builtin_scores(case, sample)
+    for config, evaluator, context in _evaluator_calls(case, sample, registry):
+        aevaluate = getattr(evaluator, "aevaluate", None)
+        if aevaluate is not None:
+            custom_scores = await aevaluate(context)
+        else:
+            custom_scores = await asyncio.to_thread(evaluator.evaluate, context)
+        scores.extend(_with_provenance(evaluator, config, custom_scores))
+    return scores
 
 
 def _sample_from_payload(
-    payload: dict[str, Any], case_id: str, trace_adapter: TraceAdapter | None
+    payload: Any, case_id: str, trace_adapter: TraceAdapter | None
 ) -> EvaluationSample:
+    if not isinstance(payload, dict):
+        raise ValueError(
+            f"live target returned {type(payload).__name__} for case {case_id!r}; "
+            "expected an object with output and trace"
+        )
     if trace_adapter is not None and "trace" in payload:
         payload = {**payload, "trace": trace_adapter(payload["trace"])}
     return EvaluationSample.model_validate({**payload, "case_id": case_id})
 
 
-def _http_payload(target: HTTPTarget, case: TestCase) -> dict[str, Any]:
-    request = urllib.request.Request(
-        target.url,
-        data=json.dumps({"input": case.input, "case_id": case.id}).encode("utf-8"),
-        headers={"Content-Type": "application/json", **target.headers},
-        method=target.method.upper(),
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=target.timeout_seconds) as response:
-            payload: dict[str, Any] = json.loads(response.read().decode("utf-8"))
-    except urllib.error.URLError as exc:
-        raise ValueError(f"HTTP target request failed for case {case.id!r}: {exc}") from exc
-    return payload
+def _live_samples(
+    suite: TestSuite,
+    calls: list[LiveCall],
+    trace_adapter: TraceAdapter | None,
+    validated: dict[str, EvaluationSample],
+) -> list[EvaluationSample]:
+    return [
+        validated.get(case.id) or _sample_from_payload(call.payload, case.id, trace_adapter)
+        for case, call in zip(suite.cases, calls, strict=True)
+        if call.status == "ok"
+    ]
 
 
 def run_live_suite(
@@ -452,6 +472,7 @@ def run_live_suite(
     registry: EvaluatorRegistry | None = None,
     trace_adapter: TraceAdapter | None = None,
     max_workers: int = 1,
+    retry: RetryPolicy | None = None,
 ) -> EvaluationReport:
     """Run a trusted live target against every case in a suite.
 
@@ -468,40 +489,80 @@ def run_live_suite(
     thread pool. Results keep the suite's case order either way, so the
     report matches a sequential run that produced the same outputs. Only
     raise it for targets that are safe to call concurrently.
+
+    `retry` retries a target call that raises or times out (default: one
+    attempt). A case whose calls all fail is reported, not raised: it fails
+    with `target_status` `timed_out` or `error` and a `target_call` score,
+    and the report's `summary.live` counts each outcome. A payload that is
+    not a valid sample still stops the run, since that is a target bug that
+    retrying will not fix. An `async def` Python target is awaited on its
+    own event loop; inside a running loop, use `arun_live_suite`.
     """
     if max_workers < 1:
         raise ValueError("max_workers must be at least 1")
-    call_case: Callable[[TestCase], dict[str, Any]]
-    if isinstance(target, PythonTarget):
-        callable_target = _load_python_callable(target.callable_path)
-
-        def call_case(case: TestCase) -> dict[str, Any]:
-            result: dict[str, Any] = callable_target(case.input, case=case)
-            return result
-
-    elif isinstance(target, HTTPTarget):
-        http_target = target
-
-        def call_case(case: TestCase) -> dict[str, Any]:
-            return _http_payload(http_target, case)
-
-    else:
-        raise ValueError(f"Unsupported live target kind: {target.kind}")
-
+    policy = retry or RetryPolicy()
+    call_case = sync_caller(target)
+    validated: dict[str, EvaluationSample] = {}
     if max_workers == 1:
         # Validate each result before calling the target for the next case, so
         # an invalid payload stops the run without further target side effects.
-        samples = [
-            _sample_from_payload(call_case(case), case.id, trace_adapter) for case in suite.cases
-        ]
+        calls = []
+        for case in suite.cases:
+            call = call_target(call_case, case, policy)
+            if call.status == "ok":
+                validated[case.id] = _sample_from_payload(call.payload, case.id, trace_adapter)
+            calls.append(call)
     else:
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            payloads = list(pool.map(call_case, suite.cases))
-        samples = [
-            _sample_from_payload(payload, case.id, trace_adapter)
-            for case, payload in zip(suite.cases, payloads, strict=True)
-        ]
-    return evaluate_suite(suite, samples, registry=registry)
+            calls = list(pool.map(lambda case: call_target(call_case, case, policy), suite.cases))
+    samples = _live_samples(suite, calls, trace_adapter, validated)
+    return _evaluate(suite, samples, registry=registry, calls=calls)
+
+
+async def arun_live_suite(
+    suite: TestSuite,
+    target: LiveTarget,
+    *,
+    registry: EvaluatorRegistry | None = None,
+    trace_adapter: TraceAdapter | None = None,
+    max_concurrency: int = 1,
+    retry: RetryPolicy | None = None,
+) -> EvaluationReport:
+    """Async `run_live_suite`: awaits `async def` targets and evaluators.
+
+    Up to `max_concurrency` cases call the target at once. An `async def`
+    Python target is cancelled when its explicit `timeout_seconds` elapses;
+    synchronous targets run in daemon threads. Scoring then runs through
+    `aevaluate_suite` with the same concurrency limit. The report has the
+    same shape and case order as the synchronous run.
+    """
+    if max_concurrency < 1:
+        raise ValueError("max_concurrency must be at least 1")
+    policy = retry or RetryPolicy()
+    call_case = async_caller(target)
+    semaphore = asyncio.Semaphore(max_concurrency)
+
+    async def one(case: TestCase) -> LiveCall:
+        async with semaphore:
+            return await acall_target(call_case, case, policy)
+
+    validated: dict[str, EvaluationSample] = {}
+    if max_concurrency == 1:
+        calls = []
+        for case in suite.cases:
+            call = await one(case)
+            if call.status == "ok":
+                validated[case.id] = _sample_from_payload(call.payload, case.id, trace_adapter)
+            calls.append(call)
+    else:
+        calls = list(await asyncio.gather(*(one(case) for case in suite.cases)))
+    return await _aevaluate(
+        suite,
+        _live_samples(suite, calls, trace_adapter, validated),
+        registry=registry,
+        calls=calls,
+        max_concurrency=max_concurrency,
+    )
 
 
 def _mean(values: list[float]) -> float | None:
@@ -562,12 +623,84 @@ def _summarize_tags(results: list[CaseEvaluation]) -> dict[str, TagSummary]:
     return summaries
 
 
-def evaluate_suite(
-    suite: TestSuite,
-    samples: list[EvaluationSample],
-    *,
-    registry: EvaluatorRegistry | None = None,
-) -> EvaluationReport:
+def _count(value: Any) -> int:
+    return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else 0
+
+
+def _summarize_judges(results: list[CaseEvaluation]) -> JudgeSummary | None:
+    judged = [
+        (result.case_id, score)
+        for result in results
+        for score in result.scores
+        if is_judge_score(score)
+    ]
+    if not judged:
+        return None
+    active = [(case_id, score) for case_id, score in judged if not score.skipped]
+    unavailable = [case_id for case_id, score in active if is_unavailable(score)]
+    costs: list[float] = []
+    cost_sources: dict[str, int] = {}
+    input_tokens = output_tokens = 0
+    latency = 0.0
+    agreements: list[float] = []
+    case_agreement: dict[str, float] = {}
+    retried = 0
+    for case_id, score in active:
+        meta = score.metadata
+        cost = meta.get("judge_cost_usd")
+        if isinstance(cost, (int, float)) and not isinstance(cost, bool):
+            costs.append(float(cost))
+            source = meta.get("judge_cost_source")
+            key = source if source in ("measured", "estimated") else "unspecified"
+            cost_sources[key] = cost_sources.get(key, 0) + 1
+        input_tokens += _count(meta.get("judge_input_tokens"))
+        output_tokens += _count(meta.get("judge_output_tokens"))
+        elapsed = meta.get("judge_latency_ms")
+        if isinstance(elapsed, (int, float)) and not isinstance(elapsed, bool) and elapsed >= 0:
+            latency += float(elapsed)
+        attempts = meta.get("judge_attempts")
+        samples = meta.get("judge_samples", 1)
+        if isinstance(attempts, int) and isinstance(samples, int) and attempts > samples:
+            retried += 1
+        agreement = meta.get("judge_agreement")
+        if isinstance(agreement, (int, float)) and not isinstance(agreement, bool):
+            agreements.append(float(agreement))
+            case_agreement[case_id] = min(case_agreement.get(case_id, 1.0), float(agreement))
+    return JudgeSummary(
+        judge_scores=len(active),
+        unavailable_scores=len(unavailable),
+        unavailable_cases=list(dict.fromkeys(unavailable)),
+        retried_scores=retried,
+        priced_scores=len(costs),
+        total_cost_usd=sum(costs) if active and len(costs) == len(active) else None,
+        cost_sources=dict(sorted(cost_sources.items())),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        total_latency_ms=round(latency, 3),
+        sampled_scores=len(agreements),
+        min_agreement=min(agreements) if agreements else None,
+        average_agreement=_mean(agreements),
+        case_agreement=case_agreement,
+    )
+
+
+def _summarize_live(results: list[CaseEvaluation]) -> LiveSummary:
+    timed_out = [r.case_id for r in results if r.target_status == "timed_out"]
+    errored = [r.case_id for r in results if r.target_status == "error"]
+    return LiveSummary(
+        total_cases=len(results),
+        ok_cases=sum(r.target_status == "ok" for r in results),
+        retried_cases=sum((r.target_attempts or 1) > 1 for r in results),
+        timed_out_cases=len(timed_out),
+        error_cases=len(errored),
+        timed_out_case_ids=timed_out,
+        error_case_ids=errored,
+    )
+
+
+def _index_samples(
+    suite: TestSuite, samples: list[EvaluationSample]
+) -> dict[str, EvaluationSample]:
     case_ids = [case.id for case in suite.cases]
     if not case_ids or len(case_ids) != len(set(case_ids)):
         raise ValueError("suite must contain nonempty, unique case IDs")
@@ -582,55 +715,67 @@ def evaluate_suite(
         if supplied.case_id not in expected:
             raise ValueError(f"Unknown sample case ID: {supplied.case_id!r}")
         by_case[supplied.case_id] = supplied
-    results: list[CaseEvaluation] = []
-    for case in suite.cases:
-        sample = by_case.get(case.id)
-        if sample is None:
-            scores = _stamp_builtin(
-                [
-                    Score(
-                        name="sample_available",
-                        value=0,
-                        passed=False,
-                        explanation="No evaluation sample was supplied for this test case.",
-                    )
-                ]
-            )
-            results.append(
-                CaseEvaluation(
-                    case_id=case.id,
-                    case_name=case.name,
-                    passed=False,
-                    scores=scores,
-                    output="",
-                    trace_id="",
-                    latency_ms=0,
-                    sample_available=False,
-                    tags=case.tags,
-                    metadata=case.metadata,
-                )
-            )
-            continue
-        scores = _score_case(case, sample, registry)
-        results.append(
-            CaseEvaluation(
-                case_id=case.id,
-                case_name=case.name,
-                passed=all(score.passed or not score.required or score.skipped for score in scores),
-                scores=scores,
-                output=sample.output,
-                trace_id=sample.trace.trace_id,
-                latency_ms=sample.trace.total_latency_ms,
-                cost_usd=sample.trace.estimated_cost_usd,
-                cost_source=(
-                    sample.trace.cost_source
-                    if sample.trace.estimated_cost_usd is not None
-                    else None
-                ),
-                tags=case.tags,
-                metadata=case.metadata,
-            )
+    return by_case
+
+
+def _unscored_result(case: TestCase, call: LiveCall | None) -> CaseEvaluation:
+    """A case with nothing to score: no sample supplied, or the live target failed."""
+    if call is None or call.status == "ok":
+        score = Score(
+            name="sample_available",
+            value=0,
+            passed=False,
+            explanation="No evaluation sample was supplied for this test case.",
         )
+    else:
+        outcome = "timed out" if call.status == "timed_out" else "failed"
+        score = Score(
+            name="target_call",
+            value=0,
+            passed=False,
+            explanation=f"Live target {outcome} after {call.attempts} attempt(s): {call.error}",
+            metadata={"status": call.status, "attempts": call.attempts, "error": call.error},
+        )
+    return CaseEvaluation(
+        case_id=case.id,
+        case_name=case.name,
+        passed=False,
+        scores=_stamp_builtin([score]),
+        output="",
+        trace_id="",
+        latency_ms=0,
+        sample_available=False,
+        target_status=call.status if call is not None else None,
+        target_attempts=call.attempts if call is not None else None,
+        target_error=call.error if call is not None else None,
+        tags=case.tags,
+        metadata=case.metadata,
+    )
+
+
+def _scored_result(
+    case: TestCase, sample: EvaluationSample, scores: list[Score], call: LiveCall | None
+) -> CaseEvaluation:
+    return CaseEvaluation(
+        case_id=case.id,
+        case_name=case.name,
+        passed=all(score.passed or not score.required or score.skipped for score in scores),
+        scores=scores,
+        output=sample.output,
+        trace_id=sample.trace.trace_id,
+        latency_ms=sample.trace.total_latency_ms,
+        cost_usd=sample.trace.estimated_cost_usd,
+        cost_source=(
+            sample.trace.cost_source if sample.trace.estimated_cost_usd is not None else None
+        ),
+        target_status="ok" if call is not None else None,
+        target_attempts=call.attempts if call is not None else None,
+        tags=case.tags,
+        metadata=case.metadata,
+    )
+
+
+def _report(suite: TestSuite, results: list[CaseEvaluation], *, live: bool) -> EvaluationReport:
     passed = sum(result.passed for result in results)
     all_scores = _score_values(results)
     costs = [result.cost_usd for result in results if result.cost_usd is not None]
@@ -649,6 +794,79 @@ def evaluate_suite(
             average_latency_ms=sum(result.latency_ms for result in results) / len(results),
             metrics=_summarize_metrics(results),
             tags=_summarize_tags(results),
+            judge=_summarize_judges(results),
+            live=_summarize_live(results) if live else None,
         ),
         cases=results,
     )
+
+
+def _evaluate(
+    suite: TestSuite,
+    samples: list[EvaluationSample],
+    *,
+    registry: EvaluatorRegistry | None,
+    calls: list[LiveCall] | None = None,
+) -> EvaluationReport:
+    by_case = _index_samples(suite, samples)
+    by_call = dict(zip((case.id for case in suite.cases), calls or [], strict=False))
+    results: list[CaseEvaluation] = []
+    for case in suite.cases:
+        sample, call = by_case.get(case.id), by_call.get(case.id)
+        if sample is None:
+            results.append(_unscored_result(case, call))
+        else:
+            results.append(_scored_result(case, sample, _score_case(case, sample, registry), call))
+    return _report(suite, results, live=calls is not None)
+
+
+async def _aevaluate(
+    suite: TestSuite,
+    samples: list[EvaluationSample],
+    *,
+    registry: EvaluatorRegistry | None,
+    calls: list[LiveCall] | None = None,
+    max_concurrency: int,
+) -> EvaluationReport:
+    by_case = _index_samples(suite, samples)
+    by_call = dict(zip((case.id for case in suite.cases), calls or [], strict=False))
+    semaphore = asyncio.Semaphore(max_concurrency)
+
+    async def one(case: TestCase) -> CaseEvaluation:
+        sample, call = by_case.get(case.id), by_call.get(case.id)
+        if sample is None:
+            return _unscored_result(case, call)
+        async with semaphore:
+            scores = await _ascore_case(case, sample, registry)
+        return _scored_result(case, sample, scores, call)
+
+    results = list(await asyncio.gather(*(one(case) for case in suite.cases)))
+    return _report(suite, results, live=calls is not None)
+
+
+def evaluate_suite(
+    suite: TestSuite,
+    samples: list[EvaluationSample],
+    *,
+    registry: EvaluatorRegistry | None = None,
+) -> EvaluationReport:
+    """Score `samples` against `suite`; cases without a sample fail as unavailable."""
+    return _evaluate(suite, samples, registry=registry)
+
+
+async def aevaluate_suite(
+    suite: TestSuite,
+    samples: list[EvaluationSample],
+    *,
+    registry: EvaluatorRegistry | None = None,
+    max_concurrency: int = 8,
+) -> EvaluationReport:
+    """Async `evaluate_suite`: scores up to `max_concurrency` cases at once.
+
+    Evaluators with an `aevaluate` method (every `CallableEvaluator`) are
+    awaited; others run their `evaluate` in a worker thread. The report
+    matches `evaluate_suite` on the same inputs, in suite case order.
+    """
+    if max_concurrency < 1:
+        raise ValueError("max_concurrency must be at least 1")
+    return await _aevaluate(suite, samples, registry=registry, max_concurrency=max_concurrency)

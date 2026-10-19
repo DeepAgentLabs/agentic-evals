@@ -1,19 +1,25 @@
 """LLM-graded rubric scorers, provider-neutral.
 
 This package never calls a model itself. `LLMRubricEvaluator` takes the
-caller's own `complete_fn: Callable[[str], str]` (prompt -> raw completion
-text) -- the same contract `LLMJudgeEvaluator` already uses -- and grades
-the response against a `RubricTemplate`'s verdict scale.
+caller's own `complete_fn` (prompt -> raw completion text, or a
+`JudgeResponse` carrying the text plus usage; sync or `async def`) and
+grades the response against a `RubricTemplate`'s verdict scale.
 """
 
+import inspect
 import re
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from string import ascii_uppercase
 from typing import Any
 
-from agentic_evals.evaluators import CallableEvaluator, EvaluationContext
+from agentic_evals.evaluators import EvaluationContext, LLMJudgeEvaluator
+from agentic_evals.judging import JudgeAttemptError, JudgeResponse
 from agentic_evals.models import Score
+from agentic_evals.reliability import RetryPolicy
+
+CompletionResult = str | JudgeResponse
+CompleteFn = Callable[[str], CompletionResult | Awaitable[CompletionResult]]
 
 
 @dataclass(frozen=True)
@@ -338,7 +344,7 @@ def make_rubric(
     )
 
 
-class LLMRubricEvaluator(CallableEvaluator):
+class LLMRubricEvaluator(LLMJudgeEvaluator):
     """Grade a sample against a `RubricTemplate` using a caller-supplied model call.
 
     The rubric's reference material (the expert answer for `FACTUALITY`,
@@ -346,25 +352,45 @@ class LLMRubricEvaluator(CallableEvaluator):
     -- deliberately *not* `case.expected_output`, since `evaluate_suite`
     runs a hardcoded exact-match check whenever `expected_output` is set,
     which would fight a rubric that's meant to allow near-matches.
+
+    `complete_fn` may return the completion text or a `JudgeResponse` with
+    the judge's tokens, cost, model and provider, and may be `async def`.
+    An unparseable completion counts as a failed attempt, so `retry` covers
+    it as well as provider errors; when every attempt fails the score is
+    unavailable and never passes. `samples=N` grades the case N times and
+    records each verdict and the agreement between them (see
+    `LLMJudgeEvaluator`).
     """
 
     def __init__(
         self,
         name: str,
         template: RubricTemplate,
-        complete_fn: Callable[[str], str],
+        complete_fn: CompleteFn,
         *,
         version: str | None = None,
+        retry: RetryPolicy | None = None,
+        samples: int = 1,
     ) -> None:
-        def _judge(context: EvaluationContext) -> Score:
-            prompt = template.render(
+        def _prompt(context: EvaluationContext) -> str:
+            return template.render(
                 output=context.sample.output,
                 expected=context.config.config.get("reference"),
                 input=context.case.input,
                 extra=context.config.config.get("extra", {}),
             )
-            raw_completion = complete_fn(prompt)
-            verdict, value = template.parse_verdict(raw_completion)
+
+        def _grade(context: EvaluationContext, completion: CompletionResult) -> Score:
+            response = (
+                completion
+                if isinstance(completion, JudgeResponse)
+                else JudgeResponse(text=completion)
+            )
+            try:
+                verdict, value = template.parse_verdict(response.text)
+            except ValueError as exc:
+                # The judge answered and may have billed for it: keep the usage.
+                raise JudgeAttemptError(str(exc), usage=response.usage_metadata()) from exc
             return Score(
                 name=name,
                 value=value,
@@ -373,8 +399,35 @@ class LLMRubricEvaluator(CallableEvaluator):
                 metadata={
                     "rubric": template.name,
                     "verdict": verdict,
-                    "raw_completion": raw_completion,
+                    "raw_completion": response.text,
+                    **response.usage_metadata(),
                 },
             )
 
-        super().__init__(name, _judge, evaluator_type="llm_rubric", version=version)
+        judge: Callable[[EvaluationContext], Any]
+        if inspect.iscoroutinefunction(complete_fn):
+
+            async def judge(context: EvaluationContext) -> Score:
+                return _grade(context, await complete_fn(_prompt(context)))
+
+        else:
+
+            def judge(context: EvaluationContext) -> Any:
+                completion = complete_fn(_prompt(context))
+                if inspect.isawaitable(completion):
+                    pending = completion
+
+                    async def finish() -> Score:
+                        return _grade(context, await pending)
+
+                    return finish()
+                return _grade(context, completion)
+
+        super().__init__(
+            name,
+            judge,
+            version=version,
+            retry=retry,
+            samples=samples,
+            evaluator_type="llm_rubric",
+        )

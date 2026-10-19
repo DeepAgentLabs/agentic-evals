@@ -467,7 +467,7 @@
           <article class="cell">
             <span class="index">02</span>
             <h3>LLM-as-judge</h3>
-            <p>Rubric scoring with ten built-in templates, from factuality to SQL correctness, or your own criteria in plain language. You supply <code>complete_fn</code> — any provider works.</p>
+            <p>Rubric scoring with ten built-in templates, from factuality to SQL correctness, or your own criteria in plain language. You supply <code>complete_fn</code> — any provider works. Judge cost, retries, repeated sampling and agreement are recorded on every score.</p>
           </article>
           <article class="cell accent">
             <span class="index">03</span>
@@ -477,12 +477,12 @@
           <article class="cell">
             <span class="index">04</span>
             <h3>Release gates</h3>
-            <p>Set thresholds on pass rate, average score, latency and total cost, for the whole suite or for a single tag or metric. The CLI exits 0 or 1, so CI can block the merge.</p>
+            <p>Set thresholds on pass rate, average score, latency and total cost, for the whole suite or for a single tag or metric. An unavailable judge or a timed-out target fails the gate instead of passing silently. The CLI exits 0 or 1, so CI can block the merge.</p>
           </article>
           <article class="cell">
             <span class="index">05</span>
             <h3>Live targets</h3>
-            <p>Run a suite against a Python callable or an HTTP endpoint instead of pre-recorded samples.</p>
+            <p>Run a suite against a Python callable, an <code>async def</code> agent or an HTTP endpoint, with bounded retries and per-case timeouts.</p>
           </article>
           <article class="cell">
             <span class="index">06</span>

@@ -17,12 +17,12 @@ deliverables, acceptance criteria and sibling dependencies.
 - **v0.7** ✅ Complete — Metric/tag breakdowns, tool-argument expectations, score provenance and concurrent live runs (`0.7.0`, `0.7.1`)
 - **v0.7.x** ✅ Complete — Published report and gate contract (JSON Schema, `0.7.2`)
 - **v0.8** ✅ Complete — Suite, pack and gate CLI for CI (`0.8.0`)
-- **v0.9** 🚧 Planned — Judge reliability, cost and live-target resilience
+- **v0.9** ✅ Complete — Judge reliability, cost and live-target resilience (`0.9.0`)
 - **v0.10** 🚧 Planned — AI Operations Specification evaluation evidence export
 - **v0.11** ⛔ Blocked — Adversarial containment scoring (needs Sidecar, Chaos, MCP and Lens evidence)
 - **v1.0** 🚧 Planned — Stable API and report schema
 
-Current release: `0.8.0` (2026-10-17). See [CHANGELOG.md](CHANGELOG.md) for
+Current release: `0.9.0` (2026-10-19). See [CHANGELOG.md](CHANGELOG.md) for
 what each version shipped.
 
 ## Scope
@@ -49,10 +49,10 @@ did not observe.
 
 | Project | Relationship | Releases |
 |---|---|---|
-| `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. Lens 0.7.0 registers its trace-aware evaluators next to Evals' built-in scorers and reports judge cost and evaluator disagreement from Evals `Score` metadata. | v0.7.x, v0.9 |
-| `agenticops-control-tower` | Tower 0.6.1 validates complete native reports/gates against published Evals 0.7.2 schemas before evidence projection and staging recovery verification. Normative AIOS mappings remain future work. | v0.7.x, v1.0 |
+| `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. Lens 0.7.0 registers its trace-aware evaluators next to Evals' built-in scorers and reports judge cost and evaluator disagreement from Evals `Score` metadata; Evals 0.9.0 writes the same `judge_*` keys for its own judges. | v0.7.x, v0.9 ✅ |
+| `agenticops-control-tower` | Tower 0.6.1 validates complete native reports/gates against published Evals 0.7.2 schemas before evidence projection and staging recovery verification; its 0.9.0-schema sync is a patch release. Normative AIOS mappings remain future work. | v0.7.x, v0.9, v1.0 |
 | `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports must follow | v0.10 |
-| `deep-agentic-core-mcp` | MCP 0.3.8 exposes native `evals.validate_artifact` and validates Lens report consumers. `spec.validate_artifact` remains the separate AIOS evidence validator. | v0.10 |
+| `deep-agentic-core-mcp` | MCP 0.3.8 exposes native `evals.validate_artifact` and validates Lens report consumers; its bundled schemas sync to Evals 0.9.0 in a patch release. `spec.validate_artifact` remains the separate AIOS evidence validator. | v0.9, v0.10 |
 | `agentic-sidecar` | Its v0.9 compares Agent Alone vs. Agent + Sidecar and uses Evals for generic scoring. Sidecar keeps supervision scenarios. | v0.11 |
 | `agentic-chaos` | Its adversarial containment work scores with Evals, and attacks run on isolated targets. Chaos 0.6.0 contracts (`pytest --chaos`) are per-run resilience checks over a `ChaosReport`, not scores or release gates; gate computation stays here. | v0.11 |
 
@@ -192,22 +192,22 @@ Implemented in [the CLI guide](docs/cli.md), with passing and failing CI fixture
 Python/HTTP parity tests and the voice example exercised by tests. Native schema
 1.0 is unchanged; no sibling runtime dependency floor increase is required.
 
-### v0.9 — Judge reliability, cost and live-target resilience
+### v0.9 — Judge reliability, cost and live-target resilience ✅ (`0.9.0`)
 
 **Goal:** make LLM-judged and live-target evaluations dependable and accounted
 for.
 
 **Deliverables:**
 
-- [ ] judge cost and latency recorded on each judge `Score` (tokens, cost,
+- [x] judge cost and latency recorded on each judge `Score` (tokens, cost,
       `cost_source`) and summed into `EvaluationSummary`
-- [ ] judge retry policy with bounded attempts, and an explicit "judge
+- [x] judge retry policy with bounded attempts, and an explicit "judge
       unavailable" outcome that is never silently scored as a pass
-- [ ] repeated judging (`samples=N`) with agreement reported per case, so a
+- [x] repeated judging (`samples=N`) with agreement reported per case, so a
       flaky judge can be detected rather than averaged away
-- [ ] live-target retries with backoff, and per-case timeout reporting
+- [x] live-target retries with backoff, and per-case timeout reporting
       (`timed_out` distinguished from failed)
-- [ ] async evaluators and async Python targets alongside the existing
+- [x] async evaluators and async Python targets alongside the existing
       thread-based concurrency
 
 **Acceptance criteria:**
@@ -224,6 +224,16 @@ calibration. Lens 0.7.0 already records judge usage on `Score.metadata`
 and sums it in `analyze_scores()`; adopting the same keys here keeps one
 contract instead of two.
 **Validate in:** Lens calibration and experiment tests against the new fields.
+
+Implemented in [the judge reliability guide](docs/judge-reliability.md):
+`JudgeResponse` usage and `summary.judge`, `RetryPolicy`, unavailable judge
+scores that fail the default gate (`max_judge_unavailable_scores=0`),
+`samples=N` with `min_judge_agreement`, per-case `target_status` with
+`summary.live`, and `aevaluate_suite`/`arun_live_suite`. Both acceptance criteria
+are covered by tests (`tests/test_judge_reliability.py`). Report schema 1.0 gains
+optional fields only. Lens 0.10.0's full test suite passes against 0.9.0 with
+no change, and its `>=0.7.1,<1` range already allows it. MCP and Control Tower
+sync their bundled schemas to 0.9.0 in patch releases.
 
 ### v0.10 — AI Operations Specification evaluation evidence export
 
@@ -316,7 +326,7 @@ minor versions.
   `1.x` releases in compatibility tests
 - Lens, Tower and MCP integrations pass against the `1.0` release candidate
 
-**Depends on:** v0.7.x and v0.8 complete; v0.9 and v0.10 complete or explicitly
+**Depends on:** v0.7.x, v0.8 and v0.9 complete; v0.10 complete or explicitly
 deferred.
 
 ---
