@@ -1,13 +1,16 @@
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
+from agentic_evals import _async
+from agentic_evals.judging import JudgeRunner
 from agentic_evals.models import (
     EvaluationSample,
     EvaluatorConfig,
     Score,
     TestCase,
 )
+from agentic_evals.reliability import RetryPolicy
 
 
 @dataclass(frozen=True)
@@ -24,7 +27,25 @@ class Evaluator(Protocol):
     def evaluate(self, context: EvaluationContext) -> list[Score]: ...
 
 
-EvaluationFunction = Callable[[EvaluationContext], Score | list[Score]]
+class AsyncEvaluator(Protocol):
+    """An evaluator that can also be awaited.
+
+    `aevaluate_suite` and `arun_live_suite` await `aevaluate` when an
+    evaluator has one, and run a plain `evaluate` in a worker thread
+    otherwise. `CallableEvaluator` and its subclasses implement both.
+    """
+
+    @property
+    def name(self) -> str: ...
+
+    def evaluate(self, context: EvaluationContext) -> list[Score]: ...
+
+    async def aevaluate(self, context: EvaluationContext) -> list[Score]: ...
+
+
+EvaluationFunction = Callable[
+    [EvaluationContext], Score | list[Score] | Awaitable[Score | list[Score]]
+]
 
 
 class CallableEvaluator:
@@ -33,6 +54,10 @@ class CallableEvaluator:
     `version` identifies the evaluator's logic (for a judge: its prompt and
     model). It is stamped onto every score as `Score.evaluator_version`, so
     a report shows which version of the rule produced each judgment.
+
+    `function` may be `async def`. `aevaluate()` awaits it; the synchronous
+    `evaluate()` runs it to completion with `asyncio.run`, which is not
+    possible inside a running event loop -- use `aevaluate_suite` there.
     """
 
     def __init__(
@@ -60,8 +85,19 @@ class CallableEvaluator:
     def version(self) -> str | None:
         return self._version
 
+    def _call(self, context: EvaluationContext) -> Any:
+        return _async.resolve(self._function(context))
+
+    async def _acall(self, context: EvaluationContext) -> Any:
+        return await _async.call(self._function, context)
+
     def evaluate(self, context: EvaluationContext) -> list[Score]:
-        result = self._function(context)
+        return self._finish(context, self._call(context))
+
+    async def aevaluate(self, context: EvaluationContext) -> list[Score]:
+        return self._finish(context, await self._acall(context))
+
+    def _finish(self, context: EvaluationContext, result: Any) -> list[Score]:
         scores = result if isinstance(result, list) else [result]
         provenance = {
             "evaluator_type": self._evaluator_type,
@@ -74,7 +110,9 @@ class CallableEvaluator:
                 if score.skipped
                 else {
                     **provenance,
-                    "passed": score.value >= context.config.threshold,
+                    # An unavailable judgment never passes, whatever the threshold.
+                    "passed": score.value >= context.config.threshold
+                    and score.metadata.get("judge_status") != "unavailable",
                     "required": context.config.required,
                 }
             )
@@ -83,10 +121,35 @@ class CallableEvaluator:
 
 
 class LLMJudgeEvaluator(CallableEvaluator):
-    """Provider-neutral adapter for an application-supplied LLM judge function."""
+    """Provider-neutral adapter for an application-supplied LLM judge function.
 
-    def __init__(self, name: str, judge: EvaluationFunction, *, version: str | None = None) -> None:
-        super().__init__(name, judge, evaluator_type="llm_judge", version=version)
+    The judge runs under `retry` (default: one attempt). A judge that raises
+    on every attempt yields an explicit unavailable score -- value 0, never
+    passing, `metadata["judge_status"] == "unavailable"` -- instead of
+    aborting the suite. With `samples=N` the judge is called N times; the
+    score's value is the mean, its verdict the most common one, and
+    `metadata["judge_agreement"]` the share of samples that agreed. Every
+    score records `judge_status`, `judge_attempts` and `judge_latency_ms`.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        judge: EvaluationFunction,
+        *,
+        version: str | None = None,
+        retry: RetryPolicy | None = None,
+        samples: int = 1,
+        evaluator_type: str = "llm_judge",
+    ) -> None:
+        super().__init__(name, judge, evaluator_type=evaluator_type, version=version)
+        self._runner = JudgeRunner(name, retry=retry, samples=samples)
+
+    def _call(self, context: EvaluationContext) -> Any:
+        return self._runner.run(self._function, context)
+
+    async def _acall(self, context: EvaluationContext) -> Any:
+        return await self._runner.arun(self._function, context)
 
 
 class BusinessRuleEvaluator(CallableEvaluator):
