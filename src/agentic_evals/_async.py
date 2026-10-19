@@ -8,6 +8,14 @@ from typing import Any, TypeVar
 T = TypeVar("T")
 
 
+class EventLoopMisuseError(RuntimeError):
+    """A sync API was asked to run async code inside a running event loop.
+
+    This is a caller error, not a judge or target failure: retry loops let it
+    propagate instead of recording it as an unavailable or failed outcome.
+    """
+
+
 async def _await(awaitable: Awaitable[T]) -> T:
     return await awaitable
 
@@ -27,7 +35,7 @@ def resolve(value: Any) -> Any:
         return asyncio.run(_await(value))
     if inspect.iscoroutine(value):
         value.close()
-    raise RuntimeError(
+    raise EventLoopMisuseError(
         "an async evaluator or target was called from a running event loop; "
         "use aevaluate_suite() or arun_live_suite() instead"
     )

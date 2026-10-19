@@ -58,6 +58,7 @@ class Attempted(Generic[T]):
     attempts: int = 0
     elapsed_ms: float = 0.0
     errors: list[str] = field(default_factory=list)
+    failures: list[Exception] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -75,8 +76,13 @@ def call_with_retry(
     policy: RetryPolicy,
     *,
     sleep: Callable[[float], None] = time.sleep,
+    propagate: tuple[type[Exception], ...] = (),
 ) -> Attempted[T]:
-    """Call `call` until it returns or the policy's attempts run out."""
+    """Call `call` until it returns or the policy's attempts run out.
+
+    Exceptions of a `propagate` type are caller or contract errors, not
+    failures of the call: they are raised at once instead of recorded.
+    """
     outcome: Attempted[T] = Attempted()
     started = time.perf_counter()
     for attempt in range(1, policy.max_attempts + 1):
@@ -86,8 +92,11 @@ def call_with_retry(
             outcome.error = None
             break
         except Exception as exc:  # noqa: BLE001 - recorded on the outcome
+            if isinstance(exc, propagate):
+                raise
             outcome.error = exc
             outcome.errors.append(describe_error(exc))
+            outcome.failures.append(exc)
             if not isinstance(exc, policy.retry_on) or attempt == policy.max_attempts:
                 break
             sleep(policy.delay(attempt))
@@ -100,6 +109,7 @@ async def acall_with_retry(
     policy: RetryPolicy,
     *,
     sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+    propagate: tuple[type[Exception], ...] = (),
 ) -> Attempted[T]:
     """Async `call_with_retry`: awaits each attempt and the backoff between them."""
     outcome: Attempted[T] = Attempted()
@@ -111,8 +121,11 @@ async def acall_with_retry(
             outcome.error = None
             break
         except Exception as exc:  # noqa: BLE001 - recorded on the outcome
+            if isinstance(exc, propagate):
+                raise
             outcome.error = exc
             outcome.errors.append(describe_error(exc))
+            outcome.failures.append(exc)
             if not isinstance(exc, policy.retry_on) or attempt == policy.max_attempts:
                 break
             await sleep(policy.delay(attempt))
