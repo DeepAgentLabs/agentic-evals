@@ -18,6 +18,9 @@ for name, accessor in (
     Draft202012Validator.check_schema(schema)
     artifact = json.loads((ROOT / "examples/report-contract" / f"{name}.json").read_text())
     Draft202012Validator(schema).validate(artifact)
+    example = "judged-live-report" if name == "evaluation-report" else "judged-live-gate-decision"
+    judged = json.loads((ROOT / "examples/report-contract" / f"{example}.json").read_text())
+    Draft202012Validator(schema).validate(judged)
     for archive in (ROOT / "dist").glob("*.tar.gz"):
         with tarfile.open(archive) as source:
             assert any(
