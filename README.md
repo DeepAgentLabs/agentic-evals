@@ -793,3 +793,16 @@ They are not scores, release gates or proof of containment. No new shared
 schema, automatic adapter or hosted execution capability is introduced.
 
 Workflow statuses and per-step contracts are per-run resilience checks, not Evals scores or release gates. Convert observed outputs to native EvaluationSamples explicitly. No adapter, runtime dependency or Evals patch release is needed.
+
+## MCP 0.4.0 unified release checks
+
+[MCP 0.4.0](https://github.com/DeepAgentLabs/mcp-server/releases/tag/v0.4.0) ships the first Phase 4 unified workflows: `core.compare_runs`, a fail-closed `core.release_check`, `core.incident_summary` and `core.export_report`. MCP judges nothing itself; it composes Lens comparisons, the Evals release gate and Chaos run reports. Malformed or failed-call evidence always blocks readiness, and so does missing evidence of a required kind; all three kinds are required by default and `required_evidence` narrows that.
+
+`core.release_check` judges a native Evals report with `evaluate_gate`: the report
+is schema-validated against the bundled 0.9.0 contract, every `GateConfig`
+threshold applies (including judge and live-target limits), and with no thresholds
+the strict default applies (every case must pass). Because `GateConfig` ignores
+unknown keys, MCP rejects them so a misspelt threshold cannot pass silently. The
+gate's reasons and observed values are returned per gate. No Evals change,
+dependency bump or release is needed.
+See [the compatibility guide](docs/mcp-0.4-unified-workflows.md).
