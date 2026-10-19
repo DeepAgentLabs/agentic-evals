@@ -17,7 +17,7 @@ def main() -> None:
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
         schema["$id"] = (
             "https://raw.githubusercontent.com/DeepAgentLabs/agentic-evals/"
-            f"v0.7.2/src/agentic_evals/schemas/{name}-1.0.schema.json"
+            f"v0.9.0/src/agentic_evals/schemas/{name}-1.0.schema.json"
         )
         (DESTINATION / f"{name}-1.0.schema.json").write_text(
             json.dumps(schema, indent=2, sort_keys=True) + "\n", encoding="utf-8"
