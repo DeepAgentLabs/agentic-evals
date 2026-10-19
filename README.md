@@ -34,9 +34,9 @@ from agentic_evals import FACTUALITY, JudgeResponse, LLMRubricEvaluator, RetryPo
 judge = LLMRubricEvaluator(
     "factuality",
     FACTUALITY,
-    complete_fn,                      # may return JudgeResponse(text=..., cost_usd=...)
+    complete_fn,  # may return JudgeResponse(text=..., cost_usd=...)
     retry=RetryPolicy(max_attempts=3, backoff_seconds=0.5),
-    samples=3,                        # judge three times, report agreement
+    samples=3,  # judge three times, report agreement
 )
 ```
 
@@ -402,9 +402,9 @@ Judge and live-target checks (0.9.0):
 ```python
 GateConfig(
     max_judge_unavailable_scores=0,  # the default: an unavailable judge fails the gate
-    min_judge_agreement=0.8,         # every case judged with samples=N
-    max_judge_cost_usd=2.50,         # fails when any judge score has no cost
-    max_timed_out_cases=0,           # live runs: timeouts, apart from wrong answers
+    min_judge_agreement=0.8,  # every case judged with samples=N
+    max_judge_cost_usd=2.50,  # fails when any judge score has no cost
+    max_timed_out_cases=0,  # live runs: timeouts, apart from wrong answers
     max_target_error_cases=0,
 )
 ```

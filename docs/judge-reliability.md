@@ -21,17 +21,19 @@ a string, carrying what the provider reported:
 ```python
 from agentic_evals import FACTUALITY, JudgeResponse, LLMRubricEvaluator
 
+
 def complete_fn(prompt: str) -> JudgeResponse:
-    reply = my_provider.complete(prompt)          # your own call
+    reply = my_provider.complete(prompt)  # your own call
     return JudgeResponse(
         text=reply.text,
         input_tokens=reply.usage.input_tokens,
         output_tokens=reply.usage.output_tokens,
-        cost_usd=reply.cost_usd,                  # None if unknown
-        cost_source="measured",                   # or "estimated"
+        cost_usd=reply.cost_usd,  # None if unknown
+        cost_source="measured",  # or "estimated"
         model="judge-model",
         provider="judge-provider",
     )
+
 
 judge = LLMRubricEvaluator("factuality", FACTUALITY, complete_fn, version="v3")
 ```
@@ -64,7 +66,9 @@ never mixes into.
 from agentic_evals import RetryPolicy
 
 judge = LLMRubricEvaluator(
-    "factuality", FACTUALITY, complete_fn,
+    "factuality",
+    FACTUALITY,
+    complete_fn,
     retry=RetryPolicy(max_attempts=3, backoff_seconds=0.5),  # 0.5 s, then 1 s
 )
 ```
