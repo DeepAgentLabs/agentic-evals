@@ -6,6 +6,10 @@ redacted evidence summaries. Private scope goals/values use explicit host delive
 
 Evals owns generic scoring and release gates. Sidecar supplies measured success observations; Evals 0.9 scores 10/12 governed synthetic observations, including two deliberately failing clean outage controls. No Sidecar verdict is converted into an evaluation score implicitly.
 
+A reader-safe summary is neither a native Decision artifact nor a hash-verifiable
+journal. Consumers requiring producer integrity must use an authorized original
+journal or native projection, as appropriate to their verification contract.
+
 The core package remains standalone. No new mandatory sibling dependency or
 shared schema is introduced. Constraint-only guardians retain expiry WARN;
 authority-bearing tasks BLOCK on expiry/revocation. Stop revokes descendants;
