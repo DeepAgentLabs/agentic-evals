@@ -806,3 +806,9 @@ unknown keys, MCP rejects them so a misspelt threshold cannot pass silently. The
 gate's reasons and observed values are returned per gate. No Evals change,
 dependency bump or release is needed.
 See [the compatibility guide](docs/mcp-0.4-unified-workflows.md).
+
+## Sidecar 0.9.0 interoperability
+
+Task-authority/delegation and reader-safe summaries are available in Sidecar.
+See [compatibility and ownership boundaries](docs/sidecar-0.9.md). Existing
+native decisions/correlation stay compatible; no new normative schema is claimed.
