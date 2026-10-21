@@ -1,0 +1,56 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out shared documentation theme
+        uses: actions/checkout@v4
+        with:
+          repository: DeepAgentLabs/deepagentlabs.github.io
+          ref: main
+          path: _docs-theme
+      - uses: astral-sh/setup-uv@v7
+      - name: Build documentation
+        run: uv run --no-project --with-requirements _docs-theme/scripts/docs-requirements.txt python _docs-theme/scripts/build_docs.py --project agentic-evals --repo "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/site/docs"
+      - name: Preserve product page
+        run: |
+          cp docs/index.html site/index.html
+          touch site/.nojekyll
+      - name: Check rendered documentation
+        run: python3 _docs-theme/scripts/check_docs_site.py site/docs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/deploy-pages@v4
+        id: deployment
