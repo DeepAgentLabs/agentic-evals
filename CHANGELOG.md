@@ -4,6 +4,16 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Documentation
+
+- Three hosted use cases at <https://deepagentlabs.io/agentic-evals/usecases/>,
+  each with a browser-only illustration: a CLI release gate with a safety tag
+  floor, trace-aware tool order and argument checks, and a judge reliability
+  gate. Their files are in `examples/usecases/`, and `tests/test_usecases.py`
+  keeps the pages' quoted files and outputs in step with the package.
+
 ## 0.9.0 - 2026-10-19
 
 ### Added

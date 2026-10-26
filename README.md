@@ -23,6 +23,13 @@ quickstart API, and the `agentic-evals` CLI) is real, tested code — see the
 still move between minor versions ahead of a 1.0; pin a version in
 production and read the changelog before upgrading.
 
+## Use cases
+
+[Step-by-step use cases](https://deepagentlabs.io/agentic-evals/usecases/), each
+verified against 0.9.0 with no model or API key: block an unsafe release with a
+tag floor, catch a right reply reached the wrong way, and gate on whether the LLM
+judge itself held up. Their files are in [examples/usecases](examples/usecases/).
+
 ## Judge reliability and live resilience (0.9.0)
 
 LLM-judged and live evaluations now say what they cost and whether they

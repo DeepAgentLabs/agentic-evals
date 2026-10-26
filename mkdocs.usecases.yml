@@ -1,0 +1,19 @@
+site_name: Agentic Evals Use Cases
+site_url: https://deepagentlabs.io/agentic-evals/usecases/
+edit_uri: edit/main/usecases/
+docs_dir: usecases
+repo_name: GitHub
+
+extra_css:
+  - assets/stylesheets/ae-sim.css
+extra_javascript:
+  - assets/scripts/ae-sim.js
+  - https://deepagentlabs.io/assets/js/usecase-views.js?v=4
+
+nav:
+  - Overview: index.md
+  - Block an unsafe release: block-an-unsafe-release.md
+  - Right reply, wrong trajectory: right-reply-wrong-trajectory.md
+  - Gate on judge reliability: gate-on-judge-reliability.md
+  - Back to docs: https://deepagentlabs.io/agentic-evals/docs/
+  - Back to Agentic Evals: https://deepagentlabs.io/agentic-evals/

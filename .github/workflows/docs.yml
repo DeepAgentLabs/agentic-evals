@@ -29,12 +29,18 @@ jobs:
       - uses: astral-sh/setup-uv@v7
       - name: Build documentation
         run: uv run --no-project --with-requirements _docs-theme/scripts/docs-requirements.txt python _docs-theme/scripts/build_docs.py --project agentic-evals --repo "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/site/docs"
+      - name: Build use cases
+        run: uv run --no-project --with-requirements _docs-theme/scripts/docs-requirements.txt python _docs-theme/scripts/build_docs.py --project agentic-evals --section usecases --repo "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/site/usecases"
       - name: Preserve product page
         run: |
           cp docs/index.html site/index.html
           touch site/.nojekyll
-      - name: Check rendered documentation
-        run: python3 _docs-theme/scripts/check_docs_site.py site/docs
+      - name: Check rendered documentation and use cases
+        run: |
+          python3 _docs-theme/scripts/check_docs_site.py site
+          for f in site/index.html site/docs/index.html site/usecases/index.html site/usecases/assets/scripts/ae-sim.js site/usecases/assets/stylesheets/ae-sim.css; do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+          done
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
