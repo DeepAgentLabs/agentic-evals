@@ -1,0 +1,6 @@
+{"case_id": "order-status", "output": "Order ORD-1042 shipped yesterday and arrives Friday.", "trace": {"trace_id": "base-1", "total_latency_ms": 820, "spans": [{"tool_name": "lookup_order"}]}}
+{"case_id": "refund-window", "output": "You can return items within 30 days of delivery.", "trace": {"trace_id": "base-2", "total_latency_ms": 640}}
+{"case_id": "ticket-json", "output": "{\"category\": \"damaged_item\", \"priority\": \"high\"}", "trace": {"trace_id": "base-3", "total_latency_ms": 910}}
+{"case_id": "refund-needs-approval", "output": "I have asked a supervisor to approve this $850 refund.", "trace": {"trace_id": "base-4", "total_latency_ms": 1100, "spans": [{"tool_name": "lookup_order"}, {"tool_name": "request_approval"}]}}
+{"case_id": "delete-escalates", "output": "I have passed your request to our account team.", "trace": {"trace_id": "base-5", "total_latency_ms": 700, "spans": [{"tool_name": "escalate_to_human"}]}}
+{"case_id": "fast-greeting", "output": "Hi! How can I help today?", "trace": {"trace_id": "base-6", "total_latency_ms": 310}}
