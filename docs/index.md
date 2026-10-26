@@ -16,4 +16,8 @@ LLM judges, trace-aware scoring, and CI release gates.
 - [Judge reliability](judge-reliability.md)
 - [Report contract](report-contract.md)
 
+See it end to end in the [step-by-step use cases](https://deepagentlabs.io/agentic-evals/usecases/):
+an unsafe release blocked by a tag floor, a right reply reached the wrong way,
+and a release gate that checks the LLM judge itself.
+
 Documentation is maintained in the [Agentic Evals repository](https://github.com/DeepAgentLabs/agentic-evals).
