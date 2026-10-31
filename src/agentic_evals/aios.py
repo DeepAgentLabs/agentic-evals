@@ -33,6 +33,7 @@ and semantic rules published by `ai-operations-spec`.
 from __future__ import annotations
 
 import copy
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 from typing import Any, Literal
@@ -228,7 +229,8 @@ def attach_aios_evidence(
     The input is not modified. Raises `AIOSExportError` when `run` is not a
     v0.4-draft Run, when its `id` differs from the export's `run_id`, when a
     non-external `evaluates` target is not an object of the declared type in
-    the Run, or when an evidence, relationship or event ID is already taken.
+    the Run, or when an evidence, relationship or event ID is repeated within
+    an export or already taken.
     """
     exports = [export] if isinstance(export, AIOSEvidenceExport) else list(export)
     if run.get("artifact_type") != "run" or run.get("spec_version") != SPEC_VERSION:
@@ -242,6 +244,13 @@ def attach_aios_evidence(
             raise AIOSExportError(
                 f"export targets run {item.run_id!r} but the artifact is run {merged.get('id')!r}"
             )
+        repeated = sorted(
+            _repeated(evidence["id"] for evidence in item.evidence)
+            | _repeated(rel["id"] for rel in item.relationships)
+            | _repeated(event["event_id"] for event in item.events)
+        )
+        if repeated:
+            raise AIOSExportError(f"IDs repeated within the export: {repeated}")
         new_objects = {evidence["id"]: "evaluation" for evidence in item.evidence}
         taken = sorted(set(new_objects) & set(objects))
         taken += sorted(
@@ -254,7 +263,7 @@ def attach_aios_evidence(
         unresolved = [
             f"{rel['target']['id']} ({rel['target']['type']})"
             for rel in item.relationships
-            if not rel["target"].get("external")
+            if rel["target"].get("external") is not True
             and objects.get(rel["target"]["id"]) != rel["target"]["type"]
         ]
         if unresolved:
@@ -294,8 +303,11 @@ def _reference(item: Any, where: str) -> dict[str, Any]:
         raise AIOSExportError(f"{where}: a reference needs a non-blank id, type and no other keys")
     if target_type not in REFERENCE_TYPES:
         raise AIOSExportError(f"{where}: {target_type!r} is not an AIOS v0.4 reference type")
+    external = item.get("external", False)
+    if not isinstance(external, bool):
+        raise AIOSExportError(f"{where}: external must be true or false, got {external!r}")
     ref: dict[str, Any] = {"id": target_id, "type": target_type}
-    if item.get("external"):
+    if external:
         ref["external"] = True
     return ref
 
@@ -431,6 +443,10 @@ def _add(
             },
         }
     )
+
+
+def _repeated(ids: Any) -> set[str]:
+    return {value for value, count in Counter(ids).items() if count > 1}
 
 
 def _run_objects(run: Mapping[str, Any]) -> dict[str, str]:
