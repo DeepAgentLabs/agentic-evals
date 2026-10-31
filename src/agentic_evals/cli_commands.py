@@ -182,6 +182,12 @@ def _export_aios(args: argparse.Namespace) -> int:
         allow_unmapped=args.allow_unmapped,
         id_prefix=args.id_prefix,
     )
+    if export.unobserved_cases:
+        print(
+            "agentic-evals: not exported (no observed output): "
+            + ", ".join(export.unobserved_cases),
+            file=sys.stderr,
+        )
     if export.unmapped_cases:
         print(
             f"agentic-evals: not exported (no target): {', '.join(export.unmapped_cases)}",
