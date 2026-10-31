@@ -58,7 +58,8 @@ agentic-evals aios export report.json --run run.json --targets targets.yaml \
 - Nothing is guessed: no mapping, an unmapped case or a target missing from
   the Run raises `AIOSExportError` instead of producing orphaned evidence.
 - A skipped score is exported as `skipped` and an undelivered judgment as
-  `unavailable`, never as a pass.
+  `unavailable`, never as a pass. A case with no observed output (a missing
+  sample or a failed live call) is listed in `unobserved_cases`, not exported.
 
 The merged Run validates with MCP's `spec.validate_artifact`
 (`conformance.aligned = true`). See the [AIOS evidence guide](docs/aios-evidence.md)

@@ -45,7 +45,8 @@ of it: the native report and `GateDecision` remain the source of truth.
 
 - Every exported evaluation has at least one `evaluates` target that
   resolves in the Run, or is marked `external: true` (rule `AIOS-0.4-P08`).
-- `unmapped_cases`, `skipped_scores` and `unavailable_scores` are reported
+- `unmapped_cases`, `unobserved_cases`, `skipped_scores` and
+  `unavailable_scores` are reported
   wherever the artifact is shared.
 - `spec.validate_artifact` reports `conformance.aligned = true`.
 

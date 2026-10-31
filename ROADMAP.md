@@ -271,6 +271,8 @@ as an `evaluation` with criterion, method, result and score, and
 `attach_aios_evidence` merges it into a Run after resolving every target.
 `agentic-evals aios export` is the CLI path. Skipped scores are exported as
 `skipped` and undelivered judgments as `unavailable`; neither carries a score.
+Cases with no observed output (no sample, or a failed live call) are listed in
+`unobserved_cases` rather than exported.
 No mapping, an unmapped case (unless `allow_unmapped=True`) or a target
 missing from the Run raises `AIOSExportError`. Both acceptance criteria are
 covered by tests (`tests/test_aios_export.py`, `tests/test_aios_example.py`),
