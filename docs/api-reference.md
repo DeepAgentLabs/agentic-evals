@@ -249,7 +249,9 @@ def attach_aios_evidence(run: dict, export: AIOSEvidenceExport | list[AIOSEviden
 ```python
 from agentic_evals import attach_aios_evidence, to_aios_evidence
 
-export = to_aios_evidence(report, run_id=run["id"], targets={"answer": "step-answer"}, gate=decision)
+export = to_aios_evidence(
+    report, run_id=run["id"], targets={"answer": "step-answer"}, gate=decision
+)
 merged = attach_aios_evidence(run, export)
 print(export.unmapped_cases, export.skipped_scores, export.unavailable_scores)
 ```
