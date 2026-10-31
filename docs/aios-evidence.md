@@ -18,6 +18,13 @@ export is derived from them and states only what they record.
 | an unavailable judge `Score` | `result: "unavailable"`, no `score` | `aiops.evaluation.failed` |
 | each `CaseEvaluation` | `criterion: "case_verdict"`, `result` from `passed` | `aiops.evaluation.completed` |
 | an optional `GateDecision` | `criterion: "release_gate"`, `reasons`, `observed`; it evaluates the Run | `aiops.evaluation.completed` |
+| a case with no observed output | not exported; listed in `unobserved_cases` | none |
+
+A case has no observed output when no sample was supplied or a live target
+timed out or errored (`sample_available: false`). There is nothing in the Run
+it could have judged, and its `sample_available` or `target_call` score
+describes the evaluation harness, so it needs no mapping and is never exported.
+Its failure still counts in the gate decision.
 
 Each object's `status` equals its `result`. `attributes` also carry the score
 name, `required`, the explanation, suite name and version, case ID and name,
@@ -53,6 +60,9 @@ The export fails loudly instead of guessing:
   `allow_unmapped=True` the case is left out and listed in `unmapped_cases`
 - a `targets` key that is not a case in the report raises (it is usually a typo)
 - a reference type outside the AIOS v0.4 vocabulary raises
+
+`AIOSEvidenceExport` reports `unmapped_cases`, `unobserved_cases`,
+`skipped_scores` and `unavailable_scores`. Keep them with the artifact.
 
 ## Python
 
@@ -90,7 +100,7 @@ agentic-evals aios export report.json \
 Without `--run`, the command prints the evidence (`--run-id` is then
 required). `--default-target STEP_ID`, or a JSON reference or list, and
 `--default-run` set the fallback target, and `--allow-unmapped` lists the
-left-out cases on stderr. Mapping, validation and merge errors exit 2; a
+left-out cases on stderr, as are unobserved cases. Mapping, validation and merge errors exit 2; a
 failing gate is exported as a failed `release_gate` evaluation and still
 exits 0. Use `agentic-evals gate` to block a release.
 
