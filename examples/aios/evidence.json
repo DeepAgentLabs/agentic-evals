@@ -1,0 +1,428 @@
+{
+  "spec_version": "0.4-draft",
+  "run_id": "support-run-042",
+  "suite_name": "support-refunds",
+  "suite_version": "1",
+  "evidence": [
+    {
+      "id": "support-run-042:evals:support-refunds:grounded-answer:score:1",
+      "type": "evaluation",
+      "name": "contains:30 days on Answer cites the refund policy",
+      "status": "passed",
+      "attributes": {
+        "criterion": "contains",
+        "method": {
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "deterministic"
+        },
+        "result": "passed",
+        "score": 1.0,
+        "score_name": "contains:30 days",
+        "required": true,
+        "explanation": "Output contains required text: '30 days'.",
+        "suite_name": "support-refunds",
+        "suite_version": "1",
+        "case_id": "grounded-answer",
+        "case_name": "Answer cites the refund policy",
+        "trace_id": "support-run-042"
+      },
+      "extensions": {
+        "io.deepagentlabs.agentic-evals": {
+          "producer": "agentic-evals",
+          "producer_version": "0.9.0",
+          "report_schema_version": "1.0"
+        }
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:grounded-answer:case",
+      "type": "evaluation",
+      "name": "case verdict for Answer cites the refund policy",
+      "status": "passed",
+      "attributes": {
+        "criterion": "case_verdict",
+        "method": {
+          "evaluator": "agentic-evals.case",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "aggregate"
+        },
+        "result": "passed",
+        "required_scores": 1,
+        "failed_required_scores": 0,
+        "sample_available": true,
+        "suite_name": "support-refunds",
+        "suite_version": "1",
+        "case_id": "grounded-answer",
+        "case_name": "Answer cites the refund policy",
+        "trace_id": "support-run-042"
+      },
+      "extensions": {
+        "io.deepagentlabs.agentic-evals": {
+          "producer": "agentic-evals",
+          "producer_version": "0.9.0",
+          "report_schema_version": "1.0"
+        }
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:score:1",
+      "type": "evaluation",
+      "name": "required_tool:refund on Refund issued with an order ID",
+      "status": "passed",
+      "attributes": {
+        "criterion": "required_tool",
+        "method": {
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "deterministic"
+        },
+        "result": "passed",
+        "score": 1.0,
+        "score_name": "required_tool:refund",
+        "required": true,
+        "explanation": "Required tool 'refund' was called.",
+        "suite_name": "support-refunds",
+        "suite_version": "1",
+        "case_id": "refund-tool",
+        "case_name": "Refund issued with an order ID",
+        "trace_id": "support-run-042"
+      },
+      "extensions": {
+        "io.deepagentlabs.agentic-evals": {
+          "producer": "agentic-evals",
+          "producer_version": "0.9.0",
+          "report_schema_version": "1.0"
+        }
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:score:2",
+      "type": "evaluation",
+      "name": "tool_args:refund on Refund issued with an order ID",
+      "status": "failed",
+      "attributes": {
+        "criterion": "tool_args",
+        "method": {
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "deterministic"
+        },
+        "result": "failed",
+        "score": 0.0,
+        "score_name": "tool_args:refund",
+        "required": true,
+        "explanation": "Tool 'refund' did not include required arguments ['order_id'].",
+        "suite_name": "support-refunds",
+        "suite_version": "1",
+        "case_id": "refund-tool",
+        "case_name": "Refund issued with an order ID",
+        "trace_id": "support-run-042"
+      },
+      "extensions": {
+        "io.deepagentlabs.agentic-evals": {
+          "producer": "agentic-evals",
+          "producer_version": "0.9.0",
+          "report_schema_version": "1.0"
+        }
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:case",
+      "type": "evaluation",
+      "name": "case verdict for Refund issued with an order ID",
+      "status": "failed",
+      "attributes": {
+        "criterion": "case_verdict",
+        "method": {
+          "evaluator": "agentic-evals.case",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "aggregate"
+        },
+        "result": "failed",
+        "required_scores": 2,
+        "failed_required_scores": 1,
+        "sample_available": true,
+        "suite_name": "support-refunds",
+        "suite_version": "1",
+        "case_id": "refund-tool",
+        "case_name": "Refund issued with an order ID",
+        "trace_id": "support-run-042"
+      },
+      "extensions": {
+        "io.deepagentlabs.agentic-evals": {
+          "producer": "agentic-evals",
+          "producer_version": "0.9.0",
+          "report_schema_version": "1.0"
+        }
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:gate",
+      "type": "evaluation",
+      "name": "release gate for support-refunds",
+      "status": "failed",
+      "attributes": {
+        "criterion": "release_gate",
+        "method": {
+          "evaluator": "agentic-evals.gate",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "gate"
+        },
+        "result": "failed",
+        "reasons": [
+          "Pass rate 50.0% is below 100.0%."
+        ],
+        "observed": {
+          "pass_rate": 0.5,
+          "average_score": 0.6666666666666666,
+          "failed_cases": 1,
+          "average_latency_ms": 0.0,
+          "total_cost_usd": null
+        },
+        "suite_name": "support-refunds",
+        "suite_version": "1"
+      },
+      "extensions": {
+        "io.deepagentlabs.agentic-evals": {
+          "producer": "agentic-evals",
+          "producer_version": "0.9.0",
+          "report_schema_version": "1.0"
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "support-run-042:evals:support-refunds:grounded-answer:score:1:evaluates:1",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:grounded-answer:score:1",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "step-answer",
+        "type": "step"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:grounded-answer:case:evaluates:1",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:grounded-answer:case",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "step-answer",
+        "type": "step"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:score:1:evaluates:1",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:refund-tool:score:1",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "step-refund",
+        "type": "step"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:score:1:evaluates:2",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:refund-tool:score:1",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "tool-1",
+        "type": "tool_invocation"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:score:2:evaluates:1",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:refund-tool:score:2",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "step-refund",
+        "type": "step"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:score:2:evaluates:2",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:refund-tool:score:2",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "tool-1",
+        "type": "tool_invocation"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:case:evaluates:1",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:refund-tool:case",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "step-refund",
+        "type": "step"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:refund-tool:case:evaluates:2",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:refund-tool:case",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "tool-1",
+        "type": "tool_invocation"
+      }
+    },
+    {
+      "id": "support-run-042:evals:support-refunds:gate:evaluates:1",
+      "type": "evaluates",
+      "source": {
+        "id": "support-run-042:evals:support-refunds:gate",
+        "type": "evaluation"
+      },
+      "target": {
+        "id": "support-run-042",
+        "type": "run"
+      }
+    }
+  ],
+  "events": [
+    {
+      "event_id": "support-run-042:evals:support-refunds:grounded-answer:score:1:event",
+      "event_name": "aiops.evaluation.completed",
+      "occurred_at": "2026-10-31T09:00:05Z",
+      "object_id": "support-run-042:evals:support-refunds:grounded-answer:score:1",
+      "object_type": "evaluation",
+      "attributes": {
+        "criterion": "contains",
+        "method": {
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "deterministic"
+        },
+        "result": "passed",
+        "targets": [
+          "step-answer"
+        ]
+      }
+    },
+    {
+      "event_id": "support-run-042:evals:support-refunds:grounded-answer:case:event",
+      "event_name": "aiops.evaluation.completed",
+      "occurred_at": "2026-10-31T09:00:05Z",
+      "object_id": "support-run-042:evals:support-refunds:grounded-answer:case",
+      "object_type": "evaluation",
+      "attributes": {
+        "criterion": "case_verdict",
+        "method": {
+          "evaluator": "agentic-evals.case",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "aggregate"
+        },
+        "result": "passed",
+        "targets": [
+          "step-answer"
+        ]
+      }
+    },
+    {
+      "event_id": "support-run-042:evals:support-refunds:refund-tool:score:1:event",
+      "event_name": "aiops.evaluation.completed",
+      "occurred_at": "2026-10-31T09:00:05Z",
+      "object_id": "support-run-042:evals:support-refunds:refund-tool:score:1",
+      "object_type": "evaluation",
+      "attributes": {
+        "criterion": "required_tool",
+        "method": {
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "deterministic"
+        },
+        "result": "passed",
+        "targets": [
+          "step-refund",
+          "tool-1"
+        ]
+      }
+    },
+    {
+      "event_id": "support-run-042:evals:support-refunds:refund-tool:score:2:event",
+      "event_name": "aiops.evaluation.completed",
+      "occurred_at": "2026-10-31T09:00:05Z",
+      "object_id": "support-run-042:evals:support-refunds:refund-tool:score:2",
+      "object_type": "evaluation",
+      "attributes": {
+        "criterion": "tool_args",
+        "method": {
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "deterministic"
+        },
+        "result": "failed",
+        "targets": [
+          "step-refund",
+          "tool-1"
+        ]
+      }
+    },
+    {
+      "event_id": "support-run-042:evals:support-refunds:refund-tool:case:event",
+      "event_name": "aiops.evaluation.completed",
+      "occurred_at": "2026-10-31T09:00:05Z",
+      "object_id": "support-run-042:evals:support-refunds:refund-tool:case",
+      "object_type": "evaluation",
+      "attributes": {
+        "criterion": "case_verdict",
+        "method": {
+          "evaluator": "agentic-evals.case",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "aggregate"
+        },
+        "result": "failed",
+        "targets": [
+          "step-refund",
+          "tool-1"
+        ]
+      }
+    },
+    {
+      "event_id": "support-run-042:evals:support-refunds:gate:event",
+      "event_name": "aiops.evaluation.completed",
+      "occurred_at": "2026-10-31T09:00:05Z",
+      "object_id": "support-run-042:evals:support-refunds:gate",
+      "object_type": "evaluation",
+      "attributes": {
+        "criterion": "release_gate",
+        "method": {
+          "evaluator": "agentic-evals.gate",
+          "evaluator_version": "0.9.0",
+          "evaluator_type": "gate"
+        },
+        "result": "failed",
+        "targets": [
+          "support-run-042"
+        ]
+      }
+    }
+  ],
+  "unmapped_cases": [],
+  "exported_cases": 2,
+  "skipped_scores": 0,
+  "unavailable_scores": 0
+}

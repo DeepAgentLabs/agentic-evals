@@ -1,0 +1,6 @@
+# Which Run object each case judged. A string is a Step ID; a mapping is any
+# AIOS v0.4 reference (add `external: true` for objects outside the Run).
+grounded-answer: step-answer
+refund-tool:
+  - step-refund
+  - {id: tool-1, type: tool_invocation}

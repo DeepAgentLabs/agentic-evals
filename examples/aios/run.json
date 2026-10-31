@@ -1,0 +1,33 @@
+{
+  "spec_version": "0.4-draft",
+  "artifact_type": "run",
+  "id": "support-run-042",
+  "workflow_id": "customer-support",
+  "started_at": "2026-10-31T09:00:00Z",
+  "ended_at": "2026-10-31T09:00:03Z",
+  "status": "completed",
+  "requests": [{"id": "support-run-042:request", "status": "completed"}],
+  "steps": [
+    {"id": "step-retrieve", "category": "retrieval", "name": "policy lookup", "status": "completed"},
+    {"id": "step-answer", "category": "model", "name": "draft answer", "status": "completed"},
+    {"id": "step-refund", "category": "tool", "name": "issue refund", "status": "completed"}
+  ],
+  "occurrences": [
+    {"id": "retrieval-1", "type": "rag_retrieval", "status": "completed"},
+    {"id": "model-1", "type": "model_interaction", "status": "completed"},
+    {"id": "tool-1", "type": "tool_invocation", "name": "refund", "status": "completed"}
+  ],
+  "relationships": [
+    {"id": "rel-run-of", "type": "run-of", "source": {"id": "support-run-042", "type": "run"}, "target": {"id": "customer-support", "type": "workflow", "external": true}},
+    {"id": "rel-contains-retrieve", "type": "contains", "source": {"id": "support-run-042", "type": "run"}, "target": {"id": "step-retrieve", "type": "step"}},
+    {"id": "rel-contains-answer", "type": "contains", "source": {"id": "support-run-042", "type": "run"}, "target": {"id": "step-answer", "type": "step"}},
+    {"id": "rel-contains-refund", "type": "contains", "source": {"id": "support-run-042", "type": "run"}, "target": {"id": "step-refund", "type": "step"}},
+    {"id": "rel-retrieval-step", "type": "observed-in", "source": {"id": "retrieval-1", "type": "rag_retrieval"}, "target": {"id": "step-retrieve", "type": "step"}},
+    {"id": "rel-model-step", "type": "observed-in", "source": {"id": "model-1", "type": "model_interaction"}, "target": {"id": "step-answer", "type": "step"}},
+    {"id": "rel-tool-step", "type": "observed-in", "source": {"id": "tool-1", "type": "tool_invocation"}, "target": {"id": "step-refund", "type": "step"}}
+  ],
+  "events": [
+    {"event_id": "support-run-042:started", "event_name": "aiops.run.started", "occurred_at": "2026-10-31T09:00:00Z", "object_id": "support-run-042", "object_type": "run"},
+    {"event_id": "support-run-042:completed", "event_name": "aiops.run.completed", "occurred_at": "2026-10-31T09:00:03Z", "object_id": "support-run-042", "object_type": "run"}
+  ]
+}
