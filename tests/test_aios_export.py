@@ -29,6 +29,7 @@ from agentic_evals import (
 from agentic_evals.aios import EXTENSION_NAME, SPEC_VERSION
 from aios_checks import FIXTURES, sample_run, schema_errors, semantic_issues
 
+ROOT = Path(__file__).resolve().parents[1]
 CREATED_AT = datetime(2026, 10, 31, 12, 0, tzinfo=timezone.utc)
 
 
@@ -173,6 +174,30 @@ def test_an_unmapped_case_is_reported_not_guessed(report) -> None:
     assert export.unmapped_cases == ["wrong", "judged"]
     assert export.exported_cases == 1
     assert {item["attributes"]["case_id"] for item in export.evidence} == {"answer"}
+
+
+def test_cases_without_observed_output_are_reported_not_exported() -> None:
+    """A missing sample or a failed live call left nothing in the Run to judge."""
+    live = EvaluationReport.model_validate_json(
+        (ROOT / "examples/report-contract/judged-live-report.json").read_text()
+    )
+    outage = next(case for case in live.cases if case.case_id == "outage")
+    assert outage.target_status == "error"
+
+    # The unobserved case needs no mapping, and mapping it does not export it.
+    for targets in ({"answered": "s", "judge-down": "s"}, {"outage": "s"}):
+        export = to_aios_evidence(live, run_id="r", targets=targets, allow_unmapped=True)
+        assert export.unobserved_cases == ["outage"]
+        exported = {item["attributes"].get("case_id") for item in export.evidence}
+        assert "outage" not in exported
+        assert "target_call" not in {item["attributes"]["criterion"] for item in export.evidence}
+
+    missing = EvaluationReport.model_validate_json(
+        (ROOT / "examples/report-contract/evaluation-report.json").read_text()
+    )
+    export = to_aios_evidence(missing, run_id="r", default_target="s")
+    assert export.unobserved_cases == ["missing"]
+    assert export.exported_cases == 1
 
 
 def test_targets_for_unknown_cases_are_rejected(report) -> None:

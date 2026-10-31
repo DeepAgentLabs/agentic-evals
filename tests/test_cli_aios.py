@@ -13,6 +13,7 @@ from aios_checks import FIXTURES, schema_errors, semantic_issues
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "examples/report-contract/evaluation-report.json"
 GATE = ROOT / "examples/report-contract/gate-decision.json"
+LIVE_REPORT = ROOT / "examples/report-contract/judged-live-report.json"
 
 
 @pytest.fixture
@@ -86,17 +87,20 @@ def test_no_mapping_is_a_usage_error(capsys) -> None:
     assert "no target mapping" in capsys.readouterr().err
 
 
-def test_unmapped_cases_fail_unless_allowed(files, capsys, tmp_path) -> None:
+def test_unmapped_cases_fail_unless_allowed(capsys, tmp_path) -> None:
     partial = tmp_path / "partial.json"
-    partial.write_text('{"answer": "step-answer"}', encoding="utf-8")
-    args = ["aios", "export", str(REPORT), "--run-id", "r1", "--targets", str(partial)]
+    partial.write_text('{"answered": "step-answer"}', encoding="utf-8")
+    args = ["aios", "export", str(LIVE_REPORT), "--run-id", "r1", "--targets", str(partial)]
 
     assert cli.main(args) == 2
-    assert "missing" in capsys.readouterr().err
+    assert "judge-down" in capsys.readouterr().err
     assert cli.main([*args, "--allow-unmapped"]) == 0
     captured = capsys.readouterr()
-    assert "not exported (no target): missing" in captured.err
-    assert json.loads(captured.out)["unmapped_cases"] == ["missing"]
+    assert "not exported (no target): judge-down" in captured.err
+    assert "not exported (no observed output): outage" in captured.err
+    export = json.loads(captured.out)
+    assert export["unmapped_cases"] == ["judge-down"]
+    assert export["unobserved_cases"] == ["outage"]
 
 
 def test_unresolved_target_in_the_run_is_an_error(files, capsys) -> None:
