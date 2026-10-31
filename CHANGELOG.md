@@ -36,6 +36,9 @@ AI Operations Specification evaluation evidence export (roadmap v0.10).
   case in the report, or a case with no target raises `AIOSExportError` (a
   `ValueError`). With `allow_unmapped=True` such cases are left out and listed in
   `unmapped_cases`.
+- A case with no observed output (no sample, or a live target that timed out
+  or errored) is not exported, because nothing in the Run could have been
+  judged. It needs no mapping and is listed in `unobserved_cases`.
 - A skipped score is exported with result `skipped`, no score value and no
   event. A judgment the judge could not deliver is `unavailable` with no score,
   and emits `aiops.evaluation.failed`. Neither is ever exported as a pass.
