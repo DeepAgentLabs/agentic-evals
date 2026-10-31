@@ -144,12 +144,12 @@ def to_aios_evidence(
     if unknown:
         raise AIOSExportError(f"targets name cases that are not in the report: {unknown}")
 
-    default_refs = _references(default_target, "default_target") if default_target else []
+    default_refs = [] if default_target is None else _references(default_target, "default_target")
     case_refs: dict[str, list[dict[str, Any]]] = {}
     unmapped: list[str] = []
     for case in report.cases:
         spec = targets.get(case.case_id)
-        refs = _references(spec, f"targets[{case.case_id!r}]") if spec else default_refs
+        refs = default_refs if spec is None else _references(spec, f"targets[{case.case_id!r}]")
         if refs:
             case_refs[case.case_id] = refs
         else:
@@ -259,7 +259,12 @@ def attach_aios_evidence(
 
 
 def _references(spec: Any, where: str) -> list[dict[str, Any]]:
-    items = [spec] if isinstance(spec, (str, Mapping)) else list(spec)
+    if isinstance(spec, (str, Mapping)):
+        items = [spec]
+    elif isinstance(spec, Sequence):
+        items = list(spec)
+    else:
+        raise AIOSExportError(f"{where} must be a target or a list of targets")
     refs = [_reference(item, where) for item in items]
     if not refs:
         raise AIOSExportError(f"{where} must name at least one target")
