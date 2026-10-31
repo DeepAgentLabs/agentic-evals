@@ -13,9 +13,10 @@ from typing import Any
 import yaml
 from jsonschema import Draft202012Validator
 
+from agentic_evals.aios import attach_aios_evidence, to_aios_evidence
 from agentic_evals.evaluators import EvaluatorRegistry
 from agentic_evals.formatting import render_gate, render_report
-from agentic_evals.gate import GateConfig, evaluate_gate
+from agentic_evals.gate import GateConfig, GateDecision, evaluate_gate
 from agentic_evals.models import EvaluationReport, HTTPTarget, PythonTarget
 from agentic_evals.packs import EvalPack, list_builtin_packs
 from agentic_evals.reliability import RetryPolicy
@@ -113,6 +114,33 @@ def add_commands(subparsers: Any) -> None:
     gate.add_argument("--config", help="YAML or JSON GateConfig (default: every case must pass)")
     _output_options(gate)
 
+    aios = subparsers.add_parser("aios", help="export AI Operations Specification evidence")
+    aios_commands = aios.add_subparsers(dest="aios_command", required=True)
+    export = aios_commands.add_parser(
+        "export", help="export a saved report as AIOS v0.4-draft evaluation evidence"
+    )
+    export.add_argument("report", help="native JSON EvaluationReport")
+    export.add_argument("--run-id", help="AIOS Run ID (default: the --run artifact's id)")
+    export.add_argument("--run", help="AIOS run artifact to merge the evidence into")
+    export.add_argument("--targets", help="YAML or JSON mapping of case ID to evaluates target(s)")
+    export.add_argument(
+        "--default-target",
+        help="target for unmapped cases: a step ID, or a JSON reference or list of references",
+    )
+    export.add_argument(
+        "--default-run",
+        action="store_true",
+        help="unmapped cases evaluate the whole Run",
+    )
+    export.add_argument("--gate", help="saved JSON GateDecision to export as release readiness")
+    export.add_argument(
+        "--allow-unmapped",
+        action="store_true",
+        help="leave out cases without a target instead of failing (they are listed on stderr)",
+    )
+    export.add_argument("--id-prefix", help="evidence ID prefix (default: <run>:evals:<suite>)")
+    export.add_argument("--out", help="output file (default: stdout; '-' also means stdout)")
+
     pack = subparsers.add_parser("pack", help="discover built-in runnable packs")
     commands = pack.add_subparsers(dest="pack_command", required=True)
     commands.add_parser("list", help="list built-in pack names")
@@ -122,7 +150,54 @@ def add_commands(subparsers: Any) -> None:
     show.add_argument("--out", help="output file (default: stdout)")
 
 
+def _default_target(args: argparse.Namespace, run_id: str) -> Any:
+    if args.default_run and args.default_target:
+        raise ValueError("use either --default-target or --default-run, not both")
+    if args.default_run:
+        return {"id": run_id, "type": "run"}
+    value = args.default_target
+    if value is not None and value.lstrip().startswith(("{", "[")):
+        return json.loads(value)
+    return value
+
+
+def _export_aios(args: argparse.Namespace) -> int:
+    report = _load_report(args.report)
+    run = json.loads(Path(args.run).read_text(encoding="utf-8")) if args.run else None
+    run_id = args.run_id or (run.get("id") if isinstance(run, dict) else None)
+    if not run_id:
+        raise ValueError("pass --run-id, or --run with an AIOS run artifact")
+    targets = _data(args.targets) if args.targets else None
+    if targets is not None and not isinstance(targets, dict):
+        raise ValueError("--targets must map case IDs to targets")
+    gate = None
+    if args.gate:
+        gate = GateDecision.model_validate_json(Path(args.gate).read_text(encoding="utf-8"))
+    export = to_aios_evidence(
+        report,
+        run_id=run_id,
+        targets=targets,
+        default_target=_default_target(args, run_id),
+        gate=gate,
+        allow_unmapped=args.allow_unmapped,
+        id_prefix=args.id_prefix,
+    )
+    if export.unmapped_cases:
+        print(
+            f"agentic-evals: not exported (no target): {', '.join(export.unmapped_cases)}",
+            file=sys.stderr,
+        )
+    if run is not None:
+        text = json.dumps(attach_aios_evidence(run, export), indent=2)
+    else:
+        text = export.model_dump_json(indent=2)
+    _emit(text + "\n", args.out)
+    return 0
+
+
 def execute(args: argparse.Namespace) -> int:
+    if args.command == "aios":
+        return _export_aios(args)
     if args.command == "pack":
         if args.pack_command == "list":
             print("\n".join(list_builtin_packs()))
