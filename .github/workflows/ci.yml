@@ -38,7 +38,8 @@ jobs:
         run: |
           uv run python scripts/generate_schemas.py
           uv run python examples/report-contract/generate.py
-          git diff --exit-code -- src/agentic_evals/schemas examples/report-contract
+          uv run python examples/aios/generate.py
+          git diff --exit-code -- src/agentic_evals/schemas examples/report-contract examples/aios
 
       - name: Test (pytest)
         run: uv run pytest
