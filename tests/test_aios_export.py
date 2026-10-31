@@ -211,6 +211,8 @@ def test_targets_for_unknown_cases_are_rejected(report) -> None:
         {"id": " ", "type": "step"},
         {"id": "x", "type": "trace"},
         {"id": "x", "type": "step", "extra": 1},
+        {"id": "x", "type": "step", "external": "false"},
+        {"id": "x", "type": "step", "external": 1},
         [],
         42,
     ],
@@ -339,6 +341,25 @@ def test_attach_detects_id_collisions_and_prefix_resolves_them(report) -> None:
     merged = attach_aios_evidence(sample_run(), [first, retry])
     assert schema_errors(merged) == []
     assert semantic_issues(merged) == []
+
+
+@pytest.mark.parametrize(
+    "collection,key", [("evidence", "id"), ("relationships", "id"), ("events", "event_id")]
+)
+def test_attach_rejects_ids_repeated_within_one_export(report, collection, key) -> None:
+    export = to_aios_evidence(report, run_id="run-001", targets=TARGETS)
+    items = getattr(export, collection)
+    items[1] = {**items[1], key: items[0][key]}
+    with pytest.raises(AIOSExportError, match="repeated within the export"):
+        attach_aios_evidence(sample_run(), export)
+
+
+def test_attach_only_skips_resolution_for_boolean_external(report) -> None:
+    export = to_aios_evidence(report, run_id="run-001", default_target="step-missing")
+    for rel in export.relationships:
+        rel["target"]["external"] = "false"  # a hand-edited export, not a real bool
+    with pytest.raises(AIOSExportError, match="step-missing"):
+        attach_aios_evidence(sample_run(), export)
 
 
 def test_attach_into_a_run_without_evidence_or_events(report) -> None:
