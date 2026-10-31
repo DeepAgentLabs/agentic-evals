@@ -98,6 +98,23 @@ agentic-evals pack show json-output-contract --suite --out suite.json
 plain `TestSuite`. Inspection does not require judge credentials. The factual-QA
 pack requires a caller-supplied `factuality` evaluator when actually evaluated.
 
+## Export AIOS evidence
+
+`agentic-evals aios export` (0.10.0) turns a saved report, and optionally a
+gate decision, into AI Operations Specification `0.4-draft` evaluation
+evidence, or merges it into an existing Run artifact:
+
+```bash
+agentic-evals aios export examples/aios/report.json \
+  --run examples/aios/run.json --targets examples/aios/targets.yaml \
+  --gate examples/aios/gate-decision.json --out run-with-evaluations.json
+```
+
+A report with no target mapping, an unmapped case (unless `--allow-unmapped`)
+or a target missing from `--run` exits 2. The export never decides a release:
+a failed gate becomes a failed `release_gate` evaluation and the command still
+exits 0. See [the AIOS evidence guide](aios-evidence.md).
+
 ## Worked CI and voice examples
 
 Copy [evaluate.yml](../examples/ci/evaluate.yml) to `.github/workflows/` in your
@@ -117,5 +134,6 @@ remain separate. MCP 0.3.9 and Tower 0.6.1 can validate these native JSON
 artifacts against their bundled 0.7.2 schemas. JUnit and Markdown must not be
 passed to native artifact validators. Chaos remains the fault producer and
 Sidecar owns supervision; Evals scores their explicitly supplied observations.
-Native Evals JSON is not an AIOS evaluation-evidence export (planned for 0.10).
+Native Evals JSON is not itself AIOS evidence; `aios export` (0.10.0) derives
+it, and MCP `spec.validate_artifact` validates the merged Run.
 No sibling runtime dependency floor or release is required for the CLI alone.
