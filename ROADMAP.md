@@ -580,3 +580,9 @@ containment. No new shared schema, automatic adapter or hosted execution
 capability is introduced.
 
 The resilience score is Chaos producer evidence. It is not an Evals score, and it is not an input to `gate`. Probe results are steady-state checks, not EvaluationSamples. To evaluate agent outputs captured during chaos, convert them to native EvaluationSamples explicitly. No adapter, runtime dependency or Evals patch release is needed.
+
+## AIOS v0.6.1 provenance and conformance suite
+
+See [AIOS v0.6.1 compatibility](docs/aios-0.6.1.md) for the new `0.6-draft` provenance
+records, portable conformance suite and naming conventions. Exports stay
+`0.4-draft`; no runtime dependency bump or package release is required.
