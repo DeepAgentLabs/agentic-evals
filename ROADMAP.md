@@ -18,11 +18,11 @@ deliverables, acceptance criteria and sibling dependencies.
 - **v0.7.x** ✅ Complete — Published report and gate contract (JSON Schema, `0.7.2`)
 - **v0.8** ✅ Complete — Suite, pack and gate CLI for CI (`0.8.0`)
 - **v0.9** ✅ Complete — Judge reliability, cost and live-target resilience (`0.9.0`)
-- **v0.10** 🚧 Planned — AI Operations Specification evaluation evidence export
+- **v0.10** ✅ Complete — AI Operations Specification evaluation evidence export (`0.10.0`)
 - **v0.11** ⛔ Blocked — Adversarial containment scoring (needs Sidecar, Chaos, MCP and Lens evidence)
 - **v1.0** 🚧 Planned — Stable API and report schema
 
-Current release: `0.9.0` (2026-10-19). See [CHANGELOG.md](CHANGELOG.md) for
+Current release: `0.10.0` (2026-10-31). See [CHANGELOG.md](CHANGELOG.md) for
 what each version shipped.
 
 ## Scope
@@ -51,8 +51,8 @@ did not observe.
 |---|---|---|
 | `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. Lens 0.7.0 registers its trace-aware evaluators next to Evals' built-in scorers and reports judge cost and evaluator disagreement from Evals `Score` metadata; Evals 0.9.0 writes the same `judge_*` keys for its own judges. | v0.7.x, v0.9 ✅ |
 | `agenticops-control-tower` | Tower 0.6.1 validates complete native reports/gates against published Evals 0.7.2 schemas before evidence projection and staging recovery verification; its 0.9.0-schema sync is a patch release. Normative AIOS mappings remain future work. | v0.7.x, v0.9, v1.0 |
-| `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports must follow | v0.10 |
-| `deep-agentic-core-mcp` | MCP 0.3.8 exposes native `evals.validate_artifact` and validates Lens report consumers; its bundled schemas sync to Evals 0.9.0 in a patch release. `spec.validate_artifact` remains the separate AIOS evidence validator. | v0.9, v0.10 |
+| `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports follow. Evals 0.10.0 exports `0.4-draft` evaluation evidence; its tests vendor the v0.4 run schemas and compare them with a spec checkout when present. | v0.10 ✅ |
+| `deep-agentic-core-mcp` | MCP 0.3.8 exposes native `evals.validate_artifact` and validates Lens report consumers; its bundled schemas sync to Evals 0.9.0 in a patch release. `spec.validate_artifact` validates Evals 0.10.0 exports merged into a Run (`conformance.aligned = true`). | v0.9, v0.10 ✅ |
 | `agentic-sidecar` | Its v0.9 compares Agent Alone vs. Agent + Sidecar and uses Evals for generic scoring. Sidecar keeps supervision scenarios. | v0.11 |
 | `agentic-chaos` | Its adversarial containment work scores with Evals, and attacks run on isolated targets. Chaos 0.6.0 contracts (`pytest --chaos`) are per-run resilience checks over a `ChaosReport`, not scores or release gates; gate computation stays here. | v0.11 |
 
@@ -235,20 +235,20 @@ optional fields only. Lens 0.10.0's full test suite passes against 0.9.0 with
 no change, and its `>=0.7.1,<1` range already allows it. MCP and Control Tower
 sync their bundled schemas to 0.9.0 in patch releases.
 
-### v0.10 — AI Operations Specification evaluation evidence export
+### v0.10 — AI Operations Specification evaluation evidence export ✅ (`0.10.0`)
 
 **Goal:** make evaluation results portable as shared operational evidence.
 
 **Deliverables:**
 
-- [ ] `to_aios_evidence(report, run_id=..., targets=...)` producing AIOS
+- [x] `to_aios_evidence(report, run_id=..., targets=...)` producing AIOS
       v0.4-draft `evaluation` evidence objects. Each object carries criterion,
       method (scorer/evaluator and version), result and score in `attributes`,
       and `evaluates` relationships to the run or step it judged.
-- [ ] merge helper that attaches the evidence to an existing AIOS `run` artifact
-- [ ] the export states only what the report records: a skipped score is not
+- [x] merge helper that attaches the evidence to an existing AIOS `run` artifact
+- [x] the export states only what the report records: a skipped score is not
       exported as a pass, and an unmapped target is reported, not guessed
-- [ ] tests that validate exports against the published v0.4 schema and the
+- [x] tests that validate exports against the published v0.4 schema and the
       spec's semantic checks (rule `AIOS-0.4-P08`: every evaluation has an
       `evaluates` target) when an `ai-operations-spec` checkout is present
 
@@ -264,6 +264,20 @@ conformance catalog.
 **Coordinate with:** `agentic-chaos` (its run export provides the target steps)
 and `agenticlens`.
 **Validate in:** `deep-agentic-core-mcp` `spec.validate_artifact`.
+
+Implemented in [the AIOS evidence guide](docs/aios-evidence.md):
+`to_aios_evidence` exports every score, case verdict and optional gate decision
+as an `evaluation` with criterion, method, result and score, and
+`attach_aios_evidence` merges it into a Run after resolving every target.
+`agentic-evals aios export` is the CLI path. Skipped scores are exported as
+`skipped` and undelivered judgments as `unavailable`; neither carries a score.
+No mapping, an unmapped case (unless `allow_unmapped=True`) or a target
+missing from the Run raises `AIOSExportError`. Both acceptance criteria are
+covered by tests (`tests/test_aios_export.py`, `tests/test_aios_example.py`),
+and the [example](examples/aios/) Run passes MCP 0.4's `spec.validate_artifact`
+with `conformance.aligned = true`. Report schema 1.0 is unchanged, so MCP and
+Control Tower keep their bundled schemas, and Lens's `agentic-evals>=0.7.1,<1`
+range already allows 0.10.0.
 
 ### v0.11 — Adversarial containment scoring ⛔ Blocked
 
@@ -326,8 +340,7 @@ minor versions.
   `1.x` releases in compatibility tests
 - Lens, Tower and MCP integrations pass against the `1.0` release candidate
 
-**Depends on:** v0.7.x, v0.8 and v0.9 complete; v0.10 complete or explicitly
-deferred.
+**Depends on:** v0.7.x, v0.8, v0.9 and v0.10 complete.
 
 ---
 
