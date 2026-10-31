@@ -580,7 +580,7 @@ since it uses the `FACTUALITY` rubric). Load your own with `load_pack(path)`.
 
 `agentic_evals/skills/` ships methodology playbooks (`SKILL.md` cards --
 Trigger/Do/Avoid/Check/Risk), not runnable code, scoped to this package's
-own API. 17 skills cover the eval lifecycle end to end:
+own API. 18 skills cover the eval lifecycle end to end:
 
 - **Frame**: `define-an-eval-objective`, `elicit-eval-criteria`
 - **Build data**: `build-an-eval-dataset`, `size-a-test-suite`
@@ -590,7 +590,7 @@ own API. 17 skills cover the eval lifecycle end to end:
 - **Investigate**: `discover-failure-modes`, `red-team-an-agent-suite`,
   `debug-a-flaky-llm-judge`
 - **Operate**: `define-a-release-gate`, `report-eval-results`,
-  `monitor-evals-in-production`
+  `monitor-evals-in-production`, `export-aios-evidence`
 
 These document how to use this package well and are meant to be read
 directly, or picked up by a coding agent's own skill mechanism -- distinct
