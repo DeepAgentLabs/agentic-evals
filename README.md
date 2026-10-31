@@ -18,7 +18,7 @@ dependency on AgenticLens itself.
 
 **Published on PyPI.** The engine (deterministic checks, LLM-as-judge and
 custom evaluators, a release gate, live Python/HTTP targets, the `Eval()`
-quickstart API, and the `agentic-evals` CLI) is real, tested code — see the
+quickstart API, the `agentic-evals` CLI and AIOS evidence export) is real, tested code — see the
 [changelog](CHANGELOG.md) for what shipped in each release. The API may
 still move between minor versions ahead of a 1.0; pin a version in
 production and read the changelog before upgrading.
@@ -29,6 +29,42 @@ production and read the changelog before upgrading.
 verified against 0.9.0 with no model or API key: block an unsafe release with a
 tag floor, catch a right reply reached the wrong way, and gate on whether the LLM
 judge itself held up. Their files are in [examples/usecases](examples/usecases/).
+
+## AIOS evaluation evidence (0.10.0)
+
+Attach evaluation results to the AI Operations Specification Run they judged,
+for example a Run exported by Agentic Chaos or AgenticLens:
+
+```python
+from agentic_evals import attach_aios_evidence, to_aios_evidence
+
+export = to_aios_evidence(
+    report,
+    run_id=run["id"],
+    targets={"grounded-answer": "step-answer", "refund-tool": "step-refund"},
+    gate=decision,  # optional: exported as a release-readiness evaluation of the Run
+)
+merged = attach_aios_evidence(run, export)
+```
+
+```bash
+agentic-evals aios export report.json --run run.json --targets targets.yaml \
+  --gate gate-decision.json --out run-with-evaluations.json
+```
+
+- Every score, case verdict and gate decision becomes an AIOS `0.4-draft`
+  `evaluation` with its criterion, method (evaluator and version), result and
+  score, plus an `evaluates` link to the Step or object you mapped it to.
+- Nothing is guessed: no mapping, an unmapped case or a target missing from
+  the Run raises `AIOSExportError` instead of producing orphaned evidence.
+- A skipped score is exported as `skipped` and an undelivered judgment as
+  `unavailable`, never as a pass. A case with no observed output (a missing
+  sample or a failed live call) is listed in `unobserved_cases`, not exported.
+
+The merged Run validates with MCP's `spec.validate_artifact`
+(`conformance.aligned = true`). See the [AIOS evidence guide](docs/aios-evidence.md)
+and the [runnable example](examples/aios/). The native report schema 1.0 is
+unchanged.
 
 ## Judge reliability and live resilience (0.9.0)
 
@@ -580,7 +616,7 @@ since it uses the `FACTUALITY` rubric). Load your own with `load_pack(path)`.
 
 `agentic_evals/skills/` ships methodology playbooks (`SKILL.md` cards --
 Trigger/Do/Avoid/Check/Risk), not runnable code, scoped to this package's
-own API. 17 skills cover the eval lifecycle end to end:
+own API. 18 skills cover the eval lifecycle end to end:
 
 - **Frame**: `define-an-eval-objective`, `elicit-eval-criteria`
 - **Build data**: `build-an-eval-dataset`, `size-a-test-suite`
@@ -590,7 +626,7 @@ own API. 17 skills cover the eval lifecycle end to end:
 - **Investigate**: `discover-failure-modes`, `red-team-an-agent-suite`,
   `debug-a-flaky-llm-judge`
 - **Operate**: `define-a-release-gate`, `report-eval-results`,
-  `monitor-evals-in-production`
+  `monitor-evals-in-production`, `export-aios-evidence`
 
 These document how to use this package well and are meant to be read
 directly, or picked up by a coding agent's own skill mechanism -- distinct

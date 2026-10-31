@@ -15,6 +15,7 @@ LLM judges, trace-aware scoring, and CI release gates.
 - [Custom evaluators, evaluation packs, and registries](advanced.md)
 - [Judge reliability](judge-reliability.md)
 - [Report contract](report-contract.md)
+- [AIOS evaluation evidence export](aios-evidence.md)
 
 See it end to end in the [step-by-step use cases](https://deepagentlabs.io/agentic-evals/usecases/):
 an unsafe release blocked by a tag floor, a right reply reached the wrong way,

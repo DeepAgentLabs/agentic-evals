@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "suite_name": "support-refunds",
+  "suite_version": "1",
+  "created_at": "2026-10-31T09:00:05Z",
+  "summary": {
+    "total_cases": 2,
+    "passed_cases": 1,
+    "failed_cases": 1,
+    "pass_rate": 0.5,
+    "average_score": 0.6666666666666666,
+    "total_cost_usd": null,
+    "priced_cases": 0,
+    "cost_sources": {},
+    "average_latency_ms": 0.0,
+    "metrics": {
+      "contains": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "pass_rate": 1.0,
+        "average_score": 1.0
+      },
+      "required_tool": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "pass_rate": 1.0,
+        "average_score": 1.0
+      },
+      "tool_args": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 0,
+        "pass_rate": 0.0,
+        "average_score": 0.0
+      }
+    },
+    "tags": {
+      "grounding": {
+        "total_cases": 1,
+        "passed_cases": 1,
+        "failed_cases": 0,
+        "pass_rate": 1.0,
+        "average_score": 1.0
+      },
+      "tools": {
+        "total_cases": 1,
+        "passed_cases": 0,
+        "failed_cases": 1,
+        "pass_rate": 0.0,
+        "average_score": 0.5
+      }
+    },
+    "judge": null,
+    "live": null
+  },
+  "cases": [
+    {
+      "case_id": "grounded-answer",
+      "case_name": "Answer cites the refund policy",
+      "passed": true,
+      "scores": [
+        {
+          "name": "contains:30 days",
+          "metric": "contains",
+          "value": 1.0,
+          "passed": true,
+          "required": true,
+          "skipped": false,
+          "explanation": "Output contains required text: '30 days'.",
+          "evaluator_type": "deterministic",
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.10.0",
+          "metadata": {}
+        }
+      ],
+      "output": "Refunds are accepted within 30 days of delivery.",
+      "trace_id": "support-run-042",
+      "latency_ms": 0.0,
+      "cost_usd": null,
+      "cost_source": null,
+      "sample_available": true,
+      "target_status": null,
+      "target_attempts": null,
+      "target_error": null,
+      "tags": [
+        "grounding"
+      ],
+      "metadata": {}
+    },
+    {
+      "case_id": "refund-tool",
+      "case_name": "Refund issued with an order ID",
+      "passed": false,
+      "scores": [
+        {
+          "name": "required_tool:refund",
+          "metric": "required_tool",
+          "value": 1.0,
+          "passed": true,
+          "required": true,
+          "skipped": false,
+          "explanation": "Required tool 'refund' was called.",
+          "evaluator_type": "deterministic",
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.10.0",
+          "metadata": {}
+        },
+        {
+          "name": "tool_args:refund",
+          "metric": "tool_args",
+          "value": 0.0,
+          "passed": false,
+          "required": true,
+          "skipped": false,
+          "explanation": "Tool 'refund' did not include required arguments ['order_id'].",
+          "evaluator_type": "deterministic",
+          "evaluator": "agentic_evals.builtin",
+          "evaluator_version": "0.10.0",
+          "metadata": {}
+        }
+      ],
+      "output": "Refund issued.",
+      "trace_id": "support-run-042",
+      "latency_ms": 0.0,
+      "cost_usd": null,
+      "cost_source": null,
+      "sample_available": true,
+      "target_status": null,
+      "target_attempts": null,
+      "target_error": null,
+      "tags": [
+        "tools"
+      ],
+      "metadata": {}
+    }
+  ]
+}

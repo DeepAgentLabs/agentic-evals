@@ -4,7 +4,54 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 0.10.0 - 2026-10-31
+
+AI Operations Specification evaluation evidence export (roadmap v0.10).
+
+### Added
+
+- `to_aios_evidence(report, run_id=..., targets=..., gate=...)` returns an
+  `AIOSEvidenceExport` of AIOS `0.4-draft` `evaluation` evidence objects. Every
+  score, case verdict and optional `GateDecision` becomes one evaluation whose
+  `attributes` carry `criterion`, `method` (evaluator, version and type),
+  `result` and `score`, with one `evaluates` relationship per mapped target and
+  an `aiops.evaluation.completed` (or `.failed`) event that names method,
+  criterion, targets and result.
+- `attach_aios_evidence(run, export)` returns a copy of an AIOS Run artifact
+  with the evidence merged in, after checking the Run ID, that every
+  non-external target exists in the Run with the declared type, and that no ID
+  is already taken. It accepts a list of exports.
+- `agentic-evals aios export REPORT` with `--run`, `--targets`,
+  `--default-target`, `--default-run`, `--gate`, `--allow-unmapped` and
+  `--id-prefix`. Mapping and merge errors exit 2.
+- The `export-aios-evidence` skill playbook (18 skills).
+- A runnable example in `examples/aios/` whose merged Run passes
+  `deep-agentic-core-mcp`'s `spec.validate_artifact` with
+  `conformance.aligned = true`. CI regenerates it and fails on drift.
+- `docs/aios-evidence.md`, plus CLI, API reference and contract updates.
+
+### Behavior
+
+- The export never guesses. No target mapping, a mapping key that is not a
+  case in the report, or a case with no target raises `AIOSExportError` (a
+  `ValueError`). With `allow_unmapped=True` such cases are left out and listed in
+  `unmapped_cases`.
+- A case with no observed output (no sample, or a live target that timed out
+  or errored) is not exported, because nothing in the Run could have been
+  judged. It needs no mapping and is listed in `unobserved_cases`.
+- A skipped score is exported with result `skipped`, no score value and no
+  event. A judgment the judge could not deliver is `unavailable` with no score,
+  and emits `aiops.evaluation.failed`. Neither is ever exported as a pass.
+- Native report schema 1.0, its `$id` and the gate decision shape are
+  unchanged. No runtime dependency is added and no sibling package is imported.
+
+### Tests
+
+- The AIOS v0.4 run schemas and valid run example are vendored in
+  `tests/fixtures/aios-v0.4/` and compared with a sibling `ai-operations-spec`
+  checkout (or `AIOS_SPEC_PATH`) when present. Exports are checked against the
+  schema and the P02, P03, P05, P06, P07, P08, P10 and P11 semantic rules, and
+  against MCP's validator when it is installed.
 
 ### Documentation
 

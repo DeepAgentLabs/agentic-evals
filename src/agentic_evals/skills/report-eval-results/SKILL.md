@@ -35,6 +35,8 @@ analysis — a PR description, a release note, a Slack update.
 6. Validate native JSON artifacts with `report_schema()` and
    `gate_decision_schema()` (Evals 0.7.2+). Keep the native gate verdict;
    structural validation is not evidence of a passing gate or AIOS conformance.
+7. When the results must travel with an AI Operations Specification Run,
+   follow `export-aios-evidence` (Evals 0.10+) after writing the report.
 
 ## Avoid
 

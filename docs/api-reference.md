@@ -225,3 +225,35 @@ report = asyncio.run(
 )
 print(report.summary.live.timed_out_case_ids)
 ```
+
+### AIOS Evidence Export
+
+Export a report as AI Operations Specification `0.4-draft` evaluation evidence (0.10.0) and attach it to an existing Run artifact:
+
+```python
+def to_aios_evidence(
+    report: EvaluationReport | dict,
+    *,
+    run_id: str,
+    targets: dict[str, str | dict | list] | None = None,
+    default_target: str | dict | list | None = None,
+    gate: GateDecision | dict | None = None,
+    allow_unmapped: bool = False,
+    id_prefix: str | None = None,
+    occurred_at: datetime | None = None,
+) -> AIOSEvidenceExport
+
+def attach_aios_evidence(run: dict, export: AIOSEvidenceExport | list[AIOSEvidenceExport]) -> dict
+```
+
+```python
+from agentic_evals import attach_aios_evidence, to_aios_evidence
+
+export = to_aios_evidence(
+    report, run_id=run["id"], targets={"answer": "step-answer"}, gate=decision
+)
+merged = attach_aios_evidence(run, export)
+print(export.unmapped_cases, export.skipped_scores, export.unavailable_scores)
+```
+
+A string target is a Step ID; a dict is an AIOS reference (`id`, `type`, optional `external`). Missing mappings, unknown case IDs and unresolved targets raise `AIOSExportError` (a `ValueError`). See [the AIOS evidence guide](aios-evidence.md).

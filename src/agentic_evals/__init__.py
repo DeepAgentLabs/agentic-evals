@@ -6,6 +6,12 @@ Extracted from AgenticLens's evaluation module (github.com/DeepAgentLabs/agentic
 """
 
 from agentic_evals._version import __version__
+from agentic_evals.aios import (
+    AIOSEvidenceExport,
+    AIOSExportError,
+    attach_aios_evidence,
+    to_aios_evidence,
+)
 from agentic_evals.evaluators import (
     AsyncEvaluator,
     BusinessRuleEvaluator,
@@ -95,6 +101,8 @@ from agentic_evals.simple import (
 )
 
 __all__ = [
+    "AIOSEvidenceExport",
+    "AIOSExportError",
     "BATTLE",
     "BUILTIN_EVALUATOR",
     "CLOSED_QA",
@@ -144,6 +152,7 @@ __all__ = [
     "TestSuite",
     "__version__",
     "aevaluate_suite",
+    "attach_aios_evidence",
     "arun_live_suite",
     "builtin_scorer_names",
     "contains",
@@ -176,6 +185,7 @@ __all__ = [
     "regex_match",
     "run_live_suite",
     "starts_with",
+    "to_aios_evidence",
     "tool_call_precision",
     "tool_call_recall",
     "trajectory_efficiency",
