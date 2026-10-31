@@ -270,7 +270,7 @@
         "criterion": "contains",
         "method": {
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "deterministic"
         },
         "result": "passed",
@@ -289,7 +289,7 @@
         "criterion": "case_verdict",
         "method": {
           "evaluator": "agentic-evals.case",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "aggregate"
         },
         "result": "passed",
@@ -308,7 +308,7 @@
         "criterion": "required_tool",
         "method": {
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "deterministic"
         },
         "result": "passed",
@@ -328,7 +328,7 @@
         "criterion": "tool_args",
         "method": {
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "deterministic"
         },
         "result": "failed",
@@ -348,7 +348,7 @@
         "criterion": "case_verdict",
         "method": {
           "evaluator": "agentic-evals.case",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "aggregate"
         },
         "result": "failed",
@@ -368,7 +368,7 @@
         "criterion": "release_gate",
         "method": {
           "evaluator": "agentic-evals.gate",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "gate"
         },
         "result": "failed",
@@ -388,7 +388,7 @@
         "criterion": "contains",
         "method": {
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "deterministic"
         },
         "result": "passed",
@@ -405,7 +405,7 @@
       "extensions": {
         "io.deepagentlabs.agentic-evals": {
           "producer": "agentic-evals",
-          "producer_version": "0.9.0",
+          "producer_version": "0.10.0",
           "report_schema_version": "1.0"
         }
       }
@@ -419,7 +419,7 @@
         "criterion": "case_verdict",
         "method": {
           "evaluator": "agentic-evals.case",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "aggregate"
         },
         "result": "passed",
@@ -435,7 +435,7 @@
       "extensions": {
         "io.deepagentlabs.agentic-evals": {
           "producer": "agentic-evals",
-          "producer_version": "0.9.0",
+          "producer_version": "0.10.0",
           "report_schema_version": "1.0"
         }
       }
@@ -449,7 +449,7 @@
         "criterion": "required_tool",
         "method": {
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "deterministic"
         },
         "result": "passed",
@@ -466,7 +466,7 @@
       "extensions": {
         "io.deepagentlabs.agentic-evals": {
           "producer": "agentic-evals",
-          "producer_version": "0.9.0",
+          "producer_version": "0.10.0",
           "report_schema_version": "1.0"
         }
       }
@@ -480,7 +480,7 @@
         "criterion": "tool_args",
         "method": {
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "deterministic"
         },
         "result": "failed",
@@ -497,7 +497,7 @@
       "extensions": {
         "io.deepagentlabs.agentic-evals": {
           "producer": "agentic-evals",
-          "producer_version": "0.9.0",
+          "producer_version": "0.10.0",
           "report_schema_version": "1.0"
         }
       }
@@ -511,7 +511,7 @@
         "criterion": "case_verdict",
         "method": {
           "evaluator": "agentic-evals.case",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "aggregate"
         },
         "result": "failed",
@@ -527,7 +527,7 @@
       "extensions": {
         "io.deepagentlabs.agentic-evals": {
           "producer": "agentic-evals",
-          "producer_version": "0.9.0",
+          "producer_version": "0.10.0",
           "report_schema_version": "1.0"
         }
       }
@@ -541,7 +541,7 @@
         "criterion": "release_gate",
         "method": {
           "evaluator": "agentic-evals.gate",
-          "evaluator_version": "0.9.0",
+          "evaluator_version": "0.10.0",
           "evaluator_type": "gate"
         },
         "result": "failed",
@@ -561,7 +561,7 @@
       "extensions": {
         "io.deepagentlabs.agentic-evals": {
           "producer": "agentic-evals",
-          "producer_version": "0.9.0",
+          "producer_version": "0.10.0",
           "report_schema_version": "1.0"
         }
       }
