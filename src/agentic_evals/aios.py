@@ -9,6 +9,10 @@ travel with a Run artifact produced elsewhere (for example by
   the criterion (`Score.metric`), the method (evaluator, version and type),
   the result and the score value
 - every case also gets one case-verdict evaluation for `CaseEvaluation.passed`
+- a case with no observed output (no sample supplied, or a live target that
+  timed out or errored) is not exported: there is nothing in the Run it could
+  have judged, and its `sample_available`/`target_call` score describes the
+  evaluation harness. It is listed in `unobserved_cases` instead
 - an optional `GateDecision` becomes one release-readiness evaluation of the Run
 - each evaluation `evaluates` the Run objects the caller maps its case to, and
   emits `aiops.evaluation.completed`, or `aiops.evaluation.failed` when the
@@ -80,7 +84,9 @@ class AIOSEvidenceExport(BaseModel):
 
     `evidence`, `relationships` and `events` are AIOS v0.4-draft objects.
     `unmapped_cases` lists the cases that had no target (only possible with
-    `allow_unmapped=True`); none of their scores were exported. The counts
+    `allow_unmapped=True`); none of their scores were exported.
+    `unobserved_cases` lists the cases with no observed output (no sample, or
+    a live target that timed out or errored), which are never exported. The counts
     say how many exported evaluations were skipped or unavailable, so a
     reader never mistakes them for passes.
     """
@@ -93,6 +99,7 @@ class AIOSEvidenceExport(BaseModel):
     relationships: list[dict[str, Any]] = Field(default_factory=list)
     events: list[dict[str, Any]] = Field(default_factory=list)
     unmapped_cases: list[str] = Field(default_factory=list)
+    unobserved_cases: list[str] = Field(default_factory=list)
     exported_cases: int = 0
     skipped_scores: int = 0
     unavailable_scores: int = 0
@@ -120,7 +127,8 @@ def to_aios_evidence(
     Raises `AIOSExportError` when neither mapping is given, when `targets`
     names a case the report does not contain, or when a case has no target,
     unless `allow_unmapped=True`, which leaves such cases out and lists them in
-    `unmapped_cases`.
+    `unmapped_cases`. Cases with no observed output need no mapping; they are
+    listed in `unobserved_cases` and not exported.
 
     `gate`, when given, adds one release-readiness evaluation of the Run.
     Evidence IDs start with `id_prefix` (default `"<run_id>:evals:<suite>"`);
@@ -147,7 +155,10 @@ def to_aios_evidence(
     default_refs = [] if default_target is None else _references(default_target, "default_target")
     case_refs: dict[str, list[dict[str, Any]]] = {}
     unmapped: list[str] = []
+    unobserved = [case.case_id for case in report.cases if not case.sample_available]
     for case in report.cases:
+        if not case.sample_available:
+            continue
         spec = targets.get(case.case_id)
         refs = default_refs if spec is None else _references(spec, f"targets[{case.case_id!r}]")
         if refs:
@@ -167,6 +178,7 @@ def to_aios_evidence(
         suite_name=report.suite_name,
         suite_version=report.suite_version,
         unmapped_cases=unmapped,
+        unobserved_cases=unobserved,
     )
     for case in report.cases:
         if case.case_id not in case_refs:
