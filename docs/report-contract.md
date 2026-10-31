@@ -68,7 +68,7 @@ the packaged schemas; CI exercises accessors from an installed wheel.
 | AgenticLens | Its existing Evals dependency accepts 0.7.2. Trace adapters, calibration and diagnosis remain Lens-owned. |
 | Control Tower 0.6.1 | Validates complete reports/gates against bundled published schemas before evidence projection. Its Evals extra requires >=0.7.2; base validation remains sibling-independent. |
 | MCP 0.3.8 | `evals.validate_artifact` validates native artifacts offline; Lens report consumers enforce the same schemas. `spec.validate_artifact` remains separate AIOS validation. |
-| AI Operations Specification | This package-local contract is not normative AIOS evidence; evaluation evidence export remains Evals v0.10. |
+| AI Operations Specification | This package-local contract is not normative AIOS evidence. Evals 0.10.0 derives AIOS `0.4-draft` evaluation evidence from it with `to_aios_evidence` ([guide](aios-evidence.md)); the native contract is unchanged. |
 | Sidecar | Supervision outcomes remain distinct from scores. Schema publication does not implement containment scoring. |
 | Chaos | Resilience outcomes remain Chaos-owned. Evals retains score and release-gate computation. |
 

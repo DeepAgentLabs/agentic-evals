@@ -222,4 +222,4 @@ accepting them. See the [contract policy](report-contract.md).
 | Control Tower | Validates native reports against bundled schemas; the 0.9.0 schemas add optional judge and live fields that Tower can project. |
 | MCP | `evals.validate_artifact` validates native reports and gates offline against bundled schemas, now synced to 0.9.0. |
 | Sidecar, Chaos | Not affected. Supervision and resilience outcomes stay theirs; live-target `timed_out` is an evaluation-harness outcome, not a chaos fault or a containment verdict. |
-| AI Operations Specification | No change. AIOS evaluation evidence export is Evals v0.10. |
+| AI Operations Specification | No change in 0.9.0. Evals 0.10.0 adds the AIOS evaluation evidence export ([guide](aios-evidence.md)). |
