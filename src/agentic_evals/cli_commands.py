@@ -61,6 +61,15 @@ def _emit(text: str, destination: str | None) -> None:
         sys.stdout.write(text)
 
 
+def _load_report(path: str) -> EvaluationReport:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    Draft202012Validator(report_schema()).validate(payload)
+    report = EvaluationReport.model_validate(payload)
+    if report.schema_version != "1.0":
+        raise ValueError(f"unsupported report schema_version: {report.schema_version}")
+    return report
+
+
 def _output_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--out", help="output file (default: stdout; '-' also means stdout)")
     parser.add_argument("--format", choices=("json", "junit", "markdown"), default="json")
@@ -127,11 +136,7 @@ def execute(args: argparse.Namespace) -> int:
             _emit((pack.suite if args.suite else pack).model_dump_json(indent=2) + "\n", args.out)
         return 0
     if args.command == "gate":
-        payload = json.loads(Path(args.report).read_text(encoding="utf-8"))
-        Draft202012Validator(report_schema()).validate(payload)
-        report = EvaluationReport.model_validate(payload)
-        if report.schema_version != "1.0":
-            raise ValueError(f"unsupported report schema_version: {report.schema_version}")
+        report = _load_report(args.report)
         raw_config = _data(args.config) if args.config else {}
         if not isinstance(raw_config, dict):
             raise ValueError("gate config must be an object")
