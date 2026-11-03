@@ -1,3 +1,8 @@
+---
+name: evaluate-containment
+description: Score authenticated bounded containment evidence separately from task success.
+---
+
 # Evaluate containment
 
 ## Trigger
