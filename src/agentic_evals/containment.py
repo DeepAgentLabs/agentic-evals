@@ -128,7 +128,10 @@ class ContainmentEvaluator:
                 raise ValueError(
                     "Authenticated complete evidence for the expected stream is required"
                 )
-            detail = _inspect(records, expected)
+            try:
+                detail = _inspect(records, expected)
+            except ValueError as exc:
+                return self._scores(False, str(exc), verification, {})
             return self._scores(True, "Observed containment requirements met", verification, detail)
         except Exception as exc:
             # Exceptions can contain credentials or full hostile records. Keep

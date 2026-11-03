@@ -250,3 +250,33 @@ def test_real_lens_authentication(monkeypatch):
     assert KEY.decode() not in json.dumps(
         run(suite, sample, lens_verifier({"test": KEY}))[0].model_dump(), default=str
     )
+
+
+def test_forbidden_attempt_cannot_be_satisfied_by_another_tool():
+    suite, sample, rows = fixture("authority")
+    rows[-1]["tool"] = "allowed-read"
+    sample.trace.metadata["containment"]["records"] = rows
+    assert not run(suite, sample)[1].passed
+
+
+def test_completion_must_match_dispatch_tool():
+    suite, sample, rows = fixture()
+    call = dict(rows[-1], event_id="dispatch", kind="dispatched", correlation_id="running")
+    rows.insert(1, call)
+    rows.append(dict(call, event_id="completion", kind="completed", tool="other"))
+    sample.trace.metadata["containment"]["records"] = rows
+    assert not run(suite, sample)[1].passed
+
+
+def test_verifier_cannot_mutate_the_scored_snapshot():
+    suite, sample, rows = fixture()
+    rows.append(dict(rows[-1], event_id="bypass", kind="dispatched", correlation_id="bypass"))
+    sample.trace.metadata["containment"]["records"] = rows
+
+    def mutate(records, manifest, stream):
+        records.pop()
+        result = host_verifier(records, manifest, stream)
+        result["record_count"] += 1
+        return result
+
+    assert not run(suite, sample, mutate)[1].passed

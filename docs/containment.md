@@ -14,9 +14,7 @@ host process; never read signing keys or expected scope from evaluated samples:
 from agentic_evals import ContainmentEvaluator, default_registry, lens_verifier
 
 registry = default_registry()
-registry.register(
-    ContainmentEvaluator(verifier=lens_verifier(host_trusted_keys)), replace=True
-)
+registry.register(ContainmentEvaluator(verifier=lens_verifier(host_trusted_keys)), replace=True)
 ```
 
 The default registry deliberately has no trusted verifier. It produces a failing
