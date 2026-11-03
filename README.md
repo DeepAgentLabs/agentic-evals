@@ -1,5 +1,14 @@
 # agentic-evals
 
+## Release sequencing
+
+The final package-local roadmap phase uses **v0.12**, followed by further
+minor releases as needed. **v1.0 is reserved for one coordinated DeepAgentLabs
+ecosystem release**, after the shared readiness and compatibility gates pass.
+Completing this minor milestone does not independently declare stable APIs or
+AIOS conformance. Existing acceptance criteria remain required. See the
+[ecosystem release policy](https://github.com/DeepAgentLabs/.github/blob/main/profile/RELEASE_POLICY.md).
+
 [![PyPI](https://img.shields.io/pypi/v/agentic-evals)](https://pypi.org/project/agentic-evals/)
 [![Python versions](https://img.shields.io/pypi/pyversions/agentic-evals)](https://pypi.org/project/agentic-evals/)
 [![CI](https://github.com/DeepAgentLabs/agentic-evals/actions/workflows/ci.yml/badge.svg)](https://github.com/DeepAgentLabs/agentic-evals/actions/workflows/ci.yml)
@@ -686,8 +695,8 @@ broader Agent Alone vs Agent + Sidecar evidence remains Sidecar v0.9 work.
 Sidecar 0.8 provides Shared/Exclusive context-only, guardrails-only or combined
 configuration, explicit host context delivery and mandatory guardrail composition.
 Exclusive rules cannot weaken shared restrictions. Cross-framework privacy,
-revocation and delegated authority remain v0.9 validation; stable schemas remain
-v1.0. Native correlated Lens readback requires Lens 0.7.1. All sibling packages
+revocation and delegated authority remain v0.9 validation; contract readiness continues in v0.10; the stable freeze is reserved for
+the coordinated ecosystem v1.0 release. Native correlated Lens readback requires Lens 0.7.1. All sibling packages
 stay optional; no dependency floor is increased without a runtime requirement.
 See the [Sidecar integration contract](https://github.com/DeepAgentLabs/agentic-sidecar/blob/main/docs/integrations.md).
 
