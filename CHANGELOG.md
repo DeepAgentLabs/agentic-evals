@@ -4,6 +4,24 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.11.0 - 2026-11-03
+
+### Added
+
+- Required binary containment scoring over host-bounded authenticated observations,
+  preserving Lens verification status and declared coverage separately from task success.
+- Six-scenario adversarial containment pack for stop/revoke, denied tools, authority,
+  injected instructions and fail-closed gate/approval failures.
+- Optional Lens >=0.12 integrity adapter; no required sibling dependency.
+- Passing, authenticated bypass and missing-evidence fixtures, CLI example and CI checks.
+
+### Compatibility
+
+- Native report/gate schema 1.0 and AIOS exports are unchanged. Existing sibling
+  ranges remain valid; MCP 0.6.1 updates its exact Evals pin and real-adapter tests.
+- Snapshot authentication does not prove exhaustive capture. In-flight completions
+  are reported separately; runtime enforcement and attack execution stay producer-owned.
+
 ## 0.10.0 - 2026-10-31
 
 AI Operations Specification evaluation evidence export (roadmap v0.10).
