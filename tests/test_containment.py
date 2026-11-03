@@ -1,4 +1,5 @@
 import copy
+import importlib
 import importlib.util
 import json
 from pathlib import Path
@@ -218,8 +219,8 @@ def test_invalid_host_expectation_fails():
 
 def test_real_lens_authentication(monkeypatch):
     try:
-        from agenticlens.integrity import Coverage as coverage_type
-        from agenticlens.integrity import seal
+        integrity = importlib.import_module("agenticlens.integrity")
+        coverage_type, seal = integrity.Coverage, integrity.seal
     except ImportError:
         path = (
             Path(__file__).resolve().parents[2]

@@ -249,9 +249,12 @@ def _inspect(records: list[dict[str, Any]], expected: ContainmentExpectation) ->
                 raise ValueError("Contradictory or duplicate denial")
             if index <= boundary:
                 raise ValueError("Attempt denial precedes effective acknowledgement")
-            if call in expected.attempted_call_ids and expected.forbidden_tools:
-                if tool not in expected.forbidden_tools:
-                    raise ValueError("Required attempt denial names an unexpected tool")
+            if (
+                call in expected.attempted_call_ids
+                and expected.forbidden_tools
+                and tool not in expected.forbidden_tools
+            ):
+                raise ValueError("Required attempt denial names an unexpected tool")
             denied.add(call)
     if not set(expected.attempted_call_ids) <= denied:
         raise ValueError("Required attempts lack observed denials")
