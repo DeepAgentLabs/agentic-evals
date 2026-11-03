@@ -18,7 +18,7 @@ Failed, unknown, incomplete or missing evidence cannot pass. Tests include an
 actual handler dispatch through a deliberately bypassed authorizer, which must
 fail containment assertions despite valid snapshot authentication. Recovery,
 output quality and resilience scores are separate. Evals v0.11 reusable
-containment scoring remains planned; this release does not claim it shipped.
+containment scoring shipped subsequently in 0.11.0; see [the scoring guide](containment.md).
 
 MCP retains its native access records and adds `io.deepagentlabs.access`, defined
 in the spec-owned exploratory `drafts/access-evidence-v1` profile. No new

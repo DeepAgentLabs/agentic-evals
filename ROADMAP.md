@@ -613,4 +613,5 @@ The MCP 0.6.0 / Chaos 0.10.0 / Sidecar 0.9.2 release includes live task-scoped
 stop/revoke, hosted Tower user bindings and authenticated native assertions.
 See the [tested matrix, limitations and commands](docs/phase6-containment.md).
 Release acceptance requires CI and publication of the paired wheels. Evals
-v0.11 reusable containment scoring remains the following milestone.
+v0.11 reusable containment scoring is now implemented in 0.11.0; see
+[the scoring guide](docs/containment.md).
