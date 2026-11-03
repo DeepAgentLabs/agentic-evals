@@ -230,7 +230,12 @@ def _inspect(records: list[dict[str, Any]], expected: ContainmentExpectation) ->
         if event_kind not in {"dispatched", "completed", "denied"}:
             continue
         call, tool = row.get("correlation_id"), row.get("tool")
-        if not isinstance(call, str) or not call.strip() or not isinstance(tool, str) or not tool:
+        if (
+            not isinstance(call, str)
+            or not call.strip()
+            or not isinstance(tool, str)
+            or not tool.strip()
+        ):
             raise ValueError("Dispatch/completion/denial requires call and tool identity")
         if event_kind == "dispatched":
             if call in dispatched or call in denied:
