@@ -19,10 +19,10 @@ deliverables, acceptance criteria and sibling dependencies.
 - **v0.8** ✅ Complete — Suite, pack and gate CLI for CI (`0.8.0`)
 - **v0.9** ✅ Complete — Judge reliability, cost and live-target resilience (`0.9.0`)
 - **v0.10** ✅ Complete — AI Operations Specification evaluation evidence export (`0.10.0`)
-- **v0.11** ⛔ Blocked — Adversarial containment scoring (needs Sidecar, Chaos, MCP and Lens evidence)
+- **v0.11** ✅ Complete — Authenticated bounded adversarial containment scoring (`0.11.0`)
 - **v1.0** 🚧 Planned — Stable API and report schema
 
-Current release: `0.10.0` (2026-10-31). See [CHANGELOG.md](CHANGELOG.md) for
+Current release: `0.11.0` (2026-11-03). See [CHANGELOG.md](CHANGELOG.md) for
 what each version shipped.
 
 ## Scope
@@ -281,7 +281,7 @@ with `conformance.aligned = true`. Report schema 1.0 is unchanged, so MCP and
 Control Tower keep their bundled schemas, and Lens's `agentic-evals>=0.7.1,<1`
 range already allows 0.10.0.
 
-### v0.11 — Adversarial containment scoring ⛔ Blocked
+### v0.11 — Adversarial containment scoring ✅ (`0.11.0`)
 
 **Goal:** score whether an agent stayed contained after stop, revoke or deny
 instructions. This is scored separately from task success, using observed
@@ -289,17 +289,17 @@ evidence rather than claims.
 
 **Deliverables:**
 
-- [ ] Provide a reusable containment eval pack covering denied tools, stop/revoke
+- [x] Provide a reusable containment eval pack covering denied tools, stop/revoke
       acknowledgements, subsequent dispatch, authority and fail-closed gate failures.
-- [ ] Assert against actual dispatch/completion events; a BLOCK verdict or a safe
+- [x] Assert against actual dispatch/completion events; a BLOCK verdict or a safe
       answer alone is not proof of containment.
-- [ ] Consume correlated Sidecar/Chaos/MCP observations through optional adapters;
+- [x] Consume correlated Sidecar/Chaos/MCP observations through optional adapters;
       coordinate common event semantics with AI Operations Specification.
-- [ ] Fail gates on missing required evidence, policy versions or event coverage;
+- [x] Fail gates on missing required evidence, policy versions or event coverage;
       preserve integrity verification status supplied by Lens.
-- [ ] Provide zero-violation gates per scenario and configurable acknowledgement
+- [x] Provide zero-violation gates per scenario and configurable acknowledgement
       latency limits; score containment separately from task success.
-- [ ] Publish passing and deliberately failing fixtures for post-stop dispatch,
+- [x] Publish passing and deliberately failing fixtures for post-stop dispatch,
       revoked access, injected instructions and incomplete traces.
 
 **Acceptance criteria:**
@@ -307,18 +307,24 @@ evidence rather than claims.
 - the deliberately bypassed-enforcement negative control fails the gate
 - missing evidence fails the gate instead of passing it
 
-**Blocked by:**
+**Validated prerequisites:**
 
-- `agentic-sidecar` v0.9: lifecycle and dispatch evidence, and revoked-authority fixtures
-- `agentic-chaos` adversarial workflows on isolated targets
-- `deep-agentic-core-mcp` revocation and dispatch evidence (its Phase 5 hosted access-control items, moved from Phase 4)
-- `agenticlens` integrity verification, still open on its roadmap
+- `agentic-sidecar` 0.9.2: lifecycle and dispatch evidence, and revoked-authority fixtures
+- `agentic-chaos` 0.10.0 adversarial workflows on isolated targets
+- `deep-agentic-core-mcp` 0.6.0/0.6.1 revocation and dispatch evidence (its Phase 5 hosted access-control items, moved from Phase 4)
+- `agenticlens` 0.12.0 integrity verification
 
 **Validate in:** Control Tower's zero-violation gate checks and Sidecar's
 Agent Alone vs. Agent + Sidecar fixtures.
 
 Evals scores observations; it does not inject attacks, enforce permissions or
 prove unobserved behavior.
+
+Implemented in [the containment guide](docs/containment.md). The six-scenario
+pack and authenticated negative controls fail closed on absent evidence and
+versions. Lens verifies the exact ordered snapshot; coverage remains producer-declared.
+MCP 0.6.1 updates its exact Evals pin and validates real dispatch negative controls.
+Native report/gate schema 1.0 is unchanged; other sibling ranges remain sufficient.
 
 ### v1.0 — Stable API and report schema
 

@@ -950,3 +950,11 @@ compatible; no runtime or patch release is required here.
 Compatibility, ownership, dependency ranges and reproducible containment acceptance
 for MCP 0.6.0 / Chaos 0.10.0 / Sidecar 0.9.2 are documented in the
 [Phase 6 guide](docs/phase6-containment.md).
+
+## Adversarial containment scoring — 0.11.0
+
+Score authenticated dispatch/completion evidence with `ContainmentEvaluator`
+and the six-scenario `adversarial-containment` pack. Missing evidence, missing
+policy versions and bypassed enforcement fail; containment stays separate from
+task success. Optional Lens verification preserves integrity status and declared
+coverage. See [the guide and runnable positive/negative fixtures](docs/containment.md).
