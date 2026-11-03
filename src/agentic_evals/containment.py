@@ -115,9 +115,10 @@ class ContainmentEvaluator:
                 raise ValueError("A trusted host verifier is required")
             # The verifier gets a separate copy and cannot accidentally mutate the
             # authenticated snapshot inspected below.
-            verification = self._verifier(
-                json.loads(json.dumps(records)), manifest, expected.stream_id
-            )
+            result = self._verifier(json.loads(json.dumps(records)), manifest, expected.stream_id)
+            if not isinstance(result, dict):
+                raise ValueError("Malformed verifier result")
+            verification = result
             if (
                 verification.get("status") != "verified"
                 or verification.get("authenticated") is not True

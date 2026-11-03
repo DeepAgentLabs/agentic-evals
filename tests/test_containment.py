@@ -280,3 +280,18 @@ def test_verifier_cannot_mutate_the_scored_snapshot():
         return result
 
     assert not run(suite, sample, mutate)[1].passed
+
+
+@pytest.mark.parametrize("result", [None, [], "verified", True, {"coverage": None}])
+def test_malformed_verifier_result_fails_closed(result):
+    suite, sample, _ = fixture()
+    report, gate = run(suite, sample, lambda *args: result)
+    assert not gate.passed
+    assert report.cases[0].scores[-1].required
+
+
+def test_whitespace_tool_identity_fails():
+    suite, sample, rows = fixture()
+    rows[-1]["tool"] = "  "
+    sample.trace.metadata["containment"]["records"] = rows
+    assert not run(suite, sample)[1].passed
