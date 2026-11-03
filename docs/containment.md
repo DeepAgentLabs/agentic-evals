@@ -101,4 +101,4 @@ Hosts own correct scope mapping, expected attempts, policy versions and clock
 measurement. All results apply only to that bounded observation stream. The
 Evals-local envelope is not a new shared artifact or normative AIOS contract.
 Native report/gate schema 1.0 is unchanged; existing Lens/Sidecar dependency
-ranges cover 0.11. Only MCP's exact Evals runtime pin needs a patch release.
+ranges cover 0.11. MCP 0.6.1 updates its exact Evals pin. Lens 0.12.1 refreshes embedded schemas/examples and target-error trial handling.
