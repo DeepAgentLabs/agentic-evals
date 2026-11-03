@@ -67,3 +67,14 @@ jobs:
           for wheel in dist/*.whl; do
             uv run --no-project --with "$wheel" python -I scripts/check_installed_contract.py
           done
+
+  containment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv python install 3.12
+      - run: uv sync --extra dev --extra integrity --python 3.12
+      - run: uv run --extra integrity pytest tests/test_containment.py --no-cov
+      - run: uv run --extra integrity python examples/containment/generate.py
+      - run: git diff --exit-code -- examples/containment

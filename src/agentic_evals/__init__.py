@@ -12,6 +12,12 @@ from agentic_evals.aios import (
     attach_aios_evidence,
     to_aios_evidence,
 )
+from agentic_evals.containment import (
+    ContainmentEvaluator,
+    ContainmentExpectation,
+    ContainmentVerifier,
+    lens_verifier,
+)
 from agentic_evals.evaluators import (
     AsyncEvaluator,
     BusinessRuleEvaluator,
@@ -115,6 +121,10 @@ __all__ = [
     "SQL_CORRECTNESS",
     "SUMMARY_QUALITY",
     "TRANSLATION",
+    "ContainmentEvaluator",
+    "ContainmentExpectation",
+    "ContainmentVerifier",
+    "lens_verifier",
     "AsyncEvaluator",
     "BusinessRuleEvaluator",
     "Case",

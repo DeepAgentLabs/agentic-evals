@@ -18,7 +18,8 @@ dependency on AgenticLens itself.
 
 **Published on PyPI.** The engine (deterministic checks, LLM-as-judge and
 custom evaluators, a release gate, live Python/HTTP targets, the `Eval()`
-quickstart API, the `agentic-evals` CLI and AIOS evidence export) is real, tested code — see the
+quickstart API, the `agentic-evals` CLI, AIOS evidence export and authenticated
+containment scoring) is real, tested code — see the
 [changelog](CHANGELOG.md) for what shipped in each release. The API may
 still move between minor versions ahead of a 1.0; pin a version in
 production and read the changelog before upgrading.
@@ -672,9 +673,9 @@ remain planned; native interoperability does not establish stable AIOS conforman
 
 ## Operational safety roadmap
 
-See [planned safety acceptance criteria](ROADMAP.md) for responsibilities and
-dependencies. These additions do not claim implemented end-to-end containment
-or integrity protection.
+See [the roadmap](ROADMAP.md) for responsibilities and dependencies. Evals 0.11
+scores bounded containment observations with optional Lens authentication;
+[the guide](docs/containment.md) states capture, trust and in-flight limits.
 
 ## Sidecar 0.8 interoperability
 
@@ -950,3 +951,11 @@ compatible; no runtime or patch release is required here.
 Compatibility, ownership, dependency ranges and reproducible containment acceptance
 for MCP 0.6.0 / Chaos 0.10.0 / Sidecar 0.9.2 are documented in the
 [Phase 6 guide](docs/phase6-containment.md).
+
+## Adversarial containment scoring — 0.11.0
+
+Score authenticated dispatch/completion evidence with `ContainmentEvaluator`
+and the six-scenario `adversarial-containment` pack. Missing evidence, missing
+policy versions and bypassed enforcement fail; containment stays separate from
+task success. Optional Lens verification preserves integrity status and declared
+coverage. See [the guide and runnable positive/negative fixtures](docs/containment.md).

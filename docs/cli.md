@@ -137,3 +137,6 @@ Sidecar owns supervision; Evals scores their explicitly supplied observations.
 Native Evals JSON is not itself AIOS evidence; `aios export` (0.10.0) derives
 it, and MCP `spec.validate_artifact` validates the merged Run.
 No sibling runtime dependency floor or release is required for the CLI alone.
+
+Containment scoring uses the same evaluate/gate path with a trusted host registry.
+See [the exact commands, fixtures and trust boundary](containment.md).

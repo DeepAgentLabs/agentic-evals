@@ -341,7 +341,9 @@ def test_sync_api_cancels_an_async_target_at_its_timeout(tmp_path: Path) -> None
     assert report.cases[0].target_status == "timed_out"
     mark = tmp_path / "target.finished"
     deadline = time.monotonic() + 2
-    while not mark.exists() and time.monotonic() < deadline:
+    while time.monotonic() < deadline:
+        if mark.exists() and mark.read_text() == "cancelled":
+            break
         time.sleep(0.02)
     assert mark.read_text() == "cancelled"
 

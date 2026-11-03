@@ -1,5 +1,6 @@
 from collections.abc import Callable
 
+from agentic_evals.containment import ContainmentEvaluator
 from agentic_evals.evaluators import CallableEvaluator, EvaluationContext, EvaluatorRegistry
 from agentic_evals.models import Score
 from agentic_evals.scorers.text import (
@@ -54,8 +55,9 @@ def default_registry() -> EvaluatorRegistry:
     registry = EvaluatorRegistry()
     for name, function in _BUILTIN_SCORERS.items():
         registry.register(CallableEvaluator(name, function, evaluator_type="builtin"))
+    registry.register(ContainmentEvaluator())
     return registry
 
 
 def builtin_scorer_names() -> tuple[str, ...]:
-    return tuple(sorted(_BUILTIN_SCORERS))
+    return tuple(sorted((*_BUILTIN_SCORERS, "containment")))

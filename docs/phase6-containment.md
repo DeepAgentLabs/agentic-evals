@@ -18,7 +18,7 @@ Failed, unknown, incomplete or missing evidence cannot pass. Tests include an
 actual handler dispatch through a deliberately bypassed authorizer, which must
 fail containment assertions despite valid snapshot authentication. Recovery,
 output quality and resilience scores are separate. Evals v0.11 reusable
-containment scoring remains planned; this release does not claim it shipped.
+containment scoring shipped subsequently in 0.11.0; see [the scoring guide](containment.md).
 
 MCP retains its native access records and adds `io.deepagentlabs.access`, defined
 in the spec-owned exploratory `drafts/access-evidence-v1` profile. No new
@@ -34,3 +34,7 @@ acceptance suite from the MCP guide; it requires the actual adapters without ski
 AIOS 0.6.1 denotes the existing Run/schema compatibility baseline. The new
 exploratory access profile is in the coordinated spec repository revision,
 not the historical v0.6.1 tag. It is not promoted to a normative schema family.
+
+Evals 0.11 now scores these bounded observations through a trusted host registry;
+MCP 0.6.1 validates real dispatch negative controls and Lens 0.12.1 updates its
+embedded report compatibility. See [the scoring guide](containment.md).
