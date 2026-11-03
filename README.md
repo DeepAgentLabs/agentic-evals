@@ -959,3 +959,10 @@ and the six-scenario `adversarial-containment` pack. Missing evidence, missing
 policy versions and bypassed enforcement fail; containment stays separate from
 task success. Optional Lens verification preserves integrity status and declared
 coverage. See [the guide and runnable positive/negative fixtures](docs/containment.md).
+
+## AIOS v0.6.2 implementation guidance
+
+AIOS v0.6.2 publishes cumulative-layer migration guidance, a non-normative
+OpenTelemetry companion profile and a strict documentation site build.
+Existing draft markers, native evidence and runtime dependencies are unchanged;
+no package patch release is needed. See [compatibility and offline example](docs/aios-0.6.2.md).
