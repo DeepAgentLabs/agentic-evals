@@ -1,5 +1,14 @@
 # agentic-evals — Roadmap
 
+## Release sequencing
+
+The final package-local roadmap phase uses **v0.12**, followed by further
+minor releases as needed. **v1.0 is reserved for one coordinated DeepAgentLabs
+ecosystem release**, after the shared readiness and compatibility gates pass.
+Completing this minor milestone does not independently declare stable APIs or
+AIOS conformance. Existing acceptance criteria remain required. See the
+[ecosystem release policy](https://github.com/DeepAgentLabs/.github/blob/main/profile/RELEASE_POLICY.md).
+
 `agentic-evals` is the **EVALUATE** layer of the DeepAgentLabs ecosystem: a
 standalone, framework-agnostic engine that scores LLM and agent outputs and
 turns the scores into release-gate decisions. This roadmap lists what has
@@ -20,7 +29,7 @@ deliverables, acceptance criteria and sibling dependencies.
 - **v0.9** ✅ Complete — Judge reliability, cost and live-target resilience (`0.9.0`)
 - **v0.10** ✅ Complete — AI Operations Specification evaluation evidence export (`0.10.0`)
 - **v0.11** ✅ Complete — Authenticated bounded adversarial containment scoring (`0.11.0`)
-- **v1.0** 🚧 Planned — Stable API and report schema
+- **v0.12** 🚧 Planned — API and report-schema readiness
 
 Current release: `0.11.0` (2026-11-03). See [CHANGELOG.md](CHANGELOG.md) for
 what each version shipped.
@@ -50,7 +59,7 @@ did not observe.
 | Project | Relationship | Releases |
 |---|---|---|
 | `agenticlens` | Consumes Evals for scoring (`agenticlens>=0.6.0` requires `agentic-evals>=0.7.1`). Lens owns datasets, calibration, experiments and diagnosis. Lens 0.7.0 registers its trace-aware evaluators next to Evals' built-in scorers and reports judge cost and evaluator disagreement from Evals `Score` metadata; Evals 0.9.0 writes the same `judge_*` keys for its own judges. | v0.7.x, v0.9 ✅ |
-| `agenticops-control-tower` | Tower 0.6.1 validates complete native reports/gates against published Evals 0.7.2 schemas before evidence projection and staging recovery verification; its 0.9.0-schema sync is a patch release. Normative AIOS mappings remain future work. | v0.7.x, v0.9, v1.0 |
+| `agenticops-control-tower` | Tower 0.6.1 validates complete native reports/gates against published Evals 0.7.2 schemas before evidence projection and staging recovery verification; its 0.9.0-schema sync is a patch release. Normative AIOS mappings remain future work. | v0.7.x, v0.9, v0.12 readiness; coordinated v1.0 |
 | `ai-operations-spec` | Defines the `evaluation` evidence object and the `evaluates` relationship (v0.4 rule `AIOS-0.4-P08`) that report exports follow. Evals 0.10.0 exports `0.4-draft` evaluation evidence; its tests vendor the v0.4 run schemas and compare them with a spec checkout when present. | v0.10 ✅ |
 | `deep-agentic-core-mcp` | MCP 0.3.8 exposes native `evals.validate_artifact` and validates Lens report consumers; its bundled schemas sync to Evals 0.9.0 in a patch release. `spec.validate_artifact` validates Evals 0.10.0 exports merged into a Run (`conformance.aligned = true`). | v0.9, v0.10 ✅ |
 | `agentic-sidecar` | Its v0.9 compares Agent Alone vs. Agent + Sidecar and uses Evals for generic scoring. Sidecar keeps supervision scenarios. | v0.11 |
@@ -326,10 +335,11 @@ versions. Lens verifies the exact ordered snapshot; coverage remains producer-de
 MCP 0.6.1 updates its exact Evals pin and validates real dispatch negative controls.
 Native report/gate schema 1.0 is unchanged; other sibling ranges remain sufficient.
 
-### v1.0 — Stable API and report schema
+### v0.12 — API and report-schema readiness
 
-**Goal:** a public API and report format others can depend on without pinning
-minor versions.
+**Goal:** prepare the public API, report contract and compatibility evidence
+for the coordinated ecosystem v1.0 release. No independent major release or
+stability guarantee is established by v0.12.
 
 **Deliverables:**
 
@@ -346,7 +356,7 @@ minor versions.
 
 - a downstream project pinned to `agentic-evals>=1.0,<2` keeps working across
   `1.x` releases in compatibility tests
-- Lens, Tower and MCP integrations pass against the `1.0` release candidate
+- Lens, Tower and MCP integrations pass against the coordinated ecosystem `1.0` release candidate
 
 **Depends on:** v0.7.x, v0.8, v0.9 and v0.10 complete.
 
@@ -368,8 +378,8 @@ broader Agent Alone vs Agent + Sidecar evidence remains Sidecar v0.9 work.
 Sidecar 0.8 provides Shared/Exclusive context-only, guardrails-only or combined
 configuration, explicit host context delivery and mandatory guardrail composition.
 Exclusive rules cannot weaken shared restrictions. Cross-framework privacy,
-revocation and delegated authority remain v0.9 validation; stable schemas remain
-v1.0. Native correlated Lens readback requires Lens 0.7.1. All sibling packages
+revocation and delegated authority remain v0.9 validation; contract readiness continues in v0.10; the stable freeze is reserved for
+the coordinated ecosystem v1.0 release. Native correlated Lens readback requires Lens 0.7.1. All sibling packages
 stay optional; no dependency floor is increased without a runtime requirement.
 See the [Sidecar integration contract](https://github.com/DeepAgentLabs/agentic-sidecar/blob/main/docs/integrations.md).
 
