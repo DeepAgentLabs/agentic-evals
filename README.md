@@ -988,3 +988,8 @@ See [the API/private-module policy](docs/public-api.md),
 [deprecation, support and sibling matrix](docs/support-policy.md), and
 [executable example index](examples/README.md). The coordinated ecosystem v1.0
 acceptance gates remain open; 0.12.0 does not promise stable major-version APIs.
+
+## Sidecar 0.10 compatibility — 2026-11-04
+
+Evals 0.12.0 retains scoring/report and gate schema 1.0; Sidecar decisions and intent grants are not scores or observed dispatch receipts.
+See [candidate contracts, migration and operator example](docs/sidecar-0.10.md).

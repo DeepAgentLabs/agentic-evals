@@ -638,3 +638,8 @@ AIOS v0.7.0 publishes cumulative-layer migration guidance, a non-normative
 OpenTelemetry companion profile and a strict documentation site build.
 Existing draft markers, native evidence and runtime dependencies are unchanged;
 no package patch release is needed. See [compatibility and offline example](docs/aios-0.7.0.md).
+
+## Sidecar 0.10 compatibility — 2026-11-04
+
+Evals 0.12.0 retains scoring/report and gate schema 1.0; Sidecar decisions and intent grants are not scores or observed dispatch receipts.
+See [candidate contracts, migration and operator example](docs/sidecar-0.10.md).
