@@ -652,3 +652,8 @@ See [compatibility, boundaries and offline operator example](docs/lens-0.13.md).
 ## Tower 0.10 capability contract readiness
 
 See [compatibility, operator example and dependency boundaries](docs/tower-0.10-compatibility.md). Tower publishes the local candidate `tower.capabilities.v1` with Python/Node HTTP validation. Evals owns scoring and release gates. Tower preserves native verdicts; a passing gate is not deployment health. Existing optional dependencies remain sufficient; no package release or stable ecosystem claim is introduced.
+
+## Chaos 0.11 ChaosHub compatibility — 2026-11-04
+
+Evals 0.12.0 retains output scoring, containment scoring and release gates. A recipe or its no-unhandled-error assertion is not an Evals gate; score the resulting outputs and attach Evals evidence explicitly. No dependency or release is needed.
+See [the compatibility guide and offline operator example](docs/chaos-0.11-chaoshub.md).
