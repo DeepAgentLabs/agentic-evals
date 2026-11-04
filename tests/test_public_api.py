@@ -19,17 +19,21 @@ def test_public_exports_are_unique_and_resolve() -> None:
 def test_public_api_retains_imports_and_call_shapes() -> None:
     for name, entry in BASELINE.items():
         obj = getattr(api, name)
-        kind = "class" if inspect.isclass(obj) else "function" if inspect.isfunction(obj) else "value"
+        kind = (
+            "class" if inspect.isclass(obj) else "function" if inspect.isfunction(obj) else "value"
+        )
         assert kind == entry["kind"], name
         assert getattr(obj, "__module__", None) == entry["module"], name
         if kind != "function":
             continue
         parameters = list(inspect.signature(obj).parameters.values())
         old = entry["parameters"]
-        assert [p.name for p in parameters[:len(old)]] == [p["name"] for p in old], name
-        for expected, actual in zip(old, parameters):
+        assert [p.name for p in parameters[: len(old)]] == [p["name"] for p in old], name
+        for expected, actual in zip(old, parameters, strict=False):
             assert actual.kind.name == expected["kind"], name
             assert (actual.default is inspect.Parameter.empty) == expected["required"], name
-        assert all(p.default is not inspect.Parameter.empty or p.kind in {
-            inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD
-        } for p in parameters[len(old):]), name
+        assert all(
+            p.default is not inspect.Parameter.empty
+            or p.kind in {inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD}
+            for p in parameters[len(old) :]
+        ), name
