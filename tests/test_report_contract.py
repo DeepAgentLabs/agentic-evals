@@ -193,3 +193,9 @@ def test_reports_saved_before_v09_load_without_judge_or_live_summaries() -> None
     assert report.summary.judge is None
     assert report.summary.live is None
     assert all(case.target_status is None for case in report.cases)
+
+
+@pytest.mark.parametrize("name,model,accessor", CONTRACTS)
+def test_contract_is_additive_to_v012_candidate(name, model, accessor) -> None:
+    baseline = json.loads((ROOT / "tests/fixtures/v0.12" / f"{name}.schema.json").read_text())
+    assert_additive(baseline, accessor())
