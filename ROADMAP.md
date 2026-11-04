@@ -648,3 +648,7 @@ See [candidate contracts, migration and operator example](docs/sidecar-0.10.md).
 
 The optional integrity extra `agenticlens>=0.12.0,<1` already admits 0.13.0. Evals owns scoring and gates; Lens release receipts compose native `evaluate_gate` with a saved policy/report digest. An authenticated artifact-service caller does not authenticate the submitted evidence.
 See [compatibility, boundaries and offline operator example](docs/lens-0.13.md).
+
+## Tower 0.10 capability contract readiness
+
+See [compatibility, operator example and dependency boundaries](docs/tower-0.10-compatibility.md). Tower publishes the local candidate `tower.capabilities.v1` with Python/Node HTTP validation. Evals owns scoring and release gates. Tower preserves native verdicts; a passing gate is not deployment health. Existing optional dependencies remain sufficient; no package release or stable ecosystem claim is introduced.
