@@ -29,9 +29,9 @@ deliverables, acceptance criteria and sibling dependencies.
 - **v0.9** ✅ Complete — Judge reliability, cost and live-target resilience (`0.9.0`)
 - **v0.10** ✅ Complete — AI Operations Specification evaluation evidence export (`0.10.0`)
 - **v0.11** ✅ Complete — Authenticated bounded adversarial containment scoring (`0.11.0`)
-- **v0.12** 🚧 Planned — API and report-schema readiness
+- **v0.12** ✅ Implemented — API and report-schema readiness (`0.12.0`); coordinated v1.0 acceptance remains open
 
-Current release: `0.11.0` (2026-11-03). See [CHANGELOG.md](CHANGELOG.md) for
+Current release: `0.12.0` (2026-11-04). See [CHANGELOG.md](CHANGELOG.md) for
 what each version shipped.
 
 ## Scope
@@ -343,13 +343,13 @@ stability guarantee is established by v0.12.
 
 **Deliverables:**
 
-- [ ] audit and freeze the public API (`__all__`), and mark internal modules
-      private
-- [ ] report schema `1.x` with an additive-only policy, a deprecation window of
+- [x] audit and freeze the public API candidate (`__all__`) in compatibility
+      fixtures, and document private implementation modules without breaking imports
+- [x] report schema `1.x` with an additive-only policy, a deprecation window of
       at least one minor release, and migration notes for any `2.0` change
-- [ ] documentation site covering the declarative API, CLI, scorers, gates and
-      skills, with every example executed in CI
-- [ ] support policy: Python versions and the sibling versions validated per
+- [x] documentation site covering the declarative API, CLI, scorers, gates and
+      skills, with every shipped Python example executed in CI
+- [x] support policy: Python versions and the sibling versions validated per
       release
 
 **Acceptance criteria:**
@@ -359,6 +359,12 @@ stability guarantee is established by v0.12.
 - Lens, Tower and MCP integrations pass against the coordinated ecosystem `1.0` release candidate
 
 **Depends on:** v0.7.x, v0.8, v0.9 and v0.10 complete.
+
+Implementation: [API candidate](docs/public-api.md), [support and tested matrix](docs/support-policy.md),
+[example inventory](examples/README.md), and required downstream compatibility CI.
+The two acceptance criteria above are **open coordinated-v1.0 release gates**:
+no 1.0 package or release candidate is published by this milestone. Current
+Lens 0.12.1, Tower 0.9.1 and MCP 0.6.1 integrations exercise Evals 0.12.0.
 
 ---
 

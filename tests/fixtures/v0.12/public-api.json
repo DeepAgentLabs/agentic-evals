@@ -1,0 +1,2316 @@
+{
+  "AIOSEvidenceExport": {
+    "module": "agentic_evals.aios",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "spec_version",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "run_id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "suite_name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "suite_version",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "evidence",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "relationships",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "events",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "unmapped_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "unobserved_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "exported_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "skipped_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "unavailable_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "AIOSExportError": {
+    "module": "agentic_evals.aios",
+    "kind": "class"
+  },
+  "AsyncEvaluator": {
+    "module": "agentic_evals.evaluators",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "args",
+        "kind": "VAR_POSITIONAL",
+        "required": true
+      },
+      {
+        "name": "kwargs",
+        "kind": "VAR_KEYWORD",
+        "required": true
+      }
+    ],
+    "methods": {
+      "evaluate": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "context",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ],
+      "aevaluate": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "context",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "BATTLE": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "BUILTIN_EVALUATOR": {
+    "module": null,
+    "kind": "value"
+  },
+  "BusinessRuleEvaluator": {
+    "module": "agentic_evals.evaluators",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "rule",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "version",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "CLOSED_QA": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "CallableEvaluator": {
+    "module": "agentic_evals.evaluators",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "function",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "evaluator_type",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "version",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "evaluate": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "context",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ],
+      "aevaluate": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "context",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "Case": {
+    "module": "agentic_evals.simple",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "input",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "expected",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      },
+      {
+        "name": "metadata",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      }
+    ],
+    "methods": {
+      "coerce": [
+        {
+          "name": "raw",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "CaseEvaluation": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "case_id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "case_name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "passed",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "scores",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "output",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "trace_id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "latency_ms",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "cost_source",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "sample_available",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "target_status",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "target_attempts",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "target_error",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "tags",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "metadata",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "CaseResult": {
+    "module": "agentic_evals.simple",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "case",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "output",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "scores",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "error",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      },
+      {
+        "name": "duration_ms",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      }
+    ],
+    "methods": {
+      "passed": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "threshold",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "ContainmentEvaluator": {
+    "module": "agentic_evals.containment",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "verifier",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "evaluate": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "context",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "ContainmentExpectation": {
+    "module": "agentic_evals.containment",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "scenario",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "subject",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "task_id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "stream_id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "policy_version",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "configuration_version",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "attempted_call_ids",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "forbidden_tools",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "acknowledgement_id",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_acknowledgement_latency_ms",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "check_requirements": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "ContainmentVerifier": {
+    "module": "collections.abc",
+    "kind": "alias"
+  },
+  "Eval": {
+    "module": "agentic_evals.simple",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "data",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "task",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "threshold",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "print_results",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "EvalPack": {
+    "module": "agentic_evals.packs.loader",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "description",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "suite",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "required_scorers",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "to_suite": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "EvalResult": {
+    "module": "agentic_evals.simple",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "threshold",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "results",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "duration_ms",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ],
+    "methods": {
+      "print_report": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "file",
+          "kind": "KEYWORD_ONLY",
+          "required": false
+        }
+      ]
+    }
+  },
+  "EvalSpan": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "tool_name",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "attributes",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "EvalTrace": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "trace_id",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "spans",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "total_latency_ms",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "estimated_cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "cost_source",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "metadata",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "EvaluationContext": {
+    "module": "agentic_evals.evaluators",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "case",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "sample",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "config",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ],
+    "methods": {}
+  },
+  "EvaluationReport": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "schema_version",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "suite_name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "suite_version",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "created_at",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "summary",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      }
+    ],
+    "methods": {}
+  },
+  "EvaluationSample": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "case_id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "output",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "trace",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      }
+    ],
+    "methods": {}
+  },
+  "EvaluationSummary": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "total_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "passed_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "failed_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "pass_rate",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "average_score",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "total_cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "priced_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "cost_sources",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "average_latency_ms",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "metrics",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "tags",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "judge",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "live",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "Evaluator": {
+    "module": "agentic_evals.evaluators",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "args",
+        "kind": "VAR_POSITIONAL",
+        "required": true
+      },
+      {
+        "name": "kwargs",
+        "kind": "VAR_KEYWORD",
+        "required": true
+      }
+    ],
+    "methods": {
+      "evaluate": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "context",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "EvaluatorConfig": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "threshold",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "required",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "config",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "EvaluatorRegistry": {
+    "module": "agentic_evals.evaluators",
+    "kind": "class",
+    "parameters": [],
+    "methods": {
+      "register": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "evaluator",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "replace",
+          "kind": "KEYWORD_ONLY",
+          "required": false
+        }
+      ],
+      "get": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "name",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ],
+      "names": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "FACTUALITY": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "GateConfig": {
+    "module": "agentic_evals.gate",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "min_pass_rate",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "min_average_score",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_failed_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "min_tag_pass_rate",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "min_metric_pass_rate",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_average_latency_ms",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_total_cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_judge_unavailable_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_judge_cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "min_judge_agreement",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_timed_out_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_target_error_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "GateDecision": {
+    "module": "agentic_evals.gate",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "passed",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "reasons",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "observed",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      }
+    ],
+    "methods": {}
+  },
+  "HTTPTarget": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "kind",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "timeout_seconds",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "url",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "method",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "headers",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "JUDGE_EVALUATOR_TYPES": {
+    "module": null,
+    "kind": "value"
+  },
+  "JudgeResponse": {
+    "module": "agentic_evals.judging",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "text",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "input_tokens",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "output_tokens",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "cost_source",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "model",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "provider",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "usage_metadata": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "JudgeSummary": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "judge_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "unavailable_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "unavailable_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "retried_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "priced_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "total_cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "cost_sources",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "input_tokens",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "output_tokens",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "total_latency_ms",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "sampled_scores",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "min_agreement",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "average_agreement",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "case_agreement",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "LLMJudgeEvaluator": {
+    "module": "agentic_evals.evaluators",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "judge",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "version",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "retry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "samples",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "evaluator_type",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "LLMRubricEvaluator": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "template",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "complete_fn",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "version",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "retry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "samples",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "LiveSummary": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "total_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "ok_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "retried_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "timed_out_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "error_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "timed_out_case_ids",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "error_case_ids",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "LiveTarget": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "kind",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "timeout_seconds",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "MODERATION": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "MetricSummary": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "total",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "passed",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "failed",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "skipped",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "pass_rate",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "average_score",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "PII_LEAKAGE": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "POSSIBLE": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "PythonTarget": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "kind",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "timeout_seconds",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "callable_path",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      }
+    ],
+    "methods": {}
+  },
+  "RetryPolicy": {
+    "module": "agentic_evals.reliability",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "max_attempts",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      },
+      {
+        "name": "backoff_seconds",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      },
+      {
+        "name": "backoff_multiplier",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      },
+      {
+        "name": "max_backoff_seconds",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      },
+      {
+        "name": "retry_on",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": false
+      }
+    ],
+    "methods": {
+      "delay": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "retry",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "RubricTemplate": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "prompt_template",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "verdict_scores",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ],
+    "methods": {
+      "render": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "output",
+          "kind": "KEYWORD_ONLY",
+          "required": true
+        },
+        {
+          "name": "expected",
+          "kind": "KEYWORD_ONLY",
+          "required": true
+        },
+        {
+          "name": "input",
+          "kind": "KEYWORD_ONLY",
+          "required": true
+        },
+        {
+          "name": "extra",
+          "kind": "KEYWORD_ONLY",
+          "required": false
+        }
+      ],
+      "parse_verdict": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "raw_completion",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "SECURITY": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "SQL_CORRECTNESS": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "SUMMARY_QUALITY": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "Score": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "metric",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "value",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "passed",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "required",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "skipped",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "explanation",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "evaluator_type",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "evaluator",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "evaluator_version",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "metadata",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "default_metric_to_name": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ],
+      "skip": [
+        {
+          "name": "name",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "explanation",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        },
+        {
+          "name": "metric",
+          "kind": "KEYWORD_ONLY",
+          "required": false
+        },
+        {
+          "name": "metadata",
+          "kind": "KEYWORD_ONLY",
+          "required": false
+        }
+      ]
+    }
+  },
+  "TRANSLATION": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "value"
+  },
+  "TagSummary": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "total_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "passed_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "failed_cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "pass_rate",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "average_score",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {}
+  },
+  "TestCase": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "input",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "expected_output",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "expected_contains",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "output_json_schema",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "required_output_fields",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "required_tools",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "forbidden_tools",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "required_tool_arguments",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "expected_tool_arguments",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "required_tool_order",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_latency_ms",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_cost_usd",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_turns",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "evaluators",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "tags",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "metadata",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "require_expectation": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "TestSuite": {
+    "module": "agentic_evals.models",
+    "kind": "class",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "version",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "description",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "cases",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "metadata",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ],
+    "methods": {
+      "unique_case_ids": [
+        {
+          "name": "self",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "required": true
+        }
+      ]
+    }
+  },
+  "__version__": {
+    "module": null,
+    "kind": "value"
+  },
+  "aevaluate_suite": {
+    "module": "agentic_evals.runner",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "suite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "samples",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "registry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_concurrency",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "arun_live_suite": {
+    "module": "agentic_evals.runner",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "suite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "target",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "registry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "trace_adapter",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_concurrency",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "retry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "attach_aios_evidence": {
+    "module": "agentic_evals.aios",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "run",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "export",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "builtin_scorer_names": {
+    "module": "agentic_evals.scorers.registry",
+    "kind": "function",
+    "parameters": []
+  },
+  "contains": {
+    "module": "agentic_evals.simple",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "output",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "expected",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "contains_all": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "contains_any": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "default_registry": {
+    "module": "agentic_evals.scorers.registry",
+    "kind": "function",
+    "parameters": []
+  },
+  "embedding_similarity": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "ends_with": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "equals": {
+    "module": "agentic_evals.simple",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "output",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "expected",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "evaluate_gate": {
+    "module": "agentic_evals.gate",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "report",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "config",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "evaluate_suite": {
+    "module": "agentic_evals.runner",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "suite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "samples",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "registry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "exact_match": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "gate_decision_schema": {
+    "module": "agentic_evals.report_contract",
+    "kind": "function",
+    "parameters": []
+  },
+  "icontains": {
+    "module": "agentic_evals.simple",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "output",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "expected",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "json_diff": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "lens_verifier": {
+    "module": "agentic_evals.containment",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "trusted_keys",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "levenshtein": {
+    "module": "agentic_evals.simple",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "output",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "expected",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "levenshtein_similarity": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "list_builtin_packs": {
+    "module": "agentic_evals.packs.library",
+    "kind": "function",
+    "parameters": []
+  },
+  "load_builtin_pack": {
+    "module": "agentic_evals.packs.library",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "registry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "load_pack": {
+    "module": "agentic_evals.packs.loader",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "path",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "registry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "load_samples": {
+    "module": "agentic_evals.runner",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "path",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "trace_adapter",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "load_suite": {
+    "module": "agentic_evals.runner",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "path",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "make_rubric": {
+    "module": "agentic_evals.scorers.rubric",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "name",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "criteria",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "levels",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "with_reference",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "matches": {
+    "module": "agentic_evals.simple",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "output",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "expected",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "no_redundant_tool_calls": {
+    "module": "agentic_evals.scorers.trajectory",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "numeric_close": {
+    "module": "agentic_evals.simple",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "output",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "expected",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "numeric_diff": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "numeric_range": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "regex_match": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "report_schema": {
+    "module": "agentic_evals.report_contract",
+    "kind": "function",
+    "parameters": []
+  },
+  "run_live_suite": {
+    "module": "agentic_evals.runner",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "suite",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "target",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "registry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "trace_adapter",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "max_workers",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "retry",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "starts_with": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "to_aios_evidence": {
+    "module": "agentic_evals.aios",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "report",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      },
+      {
+        "name": "run_id",
+        "kind": "KEYWORD_ONLY",
+        "required": true
+      },
+      {
+        "name": "targets",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "default_target",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "gate",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "allow_unmapped",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "id_prefix",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      },
+      {
+        "name": "occurred_at",
+        "kind": "KEYWORD_ONLY",
+        "required": false
+      }
+    ]
+  },
+  "tool_call_precision": {
+    "module": "agentic_evals.scorers.trajectory",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "tool_call_recall": {
+    "module": "agentic_evals.scorers.trajectory",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "trajectory_efficiency": {
+    "module": "agentic_evals.scorers.trajectory",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  },
+  "valid_json": {
+    "module": "agentic_evals.scorers.text",
+    "kind": "function",
+    "parameters": [
+      {
+        "name": "context",
+        "kind": "POSITIONAL_OR_KEYWORD",
+        "required": true
+      }
+    ]
+  }
+}

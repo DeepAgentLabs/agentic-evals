@@ -1,0 +1,61 @@
+name: Downstream compatibility
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  consumers:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repo: agenticlens
+            ref: 5c28ccf0da03385bc5c1910fdf84e507ee269113
+            tests: tests/test_evaluation.py tests/test_trace_evaluators.py tests/test_calibration.py tests/test_experiments.py tests/test_experiments_v04.py
+          - repo: agenticops-control-tower
+            ref: fea7c3e066796df64855212c58a48e827db46bea
+            tests: tests/test_evals_contract.py tests/test_evidence_posture.py tests/test_runbooks.py
+          - repo: mcp-server
+            ref: ebb78df292bedfc04976d18e25b5ec0cbcb7f51c
+            tests: tests/test_evals_contract.py tests/test_evals_aios_evidence.py tests/test_unified.py
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: DeepAgentLabs/${{ matrix.repo }}
+          ref: ${{ matrix.ref }}
+          path: downstream
+      - name: Check out Lens fixture artifacts
+        if: matrix.repo == 'mcp-server'
+        uses: actions/checkout@v4
+        with:
+          repository: DeepAgentLabs/agenticlens
+          ref: 5c28ccf0da03385bc5c1910fdf84e507ee269113
+          path: agenticlens
+      - name: Check out specification fixture artifacts
+        if: matrix.repo == 'mcp-server'
+        uses: actions/checkout@v4
+        with:
+          repository: DeepAgentLabs/ai-operations-spec
+          ref: 5a9280b94d6db6bdb86e57c3c1f03f1816ba866b
+          path: ai-operations-spec
+      - uses: astral-sh/setup-uv@v7
+      - run: uv python install 3.12
+      - name: Install downstream and candidate
+        run: |
+          uv sync --directory downstream --extra dev --python 3.12
+          if [ "${{ matrix.repo }}" = "mcp-server" ]; then
+            uv pip install --python downstream/.venv/bin/python ./agenticlens
+          fi
+          uv pip install --python downstream/.venv/bin/python --no-deps .
+      - name: Verify candidate version outside editable source paths
+        run: downstream/.venv/bin/python -I -c 'import agentic_evals; assert agentic_evals.__version__ == "0.12.0", agentic_evals.__file__'
+      - name: Exercise downstream readers, calibration, experiments and gates
+        run: uv run --directory downstream --no-sync pytest ${{ matrix.tests }} --no-cov

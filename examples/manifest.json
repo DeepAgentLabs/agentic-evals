@@ -1,0 +1,67 @@
+{
+  "examples/aios/generate.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/async_live_target.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/capitals_eval.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/containment/generate.py": {
+    "mode": "script",
+    "extra": "integrity",
+    "exit_code": 0
+  },
+  "examples/containment/registry.py": {
+    "mode": "import",
+    "extra": "integrity",
+    "exit_code": 0
+  },
+  "examples/eval_pack.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/judge_reliability.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/llm_rubric_judge.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/near_miss_similarity.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/quickstart.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/report-contract/generate.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  },
+  "examples/usecases/judge_gate.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 1
+  },
+  "examples/usecases/refund_trajectory.py": {
+    "mode": "script",
+    "extra": null,
+    "exit_code": 0
+  }
+}

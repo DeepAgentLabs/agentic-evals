@@ -257,3 +257,7 @@ print(export.unmapped_cases, export.skipped_scores, export.unavailable_scores)
 ```
 
 A string target is a Step ID; a dict is an AIOS reference (`id`, `type`, optional `external`). Missing mappings, unknown case IDs and unresolved targets raise `AIOSExportError` (a `ValueError`). See [the AIOS evidence guide](aios-evidence.md).
+
+## API readiness and support
+
+See [the public API candidate](public-api.md), [support and compatibility matrix](support-policy.md), and [executable examples](../examples/README.md).

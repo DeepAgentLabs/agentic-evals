@@ -53,6 +53,10 @@ just accept the defaults.
   in one `TestSuite` — split them, since one flaky exploratory case
   shouldn't block a release.
 
+Validate native schema 1.0 before passing saved artifacts between readers.
+Use the release-specific sibling matrix in `docs/support-policy.md`; package
+0.12 readiness does not certify coordinated ecosystem v1.0 compatibility.
+
 ## Check
 
 - For declarative CI, run `agentic-evals evaluate SUITE SAMPLES --out report.json`

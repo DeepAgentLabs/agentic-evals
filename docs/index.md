@@ -22,3 +22,7 @@ an unsafe release blocked by a tag floor, a right reply reached the wrong way,
 and a release gate that checks the LLM judge itself.
 
 Documentation is maintained in the [Agentic Evals repository](https://github.com/DeepAgentLabs/agentic-evals).
+
+## API readiness and support
+
+See [the public API candidate](public-api.md), [support and compatibility matrix](support-policy.md), and [executable examples](../examples/README.md).

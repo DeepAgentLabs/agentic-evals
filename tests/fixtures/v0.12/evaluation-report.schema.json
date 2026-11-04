@@ -1,0 +1,626 @@
+{
+  "$defs": {
+    "CaseEvaluation": {
+      "description": "One case's result.\n\n`sample_available` is `False` when no sample was supplied for the case;\nits empty `trace_id` then means \"no trace exists\", not \"trace ID lost\".\n\n`target_status` is set only by live runs: `ok` when the target answered,\n`timed_out` when every attempt exceeded the case timeout, and `error`\nwhen the target raised or failed otherwise. A timed-out or errored case\nnever passes, and is distinguishable from a case that answered wrongly.\n`target_attempts` counts the calls made, including retries, and\n`target_error` records the last failure.",
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_name": {
+          "title": "Case Name",
+          "type": "string"
+        },
+        "cost_source": {
+          "anyOf": [
+            {
+              "enum": [
+                "measured",
+                "estimated"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Source"
+        },
+        "cost_usd": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Usd"
+        },
+        "latency_ms": {
+          "title": "Latency Ms",
+          "type": "number"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "output": {
+          "title": "Output",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "sample_available": {
+          "default": true,
+          "title": "Sample Available",
+          "type": "boolean"
+        },
+        "scores": {
+          "items": {
+            "$ref": "#/$defs/Score"
+          },
+          "title": "Scores",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "target_attempts": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Attempts"
+        },
+        "target_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Error"
+        },
+        "target_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "ok",
+                "error",
+                "timed_out"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Status"
+        },
+        "trace_id": {
+          "title": "Trace Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_name",
+        "passed",
+        "scores",
+        "output",
+        "trace_id",
+        "latency_ms"
+      ],
+      "title": "CaseEvaluation",
+      "type": "object"
+    },
+    "EvaluationSummary": {
+      "properties": {
+        "average_latency_ms": {
+          "title": "Average Latency Ms",
+          "type": "number"
+        },
+        "average_score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Average Score",
+          "type": "number"
+        },
+        "cost_sources": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Cost Sources",
+          "type": "object"
+        },
+        "failed_cases": {
+          "title": "Failed Cases",
+          "type": "integer"
+        },
+        "judge": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JudgeSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "live": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LiveSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metrics": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MetricSummary"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "pass_rate": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Pass Rate",
+          "type": "number"
+        },
+        "passed_cases": {
+          "title": "Passed Cases",
+          "type": "integer"
+        },
+        "priced_cases": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Priced Cases",
+          "type": "integer"
+        },
+        "tags": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TagSummary"
+          },
+          "title": "Tags",
+          "type": "object"
+        },
+        "total_cases": {
+          "title": "Total Cases",
+          "type": "integer"
+        },
+        "total_cost_usd": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Cost Usd"
+        }
+      },
+      "required": [
+        "total_cases",
+        "passed_cases",
+        "failed_cases",
+        "pass_rate",
+        "average_score",
+        "average_latency_ms"
+      ],
+      "title": "EvaluationSummary",
+      "type": "object"
+    },
+    "JudgeSummary": {
+      "description": "What the suite's LLM judges cost, and how dependable they were.\n\nCounts cover evaluated (non-skipped) scores from `llm_judge` and\n`llm_rubric` evaluators. `unavailable_scores` are judgments the judge\ncould not deliver after its retries; they never count as passes and\n`unavailable_cases` names the cases they belong to.\n\n`total_cost_usd` is the sum of `judge_cost_usd` over every judge score,\nand is `None` unless all of them recorded a cost (`priced_scores`\nsays how many did). Judge cost is kept apart from the cost of the system\nunder evaluation in `EvaluationSummary.total_cost_usd`.\n\n`sampled_scores` were judged more than once (`samples=N`).\n`case_agreement` holds, per case, the lowest agreement among its sampled\njudge scores: the share of samples that returned the most common verdict.",
+      "properties": {
+        "average_agreement": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Average Agreement"
+        },
+        "case_agreement": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Case Agreement",
+          "type": "object"
+        },
+        "cost_sources": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Cost Sources",
+          "type": "object"
+        },
+        "input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "judge_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Judge Scores",
+          "type": "integer"
+        },
+        "min_agreement": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Agreement"
+        },
+        "output_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "priced_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Priced Scores",
+          "type": "integer"
+        },
+        "retried_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Retried Scores",
+          "type": "integer"
+        },
+        "sampled_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Sampled Scores",
+          "type": "integer"
+        },
+        "total_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Cost Usd"
+        },
+        "total_latency_ms": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Total Latency Ms",
+          "type": "number"
+        },
+        "unavailable_cases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unavailable Cases",
+          "type": "array"
+        },
+        "unavailable_scores": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Unavailable Scores",
+          "type": "integer"
+        }
+      },
+      "title": "JudgeSummary",
+      "type": "object"
+    },
+    "LiveSummary": {
+      "description": "How a live target behaved across the suite (live runs only).",
+      "properties": {
+        "error_case_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Error Case Ids",
+          "type": "array"
+        },
+        "error_cases": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Error Cases",
+          "type": "integer"
+        },
+        "ok_cases": {
+          "minimum": 0,
+          "title": "Ok Cases",
+          "type": "integer"
+        },
+        "retried_cases": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Retried Cases",
+          "type": "integer"
+        },
+        "timed_out_case_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Timed Out Case Ids",
+          "type": "array"
+        },
+        "timed_out_cases": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Timed Out Cases",
+          "type": "integer"
+        },
+        "total_cases": {
+          "minimum": 0,
+          "title": "Total Cases",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_cases",
+        "ok_cases"
+      ],
+      "title": "LiveSummary",
+      "type": "object"
+    },
+    "MetricSummary": {
+      "description": "How one metric did across the suite. Skipped scores are counted apart.",
+      "properties": {
+        "average_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Average Score"
+        },
+        "failed": {
+          "title": "Failed",
+          "type": "integer"
+        },
+        "pass_rate": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pass Rate"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "integer"
+        },
+        "skipped": {
+          "default": 0,
+          "title": "Skipped",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "passed",
+        "failed"
+      ],
+      "title": "MetricSummary",
+      "type": "object"
+    },
+    "Score": {
+      "description": "A single named judgment.\n\n`metric` is the stable key reports group by. It defaults to `name`;\nchecks whose name carries a per-case detail (`contains:42`,\n`required_tool:lookup`) share one metric (`contains`, `required_tool`).\n\nA `skipped` score records that a check did not apply to a case. It\nnever fails the case and is left out of averages and pass rates --\nbuild one with `Score.skip(...)`.\n\n`evaluator` and `evaluator_version` identify what produced the score.\n`evaluate_suite` stamps them: built-in checks are attributed to\n`BUILTIN_EVALUATOR` at this package's version, and registered\nevaluators to their registry name and their `version` attribute, if\nany. A `None` version means the evaluator did not declare one.",
+      "properties": {
+        "evaluator": {
+          "default": "",
+          "title": "Evaluator",
+          "type": "string"
+        },
+        "evaluator_type": {
+          "default": "deterministic",
+          "title": "Evaluator Type",
+          "type": "string"
+        },
+        "evaluator_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evaluator Version"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "metric": {
+          "default": "",
+          "title": "Metric",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "skipped": {
+          "default": false,
+          "title": "Skipped",
+          "type": "boolean"
+        },
+        "value": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "passed",
+        "explanation"
+      ],
+      "title": "Score",
+      "type": "object"
+    },
+    "TagSummary": {
+      "description": "How the cases carrying one tag did.",
+      "properties": {
+        "average_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Average Score"
+        },
+        "failed_cases": {
+          "title": "Failed Cases",
+          "type": "integer"
+        },
+        "pass_rate": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Pass Rate",
+          "type": "number"
+        },
+        "passed_cases": {
+          "title": "Passed Cases",
+          "type": "integer"
+        },
+        "total_cases": {
+          "title": "Total Cases",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_cases",
+        "passed_cases",
+        "failed_cases",
+        "pass_rate"
+      ],
+      "title": "TagSummary",
+      "type": "object"
+    }
+  },
+  "$id": "https://raw.githubusercontent.com/DeepAgentLabs/agentic-evals/v0.9.0/src/agentic_evals/schemas/evaluation-report-1.0.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/CaseEvaluation"
+      },
+      "title": "Cases",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "suite_name": {
+      "title": "Suite Name",
+      "type": "string"
+    },
+    "suite_version": {
+      "title": "Suite Version",
+      "type": "string"
+    },
+    "summary": {
+      "$ref": "#/$defs/EvaluationSummary"
+    }
+  },
+  "required": [
+    "suite_name",
+    "suite_version",
+    "summary",
+    "cases"
+  ],
+  "title": "EvaluationReport",
+  "type": "object"
+}

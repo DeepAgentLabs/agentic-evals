@@ -106,3 +106,11 @@ every new field, including a judge outage and a target outage. Tests check that
 they validate against both the current schemas and the frozen 0.7.1 schemas,
 so a consumer still bundling 0.7.2 schemas accepts 0.9.0 artifacts. See
 [judge reliability and live resilience](judge-reliability.md).
+
+## v0.12 readiness baseline
+
+The current 1.0 schemas are also frozen under `tests/fixtures/v0.12/`. CI
+checks both historical and current shapes so optional fields added since 0.7.1
+cannot be silently removed. Schema IDs stay at v0.9.0 because the wire contract
+has not changed. See [API deprecations and 2.0 migration requirements](public-api.md)
+and [the validated downstream matrix](support-policy.md).
