@@ -643,3 +643,8 @@ no package patch release is needed. See [compatibility and offline example](docs
 
 Evals 0.12.0 retains scoring/report and gate schema 1.0; Sidecar decisions and intent grants are not scores or observed dispatch receipts.
 See [candidate contracts, migration and operator example](docs/sidecar-0.10.md).
+
+## Lens 0.13 readiness compatibility — 2026-11-04
+
+The optional integrity extra `agenticlens>=0.12.0,<1` already admits 0.13.0. Evals owns scoring and gates; Lens release receipts compose native `evaluate_gate` with a saved policy/report digest. An authenticated artifact-service caller does not authenticate the submitted evidence.
+See [compatibility, boundaries and offline operator example](docs/lens-0.13.md).
