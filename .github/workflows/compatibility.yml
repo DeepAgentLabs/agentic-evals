@@ -13,6 +13,7 @@ jobs:
   consumers:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - repo: agenticlens
@@ -31,11 +32,28 @@ jobs:
           repository: DeepAgentLabs/${{ matrix.repo }}
           ref: ${{ matrix.ref }}
           path: downstream
+      - name: Check out Lens fixture artifacts
+        if: matrix.repo == 'mcp-server'
+        uses: actions/checkout@v4
+        with:
+          repository: DeepAgentLabs/agenticlens
+          ref: 5c28ccf0da03385bc5c1910fdf84e507ee269113
+          path: agenticlens
+      - name: Check out specification fixture artifacts
+        if: matrix.repo == 'mcp-server'
+        uses: actions/checkout@v4
+        with:
+          repository: DeepAgentLabs/ai-operations-spec
+          ref: 5a9280b94d6db6bdb86e57c3c1f03f1816ba866b
+          path: ai-operations-spec
       - uses: astral-sh/setup-uv@v7
       - run: uv python install 3.12
       - name: Install downstream and candidate
         run: |
           uv sync --directory downstream --extra dev --python 3.12
+          if [ "${{ matrix.repo }}" = "mcp-server" ]; then
+            uv pip install --python downstream/.venv/bin/python ./agenticlens
+          fi
           uv pip install --python downstream/.venv/bin/python --no-deps .
       - name: Verify candidate version outside editable source paths
         run: downstream/.venv/bin/python -I -c 'import agentic_evals; assert agentic_evals.__version__ == "0.12.0", agentic_evals.__file__'

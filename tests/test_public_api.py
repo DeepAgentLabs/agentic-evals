@@ -3,6 +3,7 @@
 import inspect
 import json
 from pathlib import Path
+from typing import get_origin
 
 import agentic_evals as api
 
@@ -20,7 +21,13 @@ def test_public_api_retains_imports_and_call_shapes() -> None:
     for name, entry in BASELINE.items():
         obj = getattr(api, name)
         kind = (
-            "class" if inspect.isclass(obj) else "function" if inspect.isfunction(obj) else "value"
+            "alias"
+            if get_origin(obj) is not None
+            else "class"
+            if inspect.isclass(obj)
+            else "function"
+            if inspect.isfunction(obj)
+            else "value"
         )
         assert kind == entry["kind"], name
         assert getattr(obj, "__module__", None) == entry["module"], name

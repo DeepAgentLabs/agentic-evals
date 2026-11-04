@@ -447,9 +447,7 @@
   },
   "ContainmentVerifier": {
     "module": "collections.abc",
-    "kind": "class",
-    "parameters": [],
-    "methods": {}
+    "kind": "alias"
   },
   "Eval": {
     "module": "agentic_evals.simple",
