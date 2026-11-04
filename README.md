@@ -1007,3 +1007,11 @@ See [compatibility, operator example and dependency boundaries](docs/tower-0.10-
 
 Evals 0.12.0 retains output scoring, containment scoring and release gates. A recipe or its no-unhandled-error assertion is not an Evals gate; score the resulting outputs and attach Evals evidence explicitly. No dependency or release is needed.
 See [the compatibility guide and offline operator example](docs/chaos-0.11-chaoshub.md).
+
+
+## MCP 0.7 integration readiness
+
+The MCP 0.7 candidate baseline includes this project's released integration.
+Its read-only compatibility observations remain separate from runtime readiness
+and native producer verdicts. See [the matrix, example and boundaries](docs/mcp-0.7-readiness.md).
+No runtime dependency or native schema changes are required here.
