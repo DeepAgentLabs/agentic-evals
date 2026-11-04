@@ -975,3 +975,16 @@ AIOS v0.7.0 publishes cumulative-layer migration guidance, a non-normative
 OpenTelemetry companion profile and a strict documentation site build.
 Existing draft markers, native evidence and runtime dependencies are unchanged;
 no package patch release is needed. See [compatibility and offline example](docs/aios-0.7.0.md).
+
+## v0.12 API and report readiness
+
+The root API candidate and current native schemas now have frozen compatibility
+baselines. CI runs every registered offline Python example, the Python 3.10-3.14
+matrix and pinned Lens/Tower/MCP integration tests against the candidate wheel.
+Existing public imports, native report schema 1.0 and AIOS 0.4-draft exports stay
+compatible. No required sibling dependency is added.
+
+See [the API/private-module policy](docs/public-api.md),
+[deprecation, support and sibling matrix](docs/support-policy.md), and
+[executable example index](examples/README.md). The coordinated ecosystem v1.0
+acceptance gates remain open; 0.12.0 does not promise stable major-version APIs.

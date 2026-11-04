@@ -4,6 +4,26 @@ All notable changes to this project will be documented here.
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 0.12.0 - 2026-11-04
+
+### Added
+
+- Candidate public API inventory with import and call-shape compatibility checks.
+- Frozen current report/gate schemas alongside the historical 0.7.1 baseline.
+- Complete offline Python example manifest, isolated execution and explicit
+  expected failing-gate exit codes, including the optional integrity CI job.
+- Pinned Lens, Tower and MCP downstream compatibility CI that installs and
+  verifies the candidate distribution rather than testing the previous lock.
+- Public/private module policy, deprecation and schema 2.0 migration requirements,
+  CPython 3.10-3.14 support and a reproducible sibling validation matrix.
+
+### Compatibility
+
+- Native schema 1.0, its immutable IDs and AIOS 0.4-draft exports are unchanged.
+  Existing public imports and sibling dependency ranges remain supported.
+- v0.12 is a readiness milestone. Stable API guarantees and the >=1.0,<2
+  downstream matrix remain gated on the coordinated ecosystem v1.0 release.
+
 ## 0.11.0 - 2026-11-03
 
 ### Added
