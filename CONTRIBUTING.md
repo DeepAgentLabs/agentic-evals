@@ -89,8 +89,12 @@ Releases are automated via GitHub Actions when a version tag is pushed.
      `agentic_evals.__version__` and stamped on built-in scores)
    - `CHANGELOG.md` → add a `## X.Y.Z - YYYY-MM-DD` section
 2. Commit: `git commit -am "release: vX.Y.Z"`
-3. Tag: `git tag vX.Y.Z`
-4. Push: `git push origin main --tags`
+3. Push the feature branch, wait for CI and the requested review, and merge.
+4. On the merged main commit, create an annotated `vX.Y.Z` tag using that
+   version's changelog section as its message (`git tag -a vX.Y.Z -F notes.md
+   --cleanup=verbatim`).
+5. Push only the release tag: `git push origin vX.Y.Z` and verify PyPI and the
+   GitHub release. Do not publish from an unmerged feature commit.
 
 The `release-pypi.yml` workflow triggers on the tag push and publishes to
 PyPI via Trusted Publishing (OIDC) — no stored API token needed.
@@ -118,3 +122,12 @@ See [SECURITY.md](SECURITY.md) for how to report a vulnerability.
   `Score`.
 - Never fabricate a value it can't back up — an unavailable cost is
   `None`, never `0.0`.
+
+## Readiness compatibility checks
+
+Keep `tests/fixtures/v0.12/` immutable once released. Review public root exports,
+constructors and methods against `docs/public-api.md` and add complete offline
+examples to `examples/manifest.json`. Match expected gate failures explicitly.
+Run `uv run pytest tests/test_public_api.py tests/test_documented_examples.py`
+and the pinned downstream workflow before publishing. Future coordinated v1.0
+acceptance is recorded separately in `docs/support-policy.md`.

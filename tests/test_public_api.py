@@ -2,6 +2,8 @@
 
 import inspect
 import json
+import re
+from importlib.metadata import version
 from pathlib import Path
 from typing import get_origin
 
@@ -63,3 +65,11 @@ def test_call_guard_rejects_incompatible_changes() -> None:
         with pytest.raises(AssertionError):
             assert_call_compatible(baseline, changed)
     assert_call_compatible(baseline, lambda value=None, *, optional=None: None)
+
+
+def test_release_metadata_matches_runtime_provenance() -> None:
+    root = Path(__file__).resolve().parents[1]
+    metadata = (root / "pyproject.toml").read_text()
+    declared = re.search(r'^version = "([^"]+)"', metadata, re.MULTILINE)
+    assert declared is not None
+    assert declared.group(1) == api.__version__ == version("agentic-evals")

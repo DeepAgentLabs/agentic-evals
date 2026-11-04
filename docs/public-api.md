@@ -2,7 +2,7 @@
 
 For v0.12, the names in `agentic_evals.__all__` are the reviewed root API
 candidate. The checked-in `tests/fixtures/v0.12/public-api.json` records their
-origin and function parameter shapes. CI rejects removed names, changed import
+origin, function and constructor parameter shapes, and declared public methods. CI rejects removed names, changed import
 origins, removed parameters, changed parameter kinds and new required arguments.
 Existing documented imports from `models`, `evaluators`, `gate`, `runner`,
 `scorers`, `packs`, `skills`, `simple`, `judging`, `reliability`, `containment`,
