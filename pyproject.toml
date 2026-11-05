@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentic-evals"
-version = "0.12.0"
+version = "1.0.0"
 description = "A standalone, framework-agnostic evaluation and scoring engine for LLM/agent outputs — extracted from AgenticLens's evaluation module."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -34,7 +34,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-integrity = ["agenticlens>=0.12.0,<1"]
+integrity = ["agenticlens>=0.12.0,<2"]
 dev = [
   "pytest>=8.0",
   "rfc3339-validator>=0.1.4",
