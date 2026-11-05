@@ -9,7 +9,11 @@ unchanged. Evals does not gain a second judge/verifier contract or perform
 runtime enforcement. No Evals dependency floor or patch release is required.
 
 The reproducible matrix, held evidence and release eligibility checks live in
-the organization repository's release/candidate.json and scripts/. Internal
+the organization repository's [candidate matrix](https://github.com/DeepAgentLabs/.github/blob/feat/coordinated-v1-readiness/release/candidate.json),
+[acceptance runner](https://github.com/DeepAgentLabs/.github/blob/81343e3/scripts/accept_ecosystem.py)
+and [readiness gate](https://github.com/DeepAgentLabs/.github/blob/81343e3/scripts/release_readiness.py).
+These artifacts are introduced in [organization PR 67](https://github.com/DeepAgentLabs/.github/pull/67);
+the matrix branch tracks the reviewed source pins while the scripts above are revision-pinned. Internal
 wheel acceptance is separate from independent review and live-provider evidence.
 The actual coordinated 1.x consumer acceptance remains a future gate until
 review permits the stable schema/API freeze.
