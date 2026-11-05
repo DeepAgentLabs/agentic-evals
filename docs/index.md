@@ -26,3 +26,7 @@ Documentation is maintained in the [Agentic Evals repository](https://github.com
 ## API readiness and support
 
 See [the public API candidate](public-api.md), [support and compatibility matrix](support-policy.md), and [executable examples](../examples/README.md).
+
+## AIOS 0.8 operational artifacts
+
+See [optional operational artifact adoption](aios-0.8-operational-artifacts.md). Native reports, gates and existing evaluation exports remain unchanged.
