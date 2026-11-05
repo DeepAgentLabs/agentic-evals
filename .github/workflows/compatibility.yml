@@ -48,6 +48,8 @@ jobs:
           path: ai-operations-spec
       - uses: astral-sh/setup-uv@v7
       - run: uv python install 3.12
+      # These pinned legacy reader tests deliberately replace Evals with --no-deps.
+      # The coordinated 1.x installability matrix is verified separately with wheels.
       - name: Install downstream and candidate
         run: |
           uv sync --directory downstream --extra dev --python 3.12
@@ -56,6 +58,6 @@ jobs:
           fi
           uv pip install --python downstream/.venv/bin/python --no-deps .
       - name: Verify candidate version outside editable source paths
-        run: downstream/.venv/bin/python -I -c 'import agentic_evals; assert agentic_evals.__version__ == "0.12.0", agentic_evals.__file__'
+        run: downstream/.venv/bin/python -I -c 'import agentic_evals; assert agentic_evals.__version__ == "1.0.0", agentic_evals.__file__'
       - name: Exercise downstream readers, calibration, experiments and gates
         run: uv run --directory downstream --no-sync pytest ${{ matrix.tests }} --no-cov
