@@ -30,3 +30,5 @@ See [the public API candidate](public-api.md), [support and compatibility matrix
 ## AIOS 0.8 operational artifacts
 
 See [optional operational artifact adoption](aios-0.8-operational-artifacts.md). Native reports, gates and existing evaluation exports remain unchanged.
+
+See [coordinated v1.0 engineering readiness](coordinated-v1-readiness.md) for candidate scope, migration and remaining acceptance gates.
