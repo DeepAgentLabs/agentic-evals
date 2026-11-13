@@ -58,6 +58,16 @@ jobs:
           fi
           uv pip install --python downstream/.venv/bin/python --no-deps .
       - name: Verify candidate version outside editable source paths
-        run: downstream/.venv/bin/python -I -c 'import agentic_evals; assert agentic_evals.__version__ == "1.0.0", agentic_evals.__file__'
+        run: |
+          downstream/.venv/bin/python -I - <<'PY'
+          from importlib.metadata import version
+          from pathlib import Path
+          import tomllib
+          import agentic_evals
+
+          expected = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+          assert agentic_evals.__version__ == expected, agentic_evals.__file__
+          assert version("agentic-evals") == expected
+          PY
       - name: Exercise downstream readers, calibration, experiments and gates
         run: uv run --directory downstream --no-sync pytest ${{ matrix.tests }} --no-cov
