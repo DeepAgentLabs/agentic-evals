@@ -74,7 +74,7 @@
           "explanation": "Output contains required text: '30 days'.",
           "evaluator_type": "deterministic",
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "1.0.0",
+          "evaluator_version": "1.0.2",
           "metadata": {}
         }
       ],
@@ -107,7 +107,7 @@
           "explanation": "Required tool 'refund' was called.",
           "evaluator_type": "deterministic",
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "1.0.0",
+          "evaluator_version": "1.0.2",
           "metadata": {}
         },
         {
@@ -120,7 +120,7 @@
           "explanation": "Tool 'refund' did not include required arguments ['order_id'].",
           "evaluator_type": "deterministic",
           "evaluator": "agentic_evals.builtin",
-          "evaluator_version": "1.0.0",
+          "evaluator_version": "1.0.2",
           "metadata": {}
         }
       ],
