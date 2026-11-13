@@ -1,0 +1,49 @@
+[
+  {
+    "run_id": "external-run-001",
+    "evaluation_case_id": "refund-1042",
+    "final_answer": "Refund 1042 is processing.",
+    "duration_ms": 640,
+    "cost_usd": 0.004,
+    "cost_source": "measured",
+    "trace_complete": true,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "tool",
+        "name": "lookup_order",
+        "args": {
+          "order_id": "1042"
+        }
+      }
+    ]
+  },
+  {
+    "run_id": "external-run-002",
+    "evaluation_case_id": "refund-1043",
+    "final_answer": "Refund 1043 is processing.",
+    "duration_ms": 980,
+    "cost_usd": 0.006,
+    "cost_source": "measured",
+    "trace_complete": true,
+    "events": [
+      {
+        "sequence": 1,
+        "type": "tool",
+        "name": "lookup_order",
+        "args": {
+          "order_id": "1043"
+        }
+      },
+      {
+        "sequence": 2,
+        "type": "tool",
+        "name": "issue_refund",
+        "args": {
+          "order_id": "1043"
+        }
+      }
+    ]
+  }
+]
+

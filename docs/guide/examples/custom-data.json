@@ -1,0 +1,15 @@
+[
+  {
+    "id": "refund-1042",
+    "input": "What is the status of refund 1042?",
+    "expected": "Refund 1042 is processing.",
+    "output": "Refund 1042 is processing."
+  },
+  {
+    "id": "refund-1043",
+    "input": "Check refund 1043. Do not issue a new refund.",
+    "expected": "Refund 1043 is processing.",
+    "output": "Refund 1043 is processing."
+  }
+]
+
