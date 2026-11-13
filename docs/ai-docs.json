@@ -1,0 +1,45 @@
+{
+  "name": "Agentic Evals",
+  "scope": "Evaluate recorded outputs and normalized traces, or run an explicit target. Producing a report and passing a release gate are separate outcomes. Generic trace examples are not automatic vendor importers.",
+  "references": [
+    {
+      "title": "Setup and task workflows",
+      "path": "docs/developer-guide.md"
+    },
+    {
+      "title": "Api Reference",
+      "path": "docs/api-reference.md"
+    },
+    {
+      "title": "Cli",
+      "path": "docs/cli.md"
+    },
+    {
+      "title": "Report Contract",
+      "path": "docs/report-contract.md"
+    },
+    {
+      "title": "Advanced",
+      "path": "docs/advanced.md"
+    },
+    {
+      "title": "Containment",
+      "path": "docs/containment.md"
+    },
+    {
+      "title": "Aios Evidence",
+      "path": "docs/aios-evidence.md"
+    }
+  ],
+  "contracts": [
+    "src/agentic_evals/__init__.py",
+    "src/agentic_evals/simple.py",
+    "src/agentic_evals/models.py",
+    "src/agentic_evals/gate.py",
+    "src/agentic_evals/runner.py",
+    "src/agentic_evals/reliability.py"
+  ],
+  "schemas": [
+    "src/agentic_evals/schemas/*.schema.json"
+  ]
+}
