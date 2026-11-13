@@ -3,10 +3,13 @@
 Replace source keys and extraction logic for your vendor's actual schema.
 Require complete ordered tool evidence for this trace-based tutorial.
 """
+
 import json
 import math
 from pathlib import Path
+
 from agentic_evals import EvalSpan, EvalTrace, EvaluationSample
+
 
 def number(value, label):
     if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -15,10 +18,12 @@ def number(value, label):
         raise ValueError(f"{label} must be finite and nonnegative")
     return value
 
+
 def nonempty(value, label):
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{label} must be a nonempty string")
     return value
+
 
 def adapt(row):
     if row.get("trace_complete") is not True:
@@ -55,13 +60,18 @@ def adapt(row):
             attributes["tool_args"] = args
         spans.append(EvalSpan(tool_name=tool_name, attributes=attributes))
     return EvaluationSample(
-        case_id=case_id, output=row["final_answer"],
+        case_id=case_id,
+        output=row["final_answer"],
         trace=EvalTrace(
-            trace_id=run_id, spans=spans, total_latency_ms=duration,
-            estimated_cost_usd=cost, cost_source=cost_source,
+            trace_id=run_id,
+            spans=spans,
+            total_latency_ms=duration,
+            estimated_cost_usd=cost,
+            cost_source=cost_source,
             metadata={"source": "generic-training-export", "trace_complete": True},
         ),
     )
+
 
 if __name__ == "__main__":
     rows = json.loads(Path("third-party-traces.json").read_text(encoding="utf-8"))
@@ -76,4 +86,3 @@ if __name__ == "__main__":
         encoding="utf-8",
     )
     print(f"Mapped {len(samples)} traces to samples.traces.jsonl")
-

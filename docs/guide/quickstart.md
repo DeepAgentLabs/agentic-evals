@@ -15,14 +15,17 @@ first_eval.py · complete file
 ```python
 from agentic_evals import Eval, equals
 
+
 def answer(country):
     return {"France": "Paris", "Japan": "Tokyo"}[country]
 
-Eval("first-evaluation",
-     data=[{"input": "France", "expected": "Paris"},
-           {"input": "Japan", "expected": "Tokyo"}],
-     task=answer,
-     scores=[equals])
+
+Eval(
+    "first-evaluation",
+    data=[{"input": "France", "expected": "Paris"}, {"input": "Japan", "expected": "Tokyo"}],
+    task=answer,
+    scores=[equals],
+)
 ```
 
 [Download first_eval.py](examples/first_eval.py)
