@@ -1,0 +1,142 @@
+{
+  "product": "Agentic Evals",
+  "repository": "agentic-evals",
+  "distribution": "agentic-evals",
+  "document": "llms-full.txt",
+  "content_type": "text/markdown; charset=utf-8",
+  "sha256": "6e441ac1006127be678524d0a528612816d994b1d54c621271667cd48945b616",
+  "source_hash_normalization": "UTF-8 text with LF newlines",
+  "human_guide": "developer-guide.md",
+  "sources": [
+    {
+      "path": "pyproject.toml",
+      "kind": "package-metadata",
+      "sha256": "96633abfddcd25449ff62f7b18688d80b0d52ea7bb50b5919e006a22901c9d83"
+    },
+    {
+      "path": "docs/ai-docs.json",
+      "kind": "source-selection",
+      "sha256": "76741e23c12b5fecfcfa1dd9440618f45fa001fb34904afd257ea597d48fb085"
+    },
+    {
+      "path": "docs/developer-guide.md",
+      "kind": "reference",
+      "sha256": "9220f749497e585cb89eb2a52d035e6702810f24eae4172cd510d6fb96728675"
+    },
+    {
+      "path": "docs/api-reference.md",
+      "kind": "reference",
+      "sha256": "827e673d3ffcc6a39849ea8b4367de37608f1909e6061809f34fb4ffe8858f62"
+    },
+    {
+      "path": "docs/cli.md",
+      "kind": "reference",
+      "sha256": "44b749193662fec8684ea8fbd08c897d6f60cefc6c7260a6b94f0012fc69f61f"
+    },
+    {
+      "path": "docs/report-contract.md",
+      "kind": "reference",
+      "sha256": "3a1f5d29d0a678e096270edebb99e2ec066999cbb2fa48fbfdd51da7e97797e2"
+    },
+    {
+      "path": "docs/advanced.md",
+      "kind": "reference",
+      "sha256": "45ac08a8318a2701e0418e9ed8a1e57e950c0232d60077099a2c1223d1a20a45"
+    },
+    {
+      "path": "docs/containment.md",
+      "kind": "reference",
+      "sha256": "a86c4496095db2bccad0bbc4cbbf7ee58734319cdb40ef8cefae16957d81b2c5"
+    },
+    {
+      "path": "docs/aios-evidence.md",
+      "kind": "reference",
+      "sha256": "4e068892d174d5cb836f473622d2a1a47437da5869aa80c04da714b05a6241bc"
+    },
+    {
+      "path": "src/agentic_evals/__init__.py",
+      "kind": "source-contract",
+      "sha256": "17f4d3daefa73b90853a5402bf7e3c9342dea8fe481e46141d5050319e1f6cfd"
+    },
+    {
+      "path": "src/agentic_evals/simple.py",
+      "kind": "source-contract",
+      "sha256": "73a906d15ec64b0386382f0af3c6f8e3acb0c1338be9c03f3f15f4205284ae2e"
+    },
+    {
+      "path": "src/agentic_evals/models.py",
+      "kind": "source-contract",
+      "sha256": "4010aeb7a173b4389eeee096ebc6e9b5e6f05e89530947f683ac1314fc39a11b"
+    },
+    {
+      "path": "src/agentic_evals/gate.py",
+      "kind": "source-contract",
+      "sha256": "b0b9c79dacb0c3cbe71194582a6d89e7330218c50acb3e13b08f6b89c7831bdd"
+    },
+    {
+      "path": "src/agentic_evals/runner.py",
+      "kind": "source-contract",
+      "sha256": "024409a6558013d2ffcd9f9e48b2b8aedb311053c97137c816a71023b60bd54d"
+    },
+    {
+      "path": "src/agentic_evals/reliability.py",
+      "kind": "source-contract",
+      "sha256": "7ac46779302093764131ef132cdb52f71c3a8488e906fb0077ac57e422950558"
+    },
+    {
+      "path": "src/agentic_evals/schemas/evaluation-report-1.0.schema.json",
+      "kind": "json-schema",
+      "sha256": "b878a2924e2d4bfd2889b8b26575fea77be26ae05fa478f815343add779c508a"
+    },
+    {
+      "path": "src/agentic_evals/schemas/gate-decision-1.0.schema.json",
+      "kind": "json-schema",
+      "sha256": "407b0dc9e8cee79d66518abef071fd4a9488bee906459946b4400b6a8d851c17"
+    },
+    {
+      "path": "docs/guide/examples/adapt_traces.py",
+      "kind": "example",
+      "sha256": "0d379c53335b218866d92336982e0b86cda61308516b1caab92425c42c25335a"
+    },
+    {
+      "path": "docs/guide/examples/add_custom_check.py",
+      "kind": "example",
+      "sha256": "df216c310dab4027287cc99f4102195d5fbb5bd7efdf4ab7134b245541c68598"
+    },
+    {
+      "path": "docs/guide/examples/build_custom.py",
+      "kind": "example",
+      "sha256": "f30bd5ad9133f26124caa5b01af32434fa2f8518eef680ff0eda4585365be06a"
+    },
+    {
+      "path": "docs/guide/examples/custom-data.json",
+      "kind": "example",
+      "sha256": "3781a90c9cbb2614699b8877fd15896aa519ed0107c8de6700bbade192de8644"
+    },
+    {
+      "path": "docs/guide/examples/custom_registry.py",
+      "kind": "example",
+      "sha256": "28d75b39339e0ccaccc65b40b31ff916d0ddee3f1ab5eeb932cb3beb824351eb"
+    },
+    {
+      "path": "docs/guide/examples/first_eval.py",
+      "kind": "example",
+      "sha256": "df1ea746ad486dd930262c77dbbbfb139c843f78f81038a04f271ea9d92b982b"
+    },
+    {
+      "path": "docs/guide/examples/gate.yaml",
+      "kind": "example",
+      "sha256": "7b0b3b16ed3f5953d0f9ea1db1b8a04e6547ddc05a48975e90c620084e3f0673"
+    },
+    {
+      "path": "docs/guide/examples/suite.traces.yaml",
+      "kind": "example",
+      "sha256": "19f9abf87e7a143317985ea1488fc58591a8558606cecbb190b291743616818f"
+    },
+    {
+      "path": "docs/guide/examples/third-party-traces.json",
+      "kind": "example",
+      "sha256": "46b2301f683ebcd996b7dce4cd8e31a6b3e7bf69f4a638367f98021b21c79795"
+    }
+  ]
+}
