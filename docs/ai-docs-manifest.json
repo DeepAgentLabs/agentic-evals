@@ -2,7 +2,7 @@
   "product": "Agentic Evals",
   "repository": "agentic-evals",
   "distribution": "agentic-evals",
-  "document": "llms-full.txt",
+  "document": "llms-full.md",
   "content_type": "text/markdown; charset=utf-8",
   "sha256": "6e441ac1006127be678524d0a528612816d994b1d54c621271667cd48945b616",
   "source_hash_normalization": "UTF-8 text with LF newlines",
