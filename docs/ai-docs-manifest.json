@@ -4,14 +4,14 @@
   "distribution": "agentic-evals",
   "document": "llms-full.md",
   "content_type": "text/markdown; charset=utf-8",
-  "sha256": "230d754c645e643b60314b4fbee9324cd780af070a52d1fcbaa5fe7fce5ecc3c",
+  "sha256": "66a4e67f1815368189663d5e086066f10d7f5c864ba7dc15216ad9ba2ef09dd1",
   "source_hash_normalization": "UTF-8 text with LF newlines",
   "human_guide": "developer-guide.md",
   "sources": [
     {
       "path": "pyproject.toml",
       "kind": "package-metadata",
-      "sha256": "e7e175076f23aee8e67b9a08d7c76936e4775c4a347cad0713997a56a2621713"
+      "sha256": "86c7755967b7981d11f726e6d10fc8f9af13a7b65c85290cdc039b014e1ebbf8"
     },
     {
       "path": "docs/ai-docs.json",
@@ -26,12 +26,12 @@
     {
       "path": "docs/developer-guide.md",
       "kind": "reference",
-      "sha256": "c8e7bb4c42ea6842c501159c3992298e805aa5570e856e973a6c85f7b9d5255c"
+      "sha256": "686b6cb12bd0aed4dbbf155f07492f1fdb5df171ac67dd8e452216fea59e7496"
     },
     {
       "path": "docs/scorers.md",
       "kind": "reference",
-      "sha256": "f9e72707aa5dc5dc58e4780704feb4f5f671f3d03a83ae5b208c214e22ae44c4"
+      "sha256": "eea46b1b64691adadb38aeb31369bdf4c8d52ef4c6fa91e06fef6f372f4bef1b"
     },
     {
       "path": "docs/api-reference.md",
