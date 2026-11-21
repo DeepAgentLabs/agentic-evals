@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agentic-evals"
-version = "1.0.3"
+version = "1.0.4"
 description = "A standalone, framework-agnostic evaluation and scoring engine for LLM/agent outputs — extracted from AgenticLens's evaluation module."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -64,6 +64,8 @@ Changelog = "https://github.com/DeepAgentLabs/agentic-evals/blob/main/CHANGELOG.
 packages = ["src/agentic_evals"]
 
 [tool.ruff]
+# Generated declaration fragments retain the source expressions and snapshot checksum.
+extend-exclude = ["docs/llms-full.md"]
 line-length = 100
 target-version = "py310"
 src = ["src", "tests"]

@@ -4,44 +4,59 @@
   "distribution": "agentic-evals",
   "document": "llms-full.md",
   "content_type": "text/markdown; charset=utf-8",
-  "sha256": "6e441ac1006127be678524d0a528612816d994b1d54c621271667cd48945b616",
+  "sha256": "66a4e67f1815368189663d5e086066f10d7f5c864ba7dc15216ad9ba2ef09dd1",
   "source_hash_normalization": "UTF-8 text with LF newlines",
   "human_guide": "developer-guide.md",
   "sources": [
     {
       "path": "pyproject.toml",
       "kind": "package-metadata",
-      "sha256": "96633abfddcd25449ff62f7b18688d80b0d52ea7bb50b5919e006a22901c9d83"
+      "sha256": "86c7755967b7981d11f726e6d10fc8f9af13a7b65c85290cdc039b014e1ebbf8"
     },
     {
       "path": "docs/ai-docs.json",
       "kind": "source-selection",
-      "sha256": "76741e23c12b5fecfcfa1dd9440618f45fa001fb34904afd257ea597d48fb085"
+      "sha256": "3ec694ec90aa0d7ca530c7a3dfa3967d476a9143624890a3d67d12bddbc790c8"
+    },
+    {
+      "path": "docs/ai-reference-index.md",
+      "kind": "reference",
+      "sha256": "a6548721314981d80fd17bf0e4b46b5dc8abcd1f4b1a91fc0ee562c66f1e580a"
     },
     {
       "path": "docs/developer-guide.md",
       "kind": "reference",
-      "sha256": "9220f749497e585cb89eb2a52d035e6702810f24eae4172cd510d6fb96728675"
+      "sha256": "686b6cb12bd0aed4dbbf155f07492f1fdb5df171ac67dd8e452216fea59e7496"
+    },
+    {
+      "path": "docs/scorers.md",
+      "kind": "reference",
+      "sha256": "eea46b1b64691adadb38aeb31369bdf4c8d52ef4c6fa91e06fef6f372f4bef1b"
     },
     {
       "path": "docs/api-reference.md",
       "kind": "reference",
-      "sha256": "827e673d3ffcc6a39849ea8b4367de37608f1909e6061809f34fb4ffe8858f62"
+      "sha256": "7f3ee86ec93f14331c51d7460bc348cff355cbe1d1b96930bafa494d239cfd1a"
     },
     {
       "path": "docs/cli.md",
       "kind": "reference",
-      "sha256": "44b749193662fec8684ea8fbd08c897d6f60cefc6c7260a6b94f0012fc69f61f"
+      "sha256": "1b0276c157a04fd35138eba92bb49b2d665772e68020902d75324a0bf3404170"
     },
     {
-      "path": "docs/report-contract.md",
+      "path": "docs/core-concepts.md",
       "kind": "reference",
-      "sha256": "3a1f5d29d0a678e096270edebb99e2ec066999cbb2fa48fbfdd51da7e97797e2"
+      "sha256": "981c3370aec256b9c23a86d0546b9ddeb8569b21b44d86fafb6da0bd4a933639"
     },
     {
       "path": "docs/advanced.md",
       "kind": "reference",
-      "sha256": "45ac08a8318a2701e0418e9ed8a1e57e950c0232d60077099a2c1223d1a20a45"
+      "sha256": "fd8508f33ac0252551ee969882f7f9a151a991d46ebfdd16249f43ef2ef6043e"
+    },
+    {
+      "path": "docs/judge-reliability.md",
+      "kind": "reference",
+      "sha256": "3ee0c5baab928930bb916389fbc88c6c9f3bbb7825c76ef82b4ffd807644571e"
     },
     {
       "path": "docs/containment.md",
@@ -54,19 +69,319 @@
       "sha256": "4e068892d174d5cb836f473622d2a1a47437da5869aa80c04da714b05a6241bc"
     },
     {
+      "path": "docs/report-contract.md",
+      "kind": "reference",
+      "sha256": "3a1f5d29d0a678e096270edebb99e2ec066999cbb2fa48fbfdd51da7e97797e2"
+    },
+    {
+      "path": "docs/public-api.md",
+      "kind": "reference",
+      "sha256": "02b54aa2b2c44f3bd904438619622277063f7345c285ee7ce31c99d991fc1ee3"
+    },
+    {
+      "path": "docs/support-policy.md",
+      "kind": "reference",
+      "sha256": "4e9847b6a2d4eb848ae62a4cb8e914d9d3cd143fade82ae270517818fd1bb950"
+    },
+    {
+      "path": "docs/coordinated-v1-readiness.md",
+      "kind": "reference",
+      "sha256": "982ae251718078b00b07b9472bcdff21a8726fd7737cb1d75fb7c978431542d3"
+    },
+    {
+      "path": "docs/guide/custom-data.md",
+      "kind": "reference",
+      "sha256": "2d9dbe7a81712f184e1b01942cb75513771c579f9781b8d87fc752c5cc708704"
+    },
+    {
+      "path": "docs/guide/existing-traces.md",
+      "kind": "reference",
+      "sha256": "68b3f58b259515100dc32396f93420dd400c85060bc406bd69dec0929baee975"
+    },
+    {
+      "path": "docs/guide/custom-scorers.md",
+      "kind": "reference",
+      "sha256": "54318a9b1d07b7a4c3401adedd9a53943c0eeb1697de0e64c468867ec6f67e5b"
+    },
+    {
+      "path": "docs/guide/data-model.md",
+      "kind": "reference",
+      "sha256": "7ed7fa0e32a679e93e7ca6e435e0d238ae16b3642d8bcdf4990a60c968679e12"
+    },
+    {
+      "path": "docs/guide/release-gates.md",
+      "kind": "reference",
+      "sha256": "24cfd7442f8a3a7cda31bb910352bec3b3b6488ef5e857b27d00e3a6c00a8be8"
+    },
+    {
+      "path": "docs/guide/judges.md",
+      "kind": "reference",
+      "sha256": "2488bca6457d352082713a70e15ba0df63d8964e372c33f2e1240f14906a994d"
+    },
+    {
+      "path": "docs/guide/live.md",
+      "kind": "reference",
+      "sha256": "241b8830279d7dd9e95029e1b8e3def84e0610c4301357be1312eca19775fa82"
+    },
+    {
+      "path": "docs/aios-0.6.1.md",
+      "kind": "reference",
+      "sha256": "21abe618033b025ba1737c1dc85ab6a0627b4c24fd6d2f8fe6b0edd81b2eab5c"
+    },
+    {
+      "path": "docs/aios-0.7.0.md",
+      "kind": "reference",
+      "sha256": "cd785f9c53190196df20db2dc20560ad6a2ef3d6c2e03af9317e0b0caff87196"
+    },
+    {
+      "path": "docs/aios-0.8-operational-artifacts.md",
+      "kind": "reference",
+      "sha256": "d9572c60994a5477cc2eb05ec7ba446437d8f3646a6c6f1c6b5932c6e8713ed0"
+    },
+    {
+      "path": "docs/aios-v0.6.md",
+      "kind": "reference",
+      "sha256": "62bb765c374057c5b84e087b67de7fe221ecff7f27939a5b09b6b28f052da07b"
+    },
+    {
+      "path": "docs/chaos-0.11-chaoshub.md",
+      "kind": "reference",
+      "sha256": "72b9b16913e522504eacaa788b08fb28a551f516f945d53fab1792d9c2b1407f"
+    },
+    {
+      "path": "docs/chaos-0.7.md",
+      "kind": "reference",
+      "sha256": "c53ec1380421e36be59720f339fe62f4819cf6d1c1b4466a2dd936e8a68ba401"
+    },
+    {
+      "path": "docs/chaos-0.8.md",
+      "kind": "reference",
+      "sha256": "edd92fb2d29f159d74ef6e61ac35e5a4b9ac9a058ececeacc06d4ca3691e7c01"
+    },
+    {
+      "path": "docs/chaos-0.9.md",
+      "kind": "reference",
+      "sha256": "ef176055c5451001eac55e902254438919f8a6b9351c19370c54b00447c56d7e"
+    },
+    {
+      "path": "docs/control-tower-0.6.md",
+      "kind": "reference",
+      "sha256": "b4e3c4839274f4151511cb7aaf062d51a1a2d48d4a0445c5ee8d896218e4d4cc"
+    },
+    {
+      "path": "docs/lens-0.10-routing.md",
+      "kind": "reference",
+      "sha256": "180b70b35807dc5b82576379d060055bb09d3fb7df18f93537e7458d5da2db27"
+    },
+    {
+      "path": "docs/lens-0.11-optimization.md",
+      "kind": "reference",
+      "sha256": "5c7d6dc981eb54bd71a2d8fa14b216653381a0ee6449ae6eb4c9f39ca42472ac"
+    },
+    {
+      "path": "docs/lens-0.13.md",
+      "kind": "reference",
+      "sha256": "db61f79bbbd53f16d22b8d88f4e0307ee57655608ce5f40eaa64e2feda56cc9a"
+    },
+    {
+      "path": "docs/mcp-0.4-unified-workflows.md",
+      "kind": "reference",
+      "sha256": "9a28cdfa943622967be75c5bbe3087db5394ff63d2ceac1efce617ac7e171356"
+    },
+    {
+      "path": "docs/mcp-0.5-access-control.md",
+      "kind": "reference",
+      "sha256": "64c5be340277b800030132882a398f64d555a6dab05f447abec49eed1878b329"
+    },
+    {
+      "path": "docs/mcp-0.7-readiness.md",
+      "kind": "reference",
+      "sha256": "679e4c6b19d79e8f092f3b1f925d9dc74adac1c2814c62af81543e8551f8b51b"
+    },
+    {
+      "path": "docs/phase6-containment.md",
+      "kind": "reference",
+      "sha256": "0a80852b2decda9d4984cf8e9eb740f0a085da21c997452da263b027e944f2e4"
+    },
+    {
+      "path": "docs/sidecar-0.10.md",
+      "kind": "reference",
+      "sha256": "e6402ac5a9e107d2ed0cf4b6f3fc35680f7537811a520ddfdb2b127ef88dbda0"
+    },
+    {
+      "path": "docs/sidecar-0.9.md",
+      "kind": "reference",
+      "sha256": "f37529a62349c7b054ffe8013ebe86c5d9857b03b6f77c8dc79bf582887e3a34"
+    },
+    {
+      "path": "docs/sidecar-v0.8.md",
+      "kind": "reference",
+      "sha256": "573b712ebb37ee3ed0eb11ffd53d863845dc09c3b04dd4d32f2f6d15ce3c0428"
+    },
+    {
+      "path": "docs/tower-0.10-compatibility.md",
+      "kind": "reference",
+      "sha256": "c8e18e27d10ef212c7ea77c380a953fcd7c041f6fa2992d3e1de7e7d2db2689b"
+    },
+    {
+      "path": "docs/tower-0.7-fleet-operations.md",
+      "kind": "reference",
+      "sha256": "ac83e7fc86fda20b3c83a5edbbd74513ef0a9fa9ab1a9c878bcd88a38c05e654"
+    },
+    {
+      "path": "docs/tower-0.8-live-operations.md",
+      "kind": "reference",
+      "sha256": "072292acbbd68b2f53905e395f56745a608ccafd90f9cd8293b2ab12541bc83e"
+    },
+    {
+      "path": "docs/tower-0.9-runbooks.md",
+      "kind": "reference",
+      "sha256": "6bf349baf43cc63c253d1a8877e66d6fe9c5a4e4fe49458af6f4665ecad3737a"
+    },
+    {
+      "path": "docs/methodology.md",
+      "kind": "reference",
+      "sha256": "addc12a3d2eb56fe90096f94bf310358245dd674b8a021c3ac2b42a006e71746"
+    },
+    {
+      "path": "src/agentic_evals/skills/analyze-an-eval-experiment/SKILL.md",
+      "kind": "reference",
+      "sha256": "412f4dce790dad8684ba7b66c13073d7080ec69d2d6e291992f8b96ed33c0a3c"
+    },
+    {
+      "path": "src/agentic_evals/skills/build-an-eval-dataset/SKILL.md",
+      "kind": "reference",
+      "sha256": "dbc9d9519249a9a67f91e6b86d0941f1b6f2a8da99ab1ee6dc1e398e9ba198a2"
+    },
+    {
+      "path": "src/agentic_evals/skills/choose-a-rubric-template/SKILL.md",
+      "kind": "reference",
+      "sha256": "98924809e6a019abe1667345f27bd2104418f313367b5a7a80944665c7c72e87"
+    },
+    {
+      "path": "src/agentic_evals/skills/debug-a-flaky-llm-judge/SKILL.md",
+      "kind": "reference",
+      "sha256": "b151b2397793ecb3534194559bc672160d3182d9149ae328e661bc989158987d"
+    },
+    {
+      "path": "src/agentic_evals/skills/define-a-release-gate/SKILL.md",
+      "kind": "reference",
+      "sha256": "4bfebb5763488d08839b7f2372f2f3abfb1a906208b7996fc572f75186702283"
+    },
+    {
+      "path": "src/agentic_evals/skills/define-an-eval-objective/SKILL.md",
+      "kind": "reference",
+      "sha256": "13adcc3455f3a2611955fe9e3d36094f66a25a733dc1741518a999c912452c0a"
+    },
+    {
+      "path": "src/agentic_evals/skills/design-an-eval-experiment/SKILL.md",
+      "kind": "reference",
+      "sha256": "40226e0d5936267364eee757d45dcc53318d635533d1bba21eb08c6620ea0192"
+    },
+    {
+      "path": "src/agentic_evals/skills/discover-failure-modes/SKILL.md",
+      "kind": "reference",
+      "sha256": "e2d4ab9c6e75311e179f752f26150b35919454b1aa2a5bb8e26ab22c2866a84e"
+    },
+    {
+      "path": "src/agentic_evals/skills/elicit-eval-criteria/SKILL.md",
+      "kind": "reference",
+      "sha256": "eedb59ca79c5202c9ef2819190978140835d5067cb00743febfe0ed19aadf768"
+    },
+    {
+      "path": "src/agentic_evals/skills/evaluate-containment/SKILL.md",
+      "kind": "reference",
+      "sha256": "4ffecd6efa24cd4500245c8d562f90d4fe4911e88c08f9dc16c28f3ac71fa952"
+    },
+    {
+      "path": "src/agentic_evals/skills/export-aios-evidence/SKILL.md",
+      "kind": "reference",
+      "sha256": "eaf6af0f0a687ef4ca118eed7d2daac92af91394ddcd1a9af0316e71f66817e3"
+    },
+    {
+      "path": "src/agentic_evals/skills/instrument-a-trace/SKILL.md",
+      "kind": "reference",
+      "sha256": "ec364e7f4a26d0d2a249cfb3819e11fa5d6004a5a7d10cb3ab2554d838c9e4dc"
+    },
+    {
+      "path": "src/agentic_evals/skills/monitor-evals-in-production/SKILL.md",
+      "kind": "reference",
+      "sha256": "b26ee03232716f90fec1f0c07a74014b517b0289758fd0fdc4a64dab75b8e3fb"
+    },
+    {
+      "path": "src/agentic_evals/skills/red-team-an-agent-suite/SKILL.md",
+      "kind": "reference",
+      "sha256": "b0c3625cb27cf9f5fe516a23c77ce7c381f8bbd09c5b18031d44945f839a7099"
+    },
+    {
+      "path": "src/agentic_evals/skills/report-eval-results/SKILL.md",
+      "kind": "reference",
+      "sha256": "81d7dc20c269936b447703d83519cfc2f84b7d27d177539f3c5de8ca47758b1d"
+    },
+    {
+      "path": "src/agentic_evals/skills/run-a-live-suite/SKILL.md",
+      "kind": "reference",
+      "sha256": "b982f5af06925b4bc97a4d2a9e19097b65d41333ea88f8481abafe597af75ebc"
+    },
+    {
+      "path": "src/agentic_evals/skills/size-a-test-suite/SKILL.md",
+      "kind": "reference",
+      "sha256": "c9cc2fa28bae6010a0383abc5a4b4266a41509da0047a2436a8f9f0f4f5c6fdc"
+    },
+    {
+      "path": "src/agentic_evals/skills/validate-a-scorer/SKILL.md",
+      "kind": "reference",
+      "sha256": "f0ad8c60c3474f666bcf81e641cc74c6cdded33ca482a55db78572871eb441e5"
+    },
+    {
+      "path": "src/agentic_evals/skills/write-a-scorer/SKILL.md",
+      "kind": "reference",
+      "sha256": "3021a960bd6b999fb3142b8541aaa735dbc71aa47c68c20ebe4944bb962d0f10"
+    },
+    {
       "path": "src/agentic_evals/__init__.py",
       "kind": "source-contract",
       "sha256": "17f4d3daefa73b90853a5402bf7e3c9342dea8fe481e46141d5050319e1f6cfd"
     },
     {
-      "path": "src/agentic_evals/simple.py",
+      "path": "src/agentic_evals/_async.py",
       "kind": "source-contract",
-      "sha256": "73a906d15ec64b0386382f0af3c6f8e3acb0c1338be9c03f3f15f4205284ae2e"
+      "sha256": "7eea2053c33bab7322f52ccd5d1bd83393af9c29d078db0904ef666ceed4a92c"
     },
     {
-      "path": "src/agentic_evals/models.py",
+      "path": "src/agentic_evals/_version.py",
       "kind": "source-contract",
-      "sha256": "4010aeb7a173b4389eeee096ebc6e9b5e6f05e89530947f683ac1314fc39a11b"
+      "sha256": "69cb91fd7489ce9e0ead0e53f3e01ce6061ee3c994c0e6eec234668ac16667b9"
+    },
+    {
+      "path": "src/agentic_evals/aios.py",
+      "kind": "source-contract",
+      "sha256": "61118de27a8d3e19bfb7dd02393dfd101c7963e6001cea3db8fc1df440654dde"
+    },
+    {
+      "path": "src/agentic_evals/cli.py",
+      "kind": "source-contract",
+      "sha256": "8429734c0f5ba4683e8fee1a0b311254b7cf8d9cf96f480a32ca10b27474c212"
+    },
+    {
+      "path": "src/agentic_evals/cli_commands.py",
+      "kind": "source-contract",
+      "sha256": "2b7571f792f739d8593807423275b271a7be0d31eaed27813d187f8569beb7ea"
+    },
+    {
+      "path": "src/agentic_evals/containment.py",
+      "kind": "source-contract",
+      "sha256": "3f8adc0c1ce9d891ffe5c19878413395c2fd4d3cbe03e27209f834aa194647e0"
+    },
+    {
+      "path": "src/agentic_evals/evaluators.py",
+      "kind": "source-contract",
+      "sha256": "8ef997a362f89fbbacf3834813dae70f6b35aef8b76edcdfe00f1d7b20137619"
+    },
+    {
+      "path": "src/agentic_evals/formatting.py",
+      "kind": "source-contract",
+      "sha256": "15822cface0338ff43452e79e0e9d3fad46dd836fc4720aeab0485c416a71776"
     },
     {
       "path": "src/agentic_evals/gate.py",
@@ -74,14 +389,79 @@
       "sha256": "b0b9c79dacb0c3cbe71194582a6d89e7330218c50acb3e13b08f6b89c7831bdd"
     },
     {
-      "path": "src/agentic_evals/runner.py",
+      "path": "src/agentic_evals/judging.py",
       "kind": "source-contract",
-      "sha256": "024409a6558013d2ffcd9f9e48b2b8aedb311053c97137c816a71023b60bd54d"
+      "sha256": "7e20e3ec57ce2dc44c7356aefbd0179c7f2d0d4e9b71b0ac529cd699da6ac716"
+    },
+    {
+      "path": "src/agentic_evals/live.py",
+      "kind": "source-contract",
+      "sha256": "29c2c2be76c10ebf7ab995da51de0b91f5396d905fde6bde89d9c98b1bb335f9"
+    },
+    {
+      "path": "src/agentic_evals/models.py",
+      "kind": "source-contract",
+      "sha256": "4010aeb7a173b4389eeee096ebc6e9b5e6f05e89530947f683ac1314fc39a11b"
+    },
+    {
+      "path": "src/agentic_evals/packs/__init__.py",
+      "kind": "source-contract",
+      "sha256": "6fbec2b7b6f1290b8a1812c33a181fda5d94056fa08344e8144a9f5df1e1e316"
+    },
+    {
+      "path": "src/agentic_evals/packs/library.py",
+      "kind": "source-contract",
+      "sha256": "073b02feaf3be420b909d0000292ee78e310f0cf362183e2aef5358644ec8a68"
+    },
+    {
+      "path": "src/agentic_evals/packs/loader.py",
+      "kind": "source-contract",
+      "sha256": "70c2e455296ffd76875d477e78fc571bef51cdfb743960e1190462c16a92c523"
     },
     {
       "path": "src/agentic_evals/reliability.py",
       "kind": "source-contract",
       "sha256": "7ac46779302093764131ef132cdb52f71c3a8488e906fb0077ac57e422950558"
+    },
+    {
+      "path": "src/agentic_evals/report_contract.py",
+      "kind": "source-contract",
+      "sha256": "8b9d35b49f09d6cb37ce60587d961e4946935d48a539d46e52dd8821089997ee"
+    },
+    {
+      "path": "src/agentic_evals/runner.py",
+      "kind": "source-contract",
+      "sha256": "024409a6558013d2ffcd9f9e48b2b8aedb311053c97137c816a71023b60bd54d"
+    },
+    {
+      "path": "src/agentic_evals/scorers/__init__.py",
+      "kind": "source-contract",
+      "sha256": "78d21ca3416abc6e130caac6be6f6cc940fafd93650f4bfa1d00a7f3f123d968"
+    },
+    {
+      "path": "src/agentic_evals/scorers/registry.py",
+      "kind": "source-contract",
+      "sha256": "77dcf756f75253b178a88886b42b543d71456821fa375b88e73a7c97ed45eb5e"
+    },
+    {
+      "path": "src/agentic_evals/scorers/rubric.py",
+      "kind": "source-contract",
+      "sha256": "e27fa9329eb3b93109ca1fd551d5e9b47e5b0959a79979ad86436fc0f8413805"
+    },
+    {
+      "path": "src/agentic_evals/scorers/text.py",
+      "kind": "source-contract",
+      "sha256": "4ad8f5b0f3bcfbb68ea86914266bf08949061ed4aa9e2b874cacfb8c55dd5630"
+    },
+    {
+      "path": "src/agentic_evals/scorers/trajectory.py",
+      "kind": "source-contract",
+      "sha256": "6b61f8be9eae14cd5cfec232f5343c198be14080552b22617276a11e301ee2d4"
+    },
+    {
+      "path": "src/agentic_evals/simple.py",
+      "kind": "source-contract",
+      "sha256": "73a906d15ec64b0386382f0af3c6f8e3acb0c1338be9c03f3f15f4205284ae2e"
     },
     {
       "path": "src/agentic_evals/schemas/evaluation-report-1.0.schema.json",
@@ -101,7 +481,7 @@
     {
       "path": "docs/guide/examples/add_custom_check.py",
       "kind": "example",
-      "sha256": "df216c310dab4027287cc99f4102195d5fbb5bd7efdf4ab7134b245541c68598"
+      "sha256": "835b94a1845b983dc8a8bc94f18136d3ad873a8531cd2f7270a3015a599a4e70"
     },
     {
       "path": "docs/guide/examples/build_custom.py",

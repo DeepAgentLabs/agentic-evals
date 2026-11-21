@@ -8,7 +8,7 @@ No end-of-support date is promised for the beta line.
 
 Runtime dependencies stay minimal; no sibling is required. Existing consumer
 ranges accepting 0.11 also accept 0.12. The optional `integrity` extra requires
-Lens >=0.12,<1. The native report/gate schema remains 1.0, byte-for-byte identical
+Lens >=0.12,<2. The native report/gate schema remains 1.0, byte-for-byte identical
 to 0.11. AIOS exports remain `0.4-draft`.
 
 ## Candidate validation matrix

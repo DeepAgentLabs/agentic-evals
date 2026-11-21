@@ -17,6 +17,30 @@ line). Each sample needs `case_id`, `output`, and `trace` (which may be `{}`).
 Missing samples become failed cases; duplicate or unknown case IDs are errors.
 An empty array records all cases as missing, rather than passing them.
 
+## Complete command inventory
+
+| Command (after `agentic-evals`) | Purpose |
+| --- | --- |
+| `run` | Discover/execute Python Eval files and fail if any collected eval fails |
+| `evaluate` | Score saved suite/sample files and produce a report |
+| `live` | Execute a trusted Python/HTTP target, then score and report |
+| `gate` | Apply release policy to a native JSON report |
+| `pack list` | List the four built-in packs |
+| `pack show` | Inspect a pack or emit its TestSuite |
+| `aios export` | Export report/gate evidence with explicit AIOS target mapping |
+
+Use `agentic-evals COMMAND --help` for exact arguments/options. `evaluate`, `live` and `gate` support `--format json|junit|markdown` and `--out`; `aios export` emits its own JSON artifact. Keep native JSON for report gating/schema validation.
+
+## Python Eval file discovery
+
+```bash
+agentic-evals run
+agentic-evals run evals/
+agentic-evals run path/to/first_eval.py
+```
+
+Directory discovery recursively matches `*_eval.py`, `eval_*.py` and `*.eval.py`, deduplicates resolved paths and runs them in sorted order. Explicit file paths are accepted without a naming-pattern requirement. A discovered file executes as trusted Python and must call `Eval(...)` at module level to contribute a result. Exit 1 means a failed collected eval, import/execution error, no matching files or no collected results; the command does not discover declarative suites as Python tests.
+
 ## Exit codes and output
 
 | Command | 0 | 1 | 2 |
