@@ -51,6 +51,8 @@ Returns a full `EvaluationReport` with per-case scores, summary metrics, pass ra
 
 ### Scorers Library
 
+See the [complete scorer and rubric catalog](scorers.md) for all 17 default registry entries, six lightweight helpers, ten rubric templates, configuration requirements and implicit-check interactions.
+
 Pre-built evaluators organized by type:
 
 #### Text Scorers (No LLM)
@@ -261,3 +263,10 @@ A string target is a Step ID; a dict is an AIOS reference (`id`, `type`, optiona
 ## API readiness and support
 
 See [the public API candidate](public-api.md), [support and compatibility matrix](support-policy.md), and [executable examples](../examples/README.md).
+
+
+## Capability and contract lookup
+
+The [Developer Guide (simple)](developer-guide.md#capability-index) has short workflows for every capability category. The [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) includes the detailed task guides, scorer catalog, public/support policy contents, statically extracted declarations from every package module and both native schemas.
+
+Use the root exported APIs for application code. Names beginning `_` are private; declaration extraction does not promote implementation helpers or modules to public status. Package, report/gate and AIOS versions remain independent. See the [public API candidate](public-api.md), [support policy](support-policy.md) and [coordinated readiness](coordinated-v1-readiness.md).
