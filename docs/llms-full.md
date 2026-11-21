@@ -194,15 +194,29 @@ Use `TestSuite`/`TestCase` for test definitions and `EvaluationSample`/`EvalTrac
 ```python
 from pathlib import Path
 from agentic_evals import (
-    EvaluationSample, EvaluatorConfig, EvalTrace, TestCase, TestSuite,
-    default_registry, evaluate_suite,
+    EvaluationSample,
+    EvaluatorConfig,
+    EvalTrace,
+    TestCase,
+    TestSuite,
+    default_registry,
+    evaluate_suite,
 )
 
-suite = TestSuite(name="numeric-demo", version="1", cases=[
-    TestCase(id="answer", name="Answer", expected_output="42", evaluators=[
-        EvaluatorConfig(name="numeric_diff", config={"abs_tol": 0.01}),
-    ]),
-])
+suite = TestSuite(
+    name="numeric-demo",
+    version="1",
+    cases=[
+        TestCase(
+            id="answer",
+            name="Answer",
+            expected_output="42",
+            evaluators=[
+                EvaluatorConfig(name="numeric_diff", config={"abs_tol": 0.01}),
+            ],
+        ),
+    ],
+)
 samples = [EvaluationSample(case_id="answer", output="42.0", trace=EvalTrace())]
 report = evaluate_suite(suite, samples, registry=default_registry())
 assert report.summary.pass_rate == 1.0
@@ -451,17 +465,31 @@ Invalid/missing scorer configuration raises rather than inventing a pass. JSON p
 
 ```python
 from agentic_evals import (
-    EvaluationSample, EvaluatorConfig, EvalTrace, TestCase, TestSuite,
-    default_registry, evaluate_suite,
+    EvaluationSample,
+    EvaluatorConfig,
+    EvalTrace,
+    TestCase,
+    TestSuite,
+    default_registry,
+    evaluate_suite,
 )
 
-suite = TestSuite(name="prefix", version="1", cases=[
-    TestCase(id="one", name="Prefix", evaluators=[
-        EvaluatorConfig(name="starts_with", config={"reference": "Answer:"}),
-    ]),
-])
+suite = TestSuite(
+    name="prefix",
+    version="1",
+    cases=[
+        TestCase(
+            id="one",
+            name="Prefix",
+            evaluators=[
+                EvaluatorConfig(name="starts_with", config={"reference": "Answer:"}),
+            ],
+        ),
+    ],
+)
 report = evaluate_suite(
-    suite, [EvaluationSample(case_id="one", output="Answer: 42", trace=EvalTrace())],
+    suite,
+    [EvaluationSample(case_id="one", output="Answer: 42", trace=EvalTrace())],
     registry=default_registry(),
 )
 assert report.summary.pass_rate == 1.0
@@ -518,8 +546,16 @@ This complete offline example uses a fixed verdict to demonstrate the integratio
 
 ```python
 from agentic_evals import (
-    EvaluationSample, EvaluatorConfig, EvalTrace, JudgeResponse, LLMRubricEvaluator,
-    TestCase, TestSuite, default_registry, evaluate_suite, make_rubric,
+    EvaluationSample,
+    EvaluatorConfig,
+    EvalTrace,
+    JudgeResponse,
+    LLMRubricEvaluator,
+    TestCase,
+    TestSuite,
+    default_registry,
+    evaluate_suite,
+    make_rubric,
 )
 
 concise = make_rubric("concise", "At most two sentences, with no preamble.")
@@ -531,11 +567,16 @@ def fixed_completion(prompt):
 
 registry = default_registry()
 registry.register(LLMRubricEvaluator("concise", concise, complete_fn=fixed_completion, version="1"))
-suite = TestSuite(name="rubric-demo", version="1", cases=[
-    TestCase(id="one", name="Concise", evaluators=[EvaluatorConfig(name="concise")]),
-])
+suite = TestSuite(
+    name="rubric-demo",
+    version="1",
+    cases=[
+        TestCase(id="one", name="Concise", evaluators=[EvaluatorConfig(name="concise")]),
+    ],
+)
 report = evaluate_suite(
-    suite, [EvaluationSample(case_id="one", output="The answer is 42.", trace=EvalTrace())],
+    suite,
+    [EvaluationSample(case_id="one", output="The answer is 42.", trace=EvalTrace())],
     registry=registry,
 )
 assert report.summary.pass_rate == 1.0
