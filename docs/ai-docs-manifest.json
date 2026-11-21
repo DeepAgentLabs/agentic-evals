@@ -351,7 +351,7 @@
     {
       "path": "src/agentic_evals/_version.py",
       "kind": "source-contract",
-      "sha256": "da997374411bdb814b8c4d88d97c8105c2443d858771c34be1282d2c2ffa7ab8"
+      "sha256": "69cb91fd7489ce9e0ead0e53f3e01ce6061ee3c994c0e6eec234668ac16667b9"
     },
     {
       "path": "src/agentic_evals/aios.py",
