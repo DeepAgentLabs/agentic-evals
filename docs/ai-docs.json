@@ -3,41 +3,264 @@
   "scope": "Evaluate recorded outputs and normalized traces, or run an explicit target. Producing a report and passing a release gate are separate outcomes. Generic trace examples are not automatic vendor importers.",
   "references": [
     {
+      "title": "AI Reference capability index",
+      "path": "docs/ai-reference-index.md"
+    },
+    {
       "title": "Setup and task workflows",
       "path": "docs/developer-guide.md"
     },
     {
-      "title": "Api Reference",
+      "title": "Complete scorer and rubric catalog",
+      "path": "docs/scorers.md"
+    },
+    {
+      "title": "API reference",
       "path": "docs/api-reference.md"
     },
     {
-      "title": "Cli",
+      "title": "CLI reference and CI",
       "path": "docs/cli.md"
     },
     {
-      "title": "Report Contract",
-      "path": "docs/report-contract.md"
+      "title": "Core concepts and data model",
+      "path": "docs/core-concepts.md"
     },
     {
-      "title": "Advanced",
+      "title": "Custom evaluators and packs",
       "path": "docs/advanced.md"
     },
     {
-      "title": "Containment",
+      "title": "Judge reliability and live target resilience",
+      "path": "docs/judge-reliability.md"
+    },
+    {
+      "title": "Authenticated containment scoring",
       "path": "docs/containment.md"
     },
     {
-      "title": "Aios Evidence",
+      "title": "AIOS evaluation evidence",
       "path": "docs/aios-evidence.md"
+    },
+    {
+      "title": "Native report and gate contract",
+      "path": "docs/report-contract.md"
+    },
+    {
+      "title": "Public API candidate",
+      "path": "docs/public-api.md"
+    },
+    {
+      "title": "Support and compatibility policy",
+      "path": "docs/support-policy.md"
+    },
+    {
+      "title": "Coordinated readiness",
+      "path": "docs/coordinated-v1-readiness.md"
+    },
+    {
+      "title": "Custom data workflow",
+      "path": "docs/guide/custom-data.md"
+    },
+    {
+      "title": "Existing trace workflow",
+      "path": "docs/guide/existing-traces.md"
+    },
+    {
+      "title": "Custom scorer workflow",
+      "path": "docs/guide/custom-scorers.md"
+    },
+    {
+      "title": "Report data model tutorial",
+      "path": "docs/guide/data-model.md"
+    },
+    {
+      "title": "Release gate tutorial",
+      "path": "docs/guide/release-gates.md"
+    },
+    {
+      "title": "Judge reliability tutorial",
+      "path": "docs/guide/judges.md"
+    },
+    {
+      "title": "Live and async tutorial",
+      "path": "docs/guide/live.md"
+    },
+    {
+      "title": "Historical integration note: AIOS v0.6.1 compatibility",
+      "path": "docs/aios-0.6.1.md"
+    },
+    {
+      "title": "Historical integration note: AIOS repository v0.7.0 compatibility",
+      "path": "docs/aios-0.7.0.md"
+    },
+    {
+      "title": "Historical integration note: AIOS 0.8.0 operational-artifact compatibility",
+      "path": "docs/aios-0.8-operational-artifacts.md"
+    },
+    {
+      "title": "Historical integration note: AIOS v0.6 compatibility",
+      "path": "docs/aios-v0.6.md"
+    },
+    {
+      "title": "Historical integration note: Chaos 0.11 ChaosHub compatibility",
+      "path": "docs/chaos-0.11-chaoshub.md"
+    },
+    {
+      "title": "Historical integration note: Chaos 0.7 compatibility",
+      "path": "docs/chaos-0.7.md"
+    },
+    {
+      "title": "Historical integration note: Chaos 0.8 compatibility",
+      "path": "docs/chaos-0.8.md"
+    },
+    {
+      "title": "Historical integration note: Chaos 0.9 compatibility",
+      "path": "docs/chaos-0.9.md"
+    },
+    {
+      "title": "Historical integration note: Control Tower 0.6.0 compatibility",
+      "path": "docs/control-tower-0.6.md"
+    },
+    {
+      "title": "Historical integration note: Lens routing integration boundary",
+      "path": "docs/lens-0.10-routing.md"
+    },
+    {
+      "title": "Historical integration note: Lens optimization and evaluation boundaries",
+      "path": "docs/lens-0.11-optimization.md"
+    },
+    {
+      "title": "Historical integration note: Lens 0.13 readiness compatibility",
+      "path": "docs/lens-0.13.md"
+    },
+    {
+      "title": "Historical integration note: MCP 0.4.0 unified workflows",
+      "path": "docs/mcp-0.4-unified-workflows.md"
+    },
+    {
+      "title": "Historical integration note: MCP 0.5.0 hosted access control",
+      "path": "docs/mcp-0.5-access-control.md"
+    },
+    {
+      "title": "Historical integration note: MCP 0.7 integration readiness \u2014 Evals 0.12.0",
+      "path": "docs/mcp-0.7-readiness.md"
+    },
+    {
+      "title": "Historical integration note: MCP Phase 6 coordinated containment release",
+      "path": "docs/phase6-containment.md"
+    },
+    {
+      "title": "Historical integration note: Sidecar 0.10 contract readiness",
+      "path": "docs/sidecar-0.10.md"
+    },
+    {
+      "title": "Historical integration note: Sidecar 0.9.0 compatibility",
+      "path": "docs/sidecar-0.9.md"
+    },
+    {
+      "title": "Historical integration note: Sidecar 0.8 integration boundary",
+      "path": "docs/sidecar-v0.8.md"
+    },
+    {
+      "title": "Historical integration note: Tower 0.10 capability contract compatibility",
+      "path": "docs/tower-0.10-compatibility.md"
+    },
+    {
+      "title": "Historical integration note: Tower 0.7.0 integration compatibility",
+      "path": "docs/tower-0.7-fleet-operations.md"
+    },
+    {
+      "title": "Historical integration note: Control Tower 0.8.0 live operations compatibility",
+      "path": "docs/tower-0.8-live-operations.md"
+    },
+    {
+      "title": "Historical integration note: Control Tower 0.9.0 runbooks compatibility",
+      "path": "docs/tower-0.9-runbooks.md"
+    },
+    {
+      "title": "Evaluation methodology playbooks",
+      "path": "docs/methodology.md"
+    },
+    {
+      "title": "Methodology playbook: analyze-an-eval-experiment",
+      "path": "src/agentic_evals/skills/analyze-an-eval-experiment/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: build-an-eval-dataset",
+      "path": "src/agentic_evals/skills/build-an-eval-dataset/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: choose-a-rubric-template",
+      "path": "src/agentic_evals/skills/choose-a-rubric-template/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: debug-a-flaky-llm-judge",
+      "path": "src/agentic_evals/skills/debug-a-flaky-llm-judge/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: define-a-release-gate",
+      "path": "src/agentic_evals/skills/define-a-release-gate/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: define-an-eval-objective",
+      "path": "src/agentic_evals/skills/define-an-eval-objective/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: design-an-eval-experiment",
+      "path": "src/agentic_evals/skills/design-an-eval-experiment/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: discover-failure-modes",
+      "path": "src/agentic_evals/skills/discover-failure-modes/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: elicit-eval-criteria",
+      "path": "src/agentic_evals/skills/elicit-eval-criteria/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: evaluate-containment",
+      "path": "src/agentic_evals/skills/evaluate-containment/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: export-aios-evidence",
+      "path": "src/agentic_evals/skills/export-aios-evidence/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: instrument-a-trace",
+      "path": "src/agentic_evals/skills/instrument-a-trace/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: monitor-evals-in-production",
+      "path": "src/agentic_evals/skills/monitor-evals-in-production/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: red-team-an-agent-suite",
+      "path": "src/agentic_evals/skills/red-team-an-agent-suite/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: report-eval-results",
+      "path": "src/agentic_evals/skills/report-eval-results/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: run-a-live-suite",
+      "path": "src/agentic_evals/skills/run-a-live-suite/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: size-a-test-suite",
+      "path": "src/agentic_evals/skills/size-a-test-suite/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: validate-a-scorer",
+      "path": "src/agentic_evals/skills/validate-a-scorer/SKILL.md"
+    },
+    {
+      "title": "Methodology playbook: write-a-scorer",
+      "path": "src/agentic_evals/skills/write-a-scorer/SKILL.md"
     }
   ],
   "contracts": [
-    "src/agentic_evals/__init__.py",
-    "src/agentic_evals/simple.py",
-    "src/agentic_evals/models.py",
-    "src/agentic_evals/gate.py",
-    "src/agentic_evals/runner.py",
-    "src/agentic_evals/reliability.py"
+    "src/agentic_evals/**/*.py"
   ],
   "schemas": [
     "src/agentic_evals/schemas/*.schema.json"
