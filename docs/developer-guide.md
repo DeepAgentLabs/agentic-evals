@@ -88,15 +88,29 @@ Use `TestSuite`/`TestCase` for test definitions and `EvaluationSample`/`EvalTrac
 ```python
 from pathlib import Path
 from agentic_evals import (
-    EvaluationSample, EvaluatorConfig, EvalTrace, TestCase, TestSuite,
-    default_registry, evaluate_suite,
+    EvaluationSample,
+    EvaluatorConfig,
+    EvalTrace,
+    TestCase,
+    TestSuite,
+    default_registry,
+    evaluate_suite,
 )
 
-suite = TestSuite(name="numeric-demo", version="1", cases=[
-    TestCase(id="answer", name="Answer", expected_output="42", evaluators=[
-        EvaluatorConfig(name="numeric_diff", config={"abs_tol": 0.01}),
-    ]),
-])
+suite = TestSuite(
+    name="numeric-demo",
+    version="1",
+    cases=[
+        TestCase(
+            id="answer",
+            name="Answer",
+            expected_output="42",
+            evaluators=[
+                EvaluatorConfig(name="numeric_diff", config={"abs_tol": 0.01}),
+            ],
+        ),
+    ],
+)
 samples = [EvaluationSample(case_id="answer", output="42.0", trace=EvalTrace())]
 report = evaluate_suite(suite, samples, registry=default_registry())
 assert report.summary.pass_rate == 1.0
