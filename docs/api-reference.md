@@ -1,6 +1,6 @@
 # API Reference (detailed)
 
-**Version:** 1.0.4
+**Version:** 1.1.0
 
 Every name below is a root export of `agentic_evals` (listed in `agentic_evals.__all__`). Names beginning `_` and the implementation modules `cli_commands`, `formatting` and `live` are private. See the [public API policy](public-api.md).
 
