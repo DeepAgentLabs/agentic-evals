@@ -618,16 +618,18 @@ sample = EvaluationSample(
 report = evaluate_suite(pack.to_suite(), [sample], registry=default_registry())
 ```
 
-Ships 3 built-in packs (`list_builtin_packs()`): `tool-use-correctness`,
-`json-output-contract` (both runnable with `default_registry()`), and
+Ships 4 built-in packs (`list_builtin_packs()`): `tool-use-correctness`,
+`json-output-contract` (both runnable with `default_registry()`),
 `factual-qa` (needs a registry with an `LLMRubricEvaluator` registered,
-since it uses the `FACTUALITY` rubric). Load your own with `load_pack(path)`.
+since it uses the `FACTUALITY` rubric) and `adversarial-containment`
+(needs a `ContainmentEvaluator` with a trusted verifier). Load your own
+with `load_pack(path)`.
 
 ## Skills
 
 `agentic_evals/skills/` ships methodology playbooks (`SKILL.md` cards --
 Trigger/Do/Avoid/Check/Risk), not runnable code, scoped to this package's
-own API. 18 skills cover the eval lifecycle end to end:
+own API. 19 skills cover the eval lifecycle end to end:
 
 - **Frame**: `define-an-eval-objective`, `elicit-eval-criteria`
 - **Build data**: `build-an-eval-dataset`, `size-a-test-suite`
@@ -637,7 +639,8 @@ own API. 18 skills cover the eval lifecycle end to end:
 - **Investigate**: `discover-failure-modes`, `red-team-an-agent-suite`,
   `debug-a-flaky-llm-judge`
 - **Operate**: `define-a-release-gate`, `report-eval-results`,
-  `monitor-evals-in-production`, `export-aios-evidence`
+  `monitor-evals-in-production`, `evaluate-containment`,
+  `export-aios-evidence`
 
 These document how to use this package well and are meant to be read
 directly, or picked up by a coding agent's own skill mechanism -- distinct

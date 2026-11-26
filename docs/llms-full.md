@@ -108,7 +108,7 @@ Source: [docs/developer-guide.md](https://github.com/DeepAgentLabs/agentic-evals
 
 Use this simple guide to choose a capability and run a local evaluation. The [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) includes detailed workflows, the complete scorer/rubric catalog, current declarations from every package module, and both native schemas. Producing a report and passing a release gate are separate outcomes.
 
-[Capability index](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#capability-index) · [Quickstart](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#quickstart) · [Configuration](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#settings) · [Troubleshooting](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#troubleshooting) · [Reference](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#reference)
+[Capability index](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#capability-index) · [Capabilities map](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/index.md#what-it-does) · [Quickstart](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#quickstart) · [Configuration](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#settings) · [Troubleshooting](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#troubleshooting) · [Reference](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#reference)
 
 ## Capability index
 
@@ -278,7 +278,7 @@ agentic-evals pack list
 agentic-evals pack show tool-use-correctness --suite --out suite.json
 ```
 
-Four built-in packs cover tool use, JSON output contracts, factual QA and adversarial containment. `load_pack()` loads a custom suite plus `required_scorers`; `load_builtin_pack()` loads a named bundle. A pack does not implement its required judge/verifier: factual QA needs a registered completion callback, and containment needs host-configured trust. See [pack structure, dependencies and all built-ins](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/advanced.md#eval-packs).
+Four built-in packs cover tool use, JSON output contracts, factual QA and adversarial containment. `load_pack()` loads a custom suite plus `required_scorers`; `list_builtin_packs()` lists the built-in names and `load_builtin_pack()` loads one. A pack does not implement its required judge/verifier: factual QA needs a registered completion callback, and containment needs host-configured trust. See [pack structure, dependencies and all built-ins](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/advanced.md#eval-packs).
 
 <span id="judges"></span>
 
@@ -296,7 +296,7 @@ Set `samples=N` on a judge evaluator to collect repeated judgments. Score value 
 
 ### Reports, costs and breakdowns
 
-`EvaluationReport` contains case scores plus suite, metric/tag, judge and live summaries. Scores preserve evaluator identity/version, required/skipped state and explanations. Agent cost and judge cost remain separate; cost coverage/provenance distinguishes missing, estimated and measured values. Optional checks do not automatically fail a case, while required failures do; skipped and unavailable states retain distinct semantics.
+`EvaluationReport` contains case scores plus suite, metric/tag, judge and live summaries. Scores preserve evaluator identity/version, required/skipped state and explanations. Agent cost and judge cost remain separate. Set `EvalTrace.cost_source` to `"measured"` or `"estimated"`; each case carries it, and the summary reports `priced_cases` and `cost_sources`. `total_cost_usd` stays `None` unless every case has a known cost. Optional checks do not automatically fail a case, while required failures do; skipped and unavailable states retain distinct semantics.
 
 See [Score/Report fields and aggregates](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md#scores-and-reports), [detailed tutorial](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/data-model.md), and [judge summary fields](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md).
 
@@ -313,7 +313,7 @@ decision = evaluate_gate(report, GateConfig(min_pass_rate=1.0))
 assert decision.passed
 ```
 
-GateConfig supports suite quality, failed-case counts, tag/metric slices, cost/latency, judge availability/agreement/cost and live target failures/timeouts. Named slices missing from a report fail their configured checks. Default gates require every case to pass and reject unavailable judgments. See [gate parameters](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md#release-gates) and [CI policy examples](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/release-gates.md).
+GateConfig fields: `min_pass_rate`, `min_average_score`, `max_failed_cases`, `min_tag_pass_rate`, `min_metric_pass_rate`, `max_average_latency_ms`, `max_total_cost_usd`, `max_judge_unavailable_scores`, `max_judge_cost_usd`, `min_judge_agreement`, `max_timed_out_cases` and `max_target_error_cases`. Named slices missing from a report fail their configured checks. Default gates require every case to pass and reject unavailable judgments. See [gate parameters](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md#release-gates) and [CI policy examples](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/release-gates.md).
 
 <span id="live"></span>
 
@@ -397,7 +397,7 @@ The package also ships 19 guidance cards for defining objectives/criteria, build
 
 Configuration lives in `TestCase`, `EvaluatorConfig`, `GateConfig`, `RetryPolicy` and target/pack definitions. Provider clients, completion/embedding callbacks, registry imports, authenticated trust stores and live endpoint access belong to the host. Core installation has no required sibling dependency. `[integrity]` adds Lens; `[voice]` supports the separate voice example.
 
-Named scorers do not silently remove unrelated case expectations. Lexical similarity, rubric agreement and snapshot authentication establish different things; none independently proves task correctness or runtime enforcement. Preserve unknown cost, missing trace, skipped check and unavailable judge states. For exact fields, see [data model](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md), [catalog semantics](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md), [reliability limits](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md), and [support policy](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/support-policy.md). Historical compatibility notes apply to their stated releases.
+Named scorers do not silently remove unrelated case expectations. Lexical similarity, rubric agreement and snapshot authentication establish different things; none independently proves task correctness or runtime enforcement. Preserve unknown cost, missing trace, skipped check and unavailable judge states. See [limitations](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/limitations.md). For exact fields, see [data model](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md), [catalog semantics](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md), [reliability limits](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md), and [support policy](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/support-policy.md). Historical compatibility notes apply to their stated releases.
 
 ## Troubleshooting
 
@@ -405,9 +405,399 @@ Confirm case IDs and artifact types match, required scorers are registered, and 
 
 ## Reference
 
-- [API reference](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md), [scorer/rubric catalog](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md) and [CLI reference](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/cli.md).
-- [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) and [capability/source index](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/ai-reference-index.md).
+- [Overview and capabilities map](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/index.md#what-it-does).
+- [API Reference (detailed)](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md), [scorer/rubric catalog](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md) and [CLI reference](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/cli.md).
+- [AI Readable Documentation](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/ai-reference-index.md) and the [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) it indexes.
 - [Source manifest and checksums](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/ai-docs-manifest.json).
+
+---
+
+## Overview and capabilities map
+
+Source: [docs/index.md](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/index.md)
+
+Did the recorded behavior meet our quality requirements?
+
+## What it does
+
+Per-case scores, summary metrics and a separate release-gate decision, grouped by area below. Each area links to its detailed guide; for runnable commands, see the [developer guide](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md).
+
+### 1. Writing evals
+
+- **Quick `Eval()` API**
+    - `Eval(name, data=..., task=..., scores=...)` with `Case` rows or a data loader
+    - Six lightweight checks: `equals`, `contains`, `icontains`, `levenshtein`, `matches`, `numeric_close`
+    - Custom score functions returning booleans, numbers or named score dictionaries
+    - Coloured terminal summary and an inspectable `EvalResult`
+- **Structured suites**
+    - `TestSuite` / `TestCase` definitions in Python, JSON or YAML (`load_suite`)
+    - Recorded `EvaluationSample` outputs from JSON or JSONL (`load_samples`), matched by case ID
+    - Missing samples fail their cases; duplicate or unknown case IDs are errors
+- **Traces**
+    - Normalized `EvalTrace` / `EvalSpan` model: tool calls, attributes, latency, cost and metadata
+    - `trace_adapter=` hook to normalize older or external trace payloads
+    - No dependency on any tracing tool
+
+Guides: [Core concepts](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md) · [Custom data](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/custom-data.md) · [Existing traces](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/existing-traces.md)
+
+### 2. Case expectations
+
+- **Output**
+    - Exact or substring output, nested required fields
+    - Draft 2020-12 JSON Schema validation (no remote schema fetches)
+- **Tools**
+    - Required and forbidden tools
+    - Required or exact tool arguments, required tool order
+- **Budgets**
+    - Maximum latency, cost and turns per case
+
+Guides: [All TestCase fields](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md#testsuite-and-testcase) · [How scorers compose with expectations](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md#case-expectations-and-named-scorers)
+
+### 3. Built-in scorers
+
+- **Text**
+    - `exact_match`, `contains_all`, `contains_any`, `starts_with`, `ends_with`, `regex_match`
+    - `levenshtein_similarity`, and `embedding_similarity` with your own `embed_fn`
+- **Structured output**
+    - `valid_json` and `json_diff` (first differing path)
+- **Numeric**
+    - `numeric_range` and `numeric_diff` (absolute or relative tolerance)
+- **Trajectory (tool use)**
+    - `tool_call_precision` and `tool_call_recall`
+    - `no_redundant_tool_calls`
+    - `trajectory_efficiency` against a measured baseline latency or cost
+
+Guides: [Scorer and rubric catalog](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md)
+
+### 4. LLM-as-judge
+
+- **Rubric templates**
+    - Ten ready-made templates: `FACTUALITY`, `CLOSED_QA`, `SUMMARY_QUALITY`, `TRANSLATION`, `SQL_CORRECTNESS`, `SECURITY`, `MODERATION`, `PII_LEAKAGE`, `BATTLE`, `POSSIBLE`
+    - Custom criteria and verdict scales with `make_rubric()`, optionally with a reference answer
+- **Running judges**
+    - `LLMRubricEvaluator` and `LLMJudgeEvaluator` with your own sync or async completion callback
+    - `JudgeResponse` to report tokens, cost, model and provider
+- **Reliability**
+    - Bounded retries with backoff (`RetryPolicy`)
+    - A judge that fails after its retries gives an explicit unavailable score that never passes
+    - Repeated judging (`samples=N`) with per-case agreement
+- **Accounting**
+    - Judge cost, tokens and latency per score, totalled in `summary.judge`
+    - Judge cost kept separate from agent cost
+
+Guides: [Judge reliability](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md) · [Judges tutorial](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/judges.md)
+
+### 5. Custom evaluators
+
+- **Evaluator types**
+    - `CallableEvaluator`, `BusinessRuleEvaluator`, `LLMJudgeEvaluator`
+    - Sync or `async def` callbacks (`AsyncEvaluator`)
+- **Registries**
+    - `default_registry()` with every built-in scorer, extended through `EvaluatorRegistry.register()`
+    - Trusted `--registry module:factory` for the CLI
+- **Provenance**
+    - Each score records the evaluator, its type and its version
+
+Guides: [Custom evaluators and packs](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/advanced.md) · [Custom scorers tutorial](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/custom-scorers.md)
+
+### 6. Live targets
+
+- **Targets**
+    - Trusted Python callables (`PythonTarget`) and HTTP endpoints (`HTTPTarget`)
+    - `run_live_suite()` and the async `arun_live_suite()`
+- **Resilience**
+    - Parallel workers, per-call timeouts and retries
+    - Timeouts and target errors reported apart from wrong answers (`target_status`, `summary.live`)
+- **Async evaluation**
+    - `aevaluate_suite()` for recorded samples with async evaluators
+    - Bounded concurrency and cancellation
+
+Guides: [Live tutorial](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/live.md) · [Live target retries and timeouts](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md#live-target-retries-and-timeouts)
+
+### 7. Reports, costs and breakdowns
+
+- **Report contents**
+    - Per-case scores with explanations, evaluator identity and required/skipped state
+    - Suite summary: pass rate, average score, latency and cost
+    - Breakdowns by metric and by tag
+    - Judge and live-target summaries
+- **Cost honesty**
+    - Unknown cost stays unknown; it is never reported as $0
+    - Cost provenance per case: measured, estimated or unspecified (`cost_source`)
+- **Formats**
+    - Native JSON, JUnit XML and Markdown
+
+Guides: [Scores and reports](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md#scores-and-reports) · [Data model tutorial](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/data-model.md)
+
+### 8. Release gates
+
+- **Suite thresholds**
+    - Pass rate, average score and failed-case count
+    - Average latency and total cost
+- **Slices**
+    - Stricter pass rates per tag (`min_tag_pass_rate`) or per metric (`min_metric_pass_rate`)
+    - A slice named in the gate but missing from the report fails the gate
+- **Judges**
+    - Unavailable judge scores (zero allowed by default), minimum agreement and judge cost
+- **Live runs**
+    - Maximum timed-out cases and target-error cases
+- **Decision**
+    - `GateDecision` with pass/fail, reasons and observed values
+
+Guides: [Release gates API](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md#release-gates) · [CI policy examples](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/release-gates.md)
+
+### 9. Eval packs
+
+- **Built-in packs**
+    - `tool-use-correctness`, `json-output-contract`, `factual-qa`, `adversarial-containment`
+- **Custom packs**
+    - One YAML/JSON file bundling a suite and its required scorers (`load_pack`)
+    - Required scorers checked against your registry when the pack loads
+
+Guides: [Eval packs](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/advanced.md#eval-packs)
+
+### 10. Adversarial containment scoring
+
+- **Scenarios**
+    - Stop, revoke, denied tool, authority, injected instruction, fail closed
+- **Evidence**
+    - Authenticated dispatch, denial and acknowledgement records, checked by a host-configured verifier
+    - Optional AgenticLens verification (`lens_verifier`, `[integrity]` extra)
+- **Fail closed**
+    - Missing evidence, missing policy versions and bypassed enforcement fail
+    - The default registry has no trusted verifier and refuses unauthenticated evidence
+    - Containment is scored separately from task success
+
+Guides: [Authenticated containment scoring](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/containment.md)
+
+### 11. CLI
+
+- **Commands**
+    - `run`: discover and run Python eval files
+    - `evaluate`: score saved samples against a suite
+    - `live`: run a suite against a trusted target
+    - `gate`: apply release thresholds to a saved report
+    - `pack list` / `pack show`: browse built-in packs
+    - `aios export`: export AIOS evaluation evidence
+- **CI**
+    - `--format json|junit|markdown`
+    - Gate exit codes: 0 pass, 1 failed gate, 2 input or usage error
+
+Guides: [CLI reference and CI](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/cli.md)
+
+### 12. Contracts and interoperability
+
+- **Native schemas**
+    - Offline JSON Schemas for the report and gate decision (`report_schema()`, `gate_decision_schema()`)
+- **AIOS evidence**
+    - Map scores and gate results to AIOS `0.4-draft` targets (`to_aios_evidence`)
+    - Attach them to an existing Run (`attach_aios_evidence`)
+- **Ecosystem**
+    - Report fields that AgenticLens, Control Tower, MCP, Sidecar and Chaos read
+
+Guides: [Native report contract](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/report-contract.md) · [AIOS evidence](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/aios-evidence.md) · [Public API](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/public-api.md)
+
+### 13. Methodology playbooks
+
+- **19 guidance cards** (methodology, not runnable code)
+    - Frame: define an objective, elicit criteria
+    - Build data: build a dataset, size a suite
+    - Score: write, choose and validate scorers and rubrics
+    - Run: instrument a trace, run a live suite
+    - Experiment: design and analyze experiments
+    - Investigate: discover failure modes, red-team a suite, debug a flaky judge
+    - Operate: define a gate, report results, monitor in production, evaluate containment, export AIOS evidence
+
+Guides: [Methodology playbooks](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/methodology.md)
+
+## What you need
+
+Test cases, actual outputs, normalized traces, and optional judge callbacks.
+
+## Start here
+
+Evaluate two recorded answers, then add tool evidence: [follow the quickstart](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#quickstart).
+
+## Limits
+
+- A report is not a release approval; run an explicit gate.
+- Tool checks need complete tool evidence in the trace.
+- Model judges need your own provider integration; the package ships no model client.
+- Containment scoring needs a trusted verifier from the host; it neither enforces runtime behavior nor proves exhaustive capture.
+
+See [Limitations](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/limitations.md).
+
+## Documentation
+
+- [Developer Guide (simple)](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md): short task workflows and a capability index
+- [API Reference (detailed)](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md): exact Python functions, parameters and return values
+- [AI Readable Documentation](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/ai-reference-index.md): the full reference as one file for AI tools, with source declarations and schemas
+
+---
+
+## Limitations
+
+Source: [docs/limitations.md](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/limitations.md)
+
+This page lists what the current Agentic Evals release does not do, so you can
+plan around it. The package's PyPI classifier is Beta. Planned
+work appears in the [Roadmap](https://github.com/DeepAgentLabs/agentic-evals/blob/main/ROADMAP.md). Topic guides list further limits
+for their own features.
+
+---
+
+## Inputs and traces
+
+### Normalized traces only
+
+Evals scores the `EvalTrace` / `EvalSpan` model, not arbitrary vendor JSON. It
+has no built-in importer for any tracing tool. Convert external traces with
+your own `trace_adapter=` callable; see [existing traces](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/existing-traces.md).
+
+### Tool checks need complete tool evidence
+
+Tool expectations and trajectory scorers grade the recorded spans. A tool call
+that was never recorded looks like a tool that was never called, and a missing
+trace cannot establish tool behaviour.
+
+### `max_turns` requires explicit metadata
+
+`max_turns` checks need a turn count in the trace metadata. Evals does not infer
+conversational turns from spans.
+
+### Unknown cost stays unknown
+
+Evals never computes cost. It reports the cost your traces carry, and
+`total_cost_usd` stays `None` unless every case in scope has a known cost. A
+cost-based gate fails on an unknown cost rather than treating it as $0.
+
+---
+
+## Scoring
+
+### Implicit case checks stay on
+
+`TestCase` fields such as `expected_output` and `expected_contains` run as
+implicit checks alongside named scorers. Adding `contains_any` does not turn a
+case into an any-match check: every `expected_contains` entry is still
+required. See [case expectations and named scorers](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md#case-expectations-and-named-scorers).
+
+### Thresholds can loosen graded scorers
+
+Named scorers pass when their value reaches `EvaluatorConfig.threshold`
+(default 1.0). A lower threshold can pass a `numeric_diff` result outside its
+configured tolerance. Keep 1.0 when the tolerance itself must be strict.
+
+### Similarity is not correctness
+
+Levenshtein and embedding similarity measure closeness to a reference, not
+whether an answer is right. Embedding similarity needs your own `embed_fn`; no
+embedding client ships with the package.
+
+---
+
+## LLM judges
+
+### No built-in provider clients
+
+Evals ships no model clients. You supply the completion callback;
+`LLMRubricEvaluator` and `LLMJudgeEvaluator` format the prompt, call your
+function and parse the verdict. Usage and cost are recorded only when your
+callback returns them in a `JudgeResponse`.
+
+### Rubric templates are prompts, not enforcement
+
+`SECURITY`, `MODERATION`, `PII_LEAKAGE` and `SQL_CORRECTNESS` ask a model to
+judge an output. They do not enforce policy at runtime or execute SQL.
+
+### Agreement is not accuracy
+
+`samples=N` measures how consistently a judge repeats its verdict. A judge can
+agree with itself and still be wrong. Calibrating judges against human labels
+is an AgenticLens feature, not part of this package.
+
+---
+
+## Live targets
+
+### Trusted targets only
+
+`PythonTarget` imports and runs code, and `HTTPTarget` sends case inputs to the
+URL you configure. Run only suites, targets and registries you trust. With more
+than one worker, targets must be thread-safe.
+
+### Timeouts do not stop synchronous work
+
+An `async def` target is cancelled at its timeout. A synchronous target keeps
+running in a daemon thread and its result is discarded, so side effects it has
+already started are not undone. See
+[live target retries and timeouts](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md#live-target-retries-and-timeouts).
+
+### Sync APIs inside an event loop
+
+`evaluate_suite` and `run_live_suite` run async judges and targets with
+`asyncio.run`, which fails inside a running event loop. Use `aevaluate_suite`
+or `arun_live_suite` there.
+
+---
+
+## Release gates
+
+### A report is not a release decision
+
+`evaluate` and `live` exit 0 whenever a report is produced, including when
+cases fail. Only `evaluate_gate()` or `agentic-evals gate` turns a report into
+a pass/fail decision, and gate thresholds are yours to choose: a permissive
+gate can deliberately let failed cases through.
+
+---
+
+## Containment scoring
+
+### Scoring is not enforcement
+
+`ContainmentEvaluator` checks authenticated evidence after the run. It does not
+stop, revoke or block anything at runtime (Sidecar owns enforcement), does not
+promise cancellation of running work, and does not prove that every event was
+captured.
+
+### A trusted verifier is required
+
+The default registry has no verifier, so every containment score fails until
+you register `ContainmentEvaluator(verifier=...)`. Trust keys come from the
+host, never from samples. See [authenticated containment scoring](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/containment.md).
+
+---
+
+## Reports and contracts
+
+### JUnit and Markdown are presentation formats
+
+Gate on the native JSON report. JUnit XML and Markdown output are for CI
+displays and summaries; they are not inputs to `gate` or `aios export`.
+
+### AIOS export is draft and structural
+
+AIOS evidence follows the draft `0.4-draft` specification. Evals ships no AIOS
+validator, and you supply the mapping from cases to Run Steps. Structural
+alignment does not mean the evaluation passed or the mapping was right. See
+[AIOS evidence](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/aios-evidence.md).
+
+### Not in this package
+
+Dataset versioning and splitting, judge calibration, HTML report rendering,
+failure diagnosis, and deeper trace-aware evaluators (handoffs, retrieval
+groundedness) live in AgenticLens, which builds on this package's
+`EvaluationReport`.
+
+---
+
+## Platform
+
+### Python 3.10+ required
+
+Agentic Evals supports CPython 3.10 to 3.14. Older Python versions are not
+supported. See the [support policy](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/support-policy.md).
 
 ---
 
@@ -596,89 +986,260 @@ The six lightweight `Eval()` helpers and ten rubric templates are separate from 
 
 Source: [docs/api-reference.md](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md)
 
-## APIs
+**Version:** 1.1.0
 
-### Eval() Quickstart
+Every name below is a root export of `agentic_evals` (listed in `agentic_evals.__all__`). Names beginning `_` and the implementation modules `cli_commands`, `formatting` and `live` are private. See the [public API policy](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/public-api.md).
 
-The fastest, most opinionated API. Perfect for simple cases.
+```python
+from agentic_evals import Eval, TestSuite, TestCase, EvaluationSample, EvalTrace, EvalSpan
+from agentic_evals import evaluate_suite, evaluate_gate, GateConfig, default_registry
+```
+
+---
+
+## Eval() Quickstart
+
+The quickest API: run a task over a dataset and score each output.
+
+### `Eval(name, *, data, task, scores=(), threshold=1.0, print_results=True)`
 
 ```python
 def Eval(
     name: str,
-    data: list[dict] | Callable[[], list[dict]],
-    task: Callable[[Any], str],
-    scores: list[Callable],
+    *,
+    data: Iterable[dict | Case] | Callable[[], Iterable[dict | Case]],
+    task: Callable[[Any], Any],
+    scores: Sequence[ScoreFn] = (),
     threshold: float = 1.0,
+    print_results: bool = True,
 ) -> EvalResult
 ```
-
-**Parameters:**
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | name | str | Eval name (appears in output) |
-| data | list[dict] or callable | Test data with "input"/"expected" keys, or callable that returns it |
+| data | iterable or callable | Rows with `input`/`expected` keys, `Case` objects, or a callable that returns them |
 | task | callable | Function under test; called with each row's `input` value, returns the output |
-| scores | list[callable] | Scorer functions; each returns 0-1 or bool |
-| threshold | float | Min score for a case to pass (default 1.0) |
+| scores | sequence of callables | Score functions; each returns a bool, a number from 0 to 1, or a dict of named scores |
+| threshold | float | Minimum score for a case to pass (default 1.0) |
+| print_results | bool | Print the coloured summary (default True) |
 
-**Built-in scorers for Eval():**
+### `Case(input, expected=None, metadata={})`
 
-* `equals` — Exact match
-* `contains` — Case-sensitive substring
-* `icontains` — Case-insensitive substring
-* `levenshtein` — Similarity (0-1)
-* `matches` — Regex match
-* `numeric_close` — 1% relative tolerance
+One dataset row. Plain dicts with the same keys work too.
 
-### TestSuite API
+### `EvalResult` and `CaseResult`
 
-More structured, trace-aware evaluation with custom expectations.
+`EvalResult(name, threshold, results, duration_ms)` holds one `CaseResult(case, output, scores, error, duration_ms)` per row. Inspect it in code; printed output alone is not a release gate.
+
+### Lightweight scorers
+
+| Scorer | Behaviour |
+| --- | --- |
+| `equals` | Exact match |
+| `contains` | Case-sensitive substring |
+| `icontains` | Case-insensitive substring |
+| `levenshtein` | Similarity from 0 to 1 |
+| `matches` | Regex match |
+| `numeric_close` | 1% relative tolerance |
+
+See [lightweight scorer semantics](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md#lightweight-eval-scorers).
+
+---
+
+## Suites, samples and traces
+
+### `TestSuite(name, version, cases, description="", metadata={})`
+
+A named, versioned list of `TestCase`s.
+
+### `TestCase`
+
+| Field | Description |
+| --- | --- |
+| `id`, `name` | Required identity |
+| `input` | Input passed to a live target |
+| `expected_output` | Exact expected output (also the default reference for some scorers) |
+| `expected_contains` | Substrings the output must contain |
+| `output_json_schema` | Draft 2020-12 JSON Schema the output must satisfy |
+| `required_output_fields` | Nested fields the JSON output must contain |
+| `required_tools`, `forbidden_tools` | Tools that must or must not appear in the trace |
+| `required_tool_arguments`, `expected_tool_arguments` | Required argument keys, or exact argument values, per tool |
+| `required_tool_order` | Tools that must appear in this order |
+| `max_latency_ms`, `max_cost_usd`, `max_turns` | Per-case budgets (`max_turns` needs turn metadata in the trace) |
+| `evaluators` | Named scorers to run, as `EvaluatorConfig`s |
+| `tags`, `metadata` | Free-form labels; tags drive breakdowns and gate slices |
+
+See [all TestCase fields and implicit checks](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md#testsuite-and-testcase).
+
+### `EvaluatorConfig(name, threshold=1.0, required=True, config={})`
+
+Selects a registered evaluator by name. `config` holds scorer options, such as `{"abs_tol": 0.01}` for `numeric_diff` or `{"pattern": "..."}` for `regex_match`. A failed optional (`required=False`) score does not fail its case.
+
+### `EvaluationSample(case_id, output, trace)`
+
+One recorded observation, matched to a case by `case_id`.
+
+### `EvalTrace(trace_id="", spans=[], total_latency_ms=0.0, estimated_cost_usd=None, cost_source=None, metadata={})`
+
+The normalized trace. `cost_source` is `"measured"` (billed or provider-reported) or `"estimated"` (computed from tokens and a price table). Leave cost as `None` when it is unknown.
+
+### `EvalSpan(tool_name=None, attributes={})`
+
+One step in the trace. Spans with a `tool_name` are tool calls; `attributes` carry tool arguments.
+
+### `load_suite(path)`
+
+Loads a `TestSuite` from a JSON or YAML file.
+
+### `load_samples(path, *, trace_adapter=None)`
+
+Loads `EvaluationSample`s from a JSON array, a `{"samples": [...]}` envelope or JSONL. `trace_adapter` is a trusted callable that converts each raw trace into the `EvalTrace` shape before validation.
 
 ```python
-def evaluate_suite(
-    suite: TestSuite,
-    samples: list[EvaluationSample],
-    registry: EvaluatorRegistry | None = None,
-) -> EvaluationReport
+from pathlib import Path
+from agentic_evals import load_samples, load_suite
+
+suite = load_suite(Path("suite.yaml"))
+samples = load_samples(Path("samples.jsonl"))
 ```
 
-Returns a full `EvaluationReport` with per-case scores, summary metrics, pass rates, cost/latency, and [breakdowns by metric and tag](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md#scores-and-reports).
+See [trace normalization](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/existing-traces.md) and [custom data](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/custom-data.md).
 
-### Scorers Library
+---
 
-See the [complete scorer and rubric catalog](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md) for all 17 default registry entries, six lightweight helpers, ten rubric templates, configuration requirements and implicit-check interactions.
+## Evaluation
 
-Pre-built evaluators organized by type:
+### `evaluate_suite(suite, samples, *, registry=None)`
 
-#### Text Scorers (No LLM)
+Scores recorded samples and returns an `EvaluationReport` with per-case scores, summary metrics, pass rates, cost, latency and [breakdowns by metric and tag](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/core-concepts.md#scores-and-reports). Without `registry`, only the case expectations run, and a case that names an evaluator raises `ValueError`.
 
 ```python
-from agentic_evals import scorers
+from agentic_evals import default_registry, evaluate_suite
 
-# Deterministic checks
-scorer = scorers.text.exact_match
-scorer = scorers.text.levenshtein_similarity
-scorer = scorers.text.valid_json
-scorer = scorers.text.json_diff
-scorer = scorers.text.regex_match
+report = evaluate_suite(suite, samples, registry=default_registry())
+print(report.summary.pass_rate)
 ```
 
-#### Rubric Scorers (LLM-Graded)
+### `aevaluate_suite(suite, samples, *, registry=None, max_concurrency=8)`
+
+The async version. Awaits `async def` evaluators and runs plain ones in a worker thread. Call it inside a running event loop instead of `evaluate_suite`.
+
+```python
+import asyncio
+from agentic_evals import aevaluate_suite
+
+report = asyncio.run(aevaluate_suite(suite, samples, registry=registry, max_concurrency=4))
+```
+
+### `EvaluationReport`
+
+| Field | Description |
+| --- | --- |
+| `schema_version` | Native report contract version (`"1.0"`) |
+| `suite_name`, `suite_version`, `created_at` | Identity |
+| `summary` | `EvaluationSummary` |
+| `cases` | One `CaseEvaluation` per test case |
+
+### `EvaluationSummary`
+
+`total_cases`, `passed_cases`, `failed_cases`, `pass_rate`, `average_score`, `average_latency_ms`, `total_cost_usd` (`None` unless every case has a known cost), `priced_cases`, `cost_sources`, `metrics` (`MetricSummary` per `Score.metric`), `tags` (`TagSummary` per tag), `judge` (`JudgeSummary`) and `live` (`LiveSummary`).
+
+### `CaseEvaluation`
+
+`case_id`, `case_name`, `passed`, `scores`, `output`, `trace_id`, `latency_ms`, `cost_usd`, `cost_source`, `sample_available` (False when no sample was supplied), `target_status`, `target_attempts`, `target_error`, `tags` and `metadata`.
+
+### `Score`
+
+```python
+class Score(BaseModel):
+    name: str
+    metric: str = ""
+    value: float  # 0.0 – 1.0
+    passed: bool
+    required: bool = True
+    skipped: bool = False
+    explanation: str
+    evaluator_type: str = "deterministic"
+    evaluator: str = ""
+    evaluator_version: str | None = None
+    metadata: dict = {}
+```
+
+### `MetricSummary`, `TagSummary`, `JudgeSummary`, `LiveSummary`
+
+- `MetricSummary`: `total`, `passed`, `failed`, `skipped`, `pass_rate`, `average_score`.
+- `TagSummary`: `total_cases`, `passed_cases`, `failed_cases`, `pass_rate`, `average_score`.
+- `JudgeSummary`: judge score counts, `unavailable_scores` and `unavailable_cases`, retries, tokens, latency, `total_cost_usd`, and agreement (`min_agreement`, `average_agreement`, `case_agreement`).
+- `LiveSummary`: `total_cases`, `ok_cases`, `retried_cases`, `timed_out_cases`, `error_cases` and the matching case IDs.
+
+---
+
+## Scorers Library
+
+`default_registry()` returns a fresh `EvaluatorRegistry` with 17 built-in scorers: the twelve deterministic ones, the four trajectory ones and `containment`. `builtin_scorer_names()` lists them. Each scorer is also exported as a function taking an `EvaluationContext` and returning a `Score`. See the [complete scorer and rubric catalog](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/scorers.md) for every configuration option.
+
+### Text Scorers (No LLM)
+
+| Scorer | Checks | Key `config` options |
+| --- | --- | --- |
+| `exact_match` | Output equals `expected_output` | — |
+| `contains_all` / `contains_any` | All or any of `expected_contains` appear | — |
+| `starts_with` / `ends_with` | Output prefix or suffix | — |
+| `regex_match` | Output matches a pattern | `pattern`, `case_insensitive`, `full_match` |
+| `levenshtein_similarity` | Edit-distance similarity to the reference | `reference` |
+| `embedding_similarity` | Cosine similarity of embeddings | `embed_fn` (yours), `reference` |
+| `valid_json` | Output parses as JSON | — |
+| `json_diff` | JSON output equals the expected JSON; names the first differing path | — |
+| `numeric_range` | Number within bounds | `min`, `max` |
+| `numeric_diff` | Number within tolerance of the expected value | `rel_tol`, `abs_tol` |
+
+```python
+from agentic_evals import EvaluatorConfig, TestCase
+
+TestCase(
+    id="total",
+    name="Order total",
+    expected_output="42",
+    evaluators=[EvaluatorConfig(name="numeric_diff", config={"abs_tol": 0.01})],
+)
+```
+
+### Trajectory Scorers (Trace-Aware)
+
+| Scorer | Checks | Key `config` options |
+| --- | --- | --- |
+| `tool_call_precision` | Share of tool calls that were allowed | `allowed_tools` (defaults to `required_tools`) |
+| `tool_call_recall` | Share of `required_tools` that were called | — |
+| `no_redundant_tool_calls` | No repeated tool call with the same attributes | — |
+| `trajectory_efficiency` | Latency or cost relative to a baseline | `baseline_latency_ms`, `baseline_cost_usd` |
+
+They grade recorded spans, not final text. A missing trace cannot establish tool behaviour.
+
+### Rubric Scorers (LLM-Graded)
+
+Ten `RubricTemplate` constants: `FACTUALITY`, `CLOSED_QA`, `SUMMARY_QUALITY`, `TRANSLATION`, `SQL_CORRECTNESS`, `SECURITY`, `MODERATION`, `PII_LEAKAGE`, `BATTLE` and `POSSIBLE`. They are not in `default_registry()`, because they need your completion callback.
+
+### `LLMRubricEvaluator(name, template, complete_fn, *, version=None, retry=None, samples=1)`
+
+Formats the template, calls `complete_fn(prompt)`, and parses the verdict into a score. `complete_fn` may be sync or async and returns a `str` or a `JudgeResponse`.
 
 ```python
 from agentic_evals import LLMRubricEvaluator, FACTUALITY, default_registry
 
-# Register an LLM rubric evaluator
 registry = default_registry()
 registry.register(
     LLMRubricEvaluator(
         "factuality_check",
         FACTUALITY,
-        complete_fn=your_model_call,  # Your function to call LLM
+        complete_fn=your_model_call,  # Your function to call an LLM
     )
 )
 ```
+
+For reference-based rubrics, put the reference in `EvaluatorConfig.config["reference"]`.
+
+### `make_rubric(name, criteria, *, levels=None, with_reference=False)`
 
 When no built-in template fits, describe the criterion in plain language. `make_rubric()` builds the prompt, the verdict letters and their scores:
 
@@ -703,26 +1264,105 @@ registry.register(LLMRubricEvaluator("tone", tone, complete_fn=your_model_call))
 
 The default scale is pass/fail. Pass `with_reference=True` to show the judge a reference next to the output.
 
-#### Trajectory Scorers (Trace-Aware)
+### `RubricTemplate(name, prompt_template, verdict_scores)`
+
+The template type returned by `make_rubric()`; `verdict_scores` maps each verdict letter to a score.
+
+---
+
+## Custom evaluators and registries
+
+### `EvaluationContext(case, sample, config)`
+
+What every evaluator receives: the `TestCase`, the `EvaluationSample` and the `EvaluatorConfig`.
+
+### `Evaluator` and `AsyncEvaluator`
+
+Protocols. An evaluator has a `name` and `evaluate(context) -> list[Score]`; an async evaluator also has `async aevaluate(context)`. The async runners await `aevaluate` when it exists.
+
+### `CallableEvaluator(name, function, *, evaluator_type="custom", version=None)`
+
+Wraps any trusted function that takes an `EvaluationContext` and returns a `Score` or a list of scores. The function may be `async def`. `version` is stamped onto each score as `Score.evaluator_version`.
 
 ```python
-from agentic_evals import scorers
+from agentic_evals import CallableEvaluator, Score, default_registry
 
-scorer = scorers.trajectory.tool_call_precision
-scorer = scorers.trajectory.tool_call_recall
-scorer = scorers.trajectory.no_redundant_tool_calls
-scorer = scorers.trajectory.trajectory_efficiency
+
+def polite(context):
+    ok = "please" in str(context.sample.output).lower()
+    return Score(name="polite", value=float(ok), passed=ok, explanation="checks for 'please'")
+
+
+registry = default_registry()
+registry.register(CallableEvaluator("polite", polite, version="1"))
 ```
 
-### Release Gates
+### `BusinessRuleEvaluator(name, rule, *, version=None)`
 
-Turn an evaluation report into a pass/fail CI decision:
+A `CallableEvaluator` for organization-specific pass/fail rules, labelled as a business rule in reports.
+
+### `LLMJudgeEvaluator(name, judge, *, version=None, retry=None, samples=1, evaluator_type="llm_judge")`
+
+A `CallableEvaluator` for your own judge function, with judge retries, unavailable scores, repeated sampling and usage accounting. `LLMRubricEvaluator` builds on it.
+
+### `EvaluatorRegistry()`
+
+Holds trusted evaluators by name. Suite files refer to evaluators by name; they never import code.
+
+| Method | Description |
+| --- | --- |
+| `register(evaluator, *, replace=False)` | Add an evaluator; raises `ValueError` on a duplicate name unless `replace=True` |
+| `get(name)` | Look up an evaluator; raises `ValueError` if missing |
+| `names()` | Sorted registered names |
+
+### `default_registry()` and `builtin_scorer_names()`
+
+A fresh registry with all 17 built-ins, and their sorted names. `BUILTIN_EVALUATOR` is the `evaluator_type` label built-in scorers carry; `JUDGE_EVALUATOR_TYPES` is the set of types counted as judges.
+
+See [custom evaluators and packs](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/advanced.md) and the [custom scorer tutorial](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/custom-scorers.md).
+
+---
+
+## Judge reliability
+
+### `RetryPolicy(max_attempts=1, backoff_seconds=0.0, backoff_multiplier=2.0, max_backoff_seconds=30.0, retry_on=(Exception,))`
+
+Bounds retries for judges and live targets. Backoff grows by `backoff_multiplier` up to `max_backoff_seconds`.
+
+### `JudgeResponse(text, input_tokens=None, output_tokens=None, cost_usd=None, cost_source=None, model=None, provider=None)`
+
+Return this from a judge's completion callback, instead of a plain string, to record usage. Unknown values stay `None`.
 
 ```python
-def evaluate_gate(
-    report: EvaluationReport,
-    config: GateConfig,
-) -> GateDecision
+from agentic_evals import FACTUALITY, JudgeResponse, LLMRubricEvaluator, RetryPolicy
+
+
+def complete_fn(prompt):
+    reply = call_your_model(prompt)
+    return JudgeResponse(text=reply.text, cost_usd=reply.cost, cost_source="measured")
+
+
+judge = LLMRubricEvaluator(
+    "factuality",
+    FACTUALITY,
+    complete_fn,
+    retry=RetryPolicy(max_attempts=3, backoff_seconds=0.5),
+    samples=3,  # judge three times, report agreement
+)
+```
+
+A judge that still fails after its retries, or whose verdict cannot be parsed, yields an unavailable score that never passes. See [judge reliability](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md).
+
+---
+
+## Release Gates
+
+Turn an evaluation report into a pass/fail CI decision.
+
+### `evaluate_gate(report, config)`
+
+```python
+def evaluate_gate(report: EvaluationReport, config: GateConfig) -> GateDecision
 ```
 
 ```python
@@ -742,6 +1382,25 @@ if not decision.passed:
     exit(1)
 ```
 
+### `GateConfig`
+
+The default is strict: every case must pass and no judge may be unavailable.
+
+| Field | Default | Fails when |
+| --- | --- | --- |
+| `min_pass_rate` | `1.0` | Suite pass rate is lower |
+| `min_average_score` | `None` | Average score is lower |
+| `max_failed_cases` | `None` | More cases failed |
+| `min_tag_pass_rate` | `{}` | A tag's pass rate is lower, or the tag is missing |
+| `min_metric_pass_rate` | `{}` | A metric's pass rate is lower, or the metric is missing |
+| `max_average_latency_ms` | `None` | Average latency is higher |
+| `max_total_cost_usd` | `None` | Total cost is higher, or unknown |
+| `max_judge_unavailable_scores` | `0` | More judge scores were unavailable |
+| `max_judge_cost_usd` | `None` | Judge cost is higher, or any judge score has no cost |
+| `min_judge_agreement` | `None` | A case judged with `samples=N` agreed less |
+| `max_timed_out_cases` | `None` | More live cases timed out |
+| `max_target_error_cases` | `None` | More live cases hit a target error |
+
 A gate can hold one slice of the report to a stricter bar than the suite as a whole, keyed by case tag or by `Score.metric`:
 
 ```python
@@ -754,19 +1413,17 @@ GateConfig(
 
 A tag or metric named in the config but missing from the report fails the gate, so a renamed tag cannot quietly switch a check off.
 
-Since 0.9.0 the gate also reads judge and live-target outcomes. A judge that never delivered a verdict fails the default gate (`max_judge_unavailable_scores=0`):
+### `GateDecision(passed, reasons, observed)`
 
-```python
-GateConfig(
-    min_judge_agreement=0.8,  # every case judged with samples=N
-    max_judge_cost_usd=2.50,  # fails when any judge score has no cost
-    max_timed_out_cases=0,  # live runs: timeouts, apart from wrong answers
-)
-```
+`passed` is the verdict, `reasons` lists every failed check and `observed` holds the measured values. See [CI policy examples](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/release-gates.md).
 
-### Live Targets
+---
 
-Run a suite against a real system (trusted code or HTTP endpoint) instead of pre-recorded samples:
+## Live Targets
+
+Run a suite against a real system (trusted code or HTTP endpoint) instead of pre-recorded samples.
+
+### `run_live_suite(suite, target, *, registry=None, trace_adapter=None, max_workers=1, retry=None)`
 
 ```python
 def run_live_suite(
@@ -774,13 +1431,15 @@ def run_live_suite(
     target: LiveTarget,
     *,
     registry: EvaluatorRegistry | None = None,
-    trace_adapter: TraceAdapter | None = None,
+    trace_adapter: Callable[[Any], Any] | None = None,
     max_workers: int = 1,
     retry: RetryPolicy | None = None,
 ) -> EvaluationReport
 ```
 
-**Python Target (executes local code):**
+### `PythonTarget(callable_path, timeout_seconds=30.0)`
+
+Executes local code:
 
 ```python
 from agentic_evals import PythonTarget, run_live_suite
@@ -792,7 +1451,9 @@ report = run_live_suite(
 )
 ```
 
-**HTTP Target (calls a remote endpoint):**
+### `HTTPTarget(url, method="POST", headers={}, timeout_seconds=30.0)`
+
+Calls a remote endpoint:
 
 ```python
 from agentic_evals import HTTPTarget, run_live_suite
@@ -807,7 +1468,11 @@ report = run_live_suite(
 )
 ```
 
-**Retries, timeouts and async (0.9.0):** a call that raises or times out is retried under `retry`; a case whose calls all fail is reported with `target_status` `"timed_out"` or `"error"` instead of aborting the run. `arun_live_suite` awaits `async def` targets and cancels them at an explicit `timeout_seconds`.
+`LiveTarget(kind, timeout_seconds=30.0)` is their common base type.
+
+### `arun_live_suite(suite, target, *, registry=None, trace_adapter=None, max_concurrency=1, retry=None)`
+
+A call that raises or times out is retried under `retry`; a case whose calls all fail is reported with `target_status` `"timed_out"` or `"error"` instead of aborting the run. `arun_live_suite` awaits `async def` targets and cancels them at an explicit `timeout_seconds`.
 
 ```python
 import asyncio
@@ -824,9 +1489,70 @@ report = asyncio.run(
 print(report.summary.live.timed_out_case_ids)
 ```
 
-### AIOS Evidence Export
+See [live target retries and timeouts](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/judge-reliability.md#live-target-retries-and-timeouts) and the [live tutorial](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/guide/live.md).
 
-Export a report as AI Operations Specification `0.4-draft` evaluation evidence (0.10.0) and attach it to an existing Run artifact:
+---
+
+## Eval packs
+
+### `EvalPack(name, suite, description="", required_scorers=[])`
+
+A shareable bundle of a `TestSuite` and the scorer names it needs. `pack.to_suite()` returns the suite.
+
+### `list_builtin_packs()`
+
+Returns the built-in pack names: `adversarial-containment`, `factual-qa`, `json-output-contract` and `tool-use-correctness`.
+
+### `load_builtin_pack(name, *, registry=None)` and `load_pack(path, *, registry=None)`
+
+Load a built-in pack by name, or your own YAML/JSON pack file. With `registry`, every required scorer is checked up front.
+
+```python
+from agentic_evals import default_registry, evaluate_suite, load_builtin_pack
+
+registry = default_registry()
+pack = load_builtin_pack("tool-use-correctness", registry=registry)
+report = evaluate_suite(pack.to_suite(), samples, registry=registry)
+```
+
+`factual-qa` needs a registered `LLMRubricEvaluator`; `adversarial-containment` needs a `ContainmentEvaluator` with a trusted verifier. See [eval packs](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/advanced.md#eval-packs).
+
+---
+
+## Containment scoring
+
+### `ContainmentEvaluator(*, verifier=None)`
+
+Scores authenticated containment evidence at `sample.trace.metadata["containment"]` (`records` and `manifest`). It fails closed: without a verifier, every containment score fails. The default registry registers it without a verifier.
+
+### `ContainmentVerifier`
+
+The trusted callback type: `(records, manifest, stream_id) -> dict` in the AgenticLens verification result shape. Keys never travel in samples or reports.
+
+### `lens_verifier(trusted_keys)`
+
+Builds a `ContainmentVerifier` from AgenticLens (`pip install "agentic-evals[integrity]"`). It copies the host's trust store when it is created.
+
+```python
+from agentic_evals import ContainmentEvaluator, default_registry, lens_verifier
+
+registry = default_registry()
+registry.register(ContainmentEvaluator(verifier=lens_verifier(host_trusted_keys)), replace=True)
+```
+
+### `ContainmentExpectation`
+
+The trusted scenario in `EvaluatorConfig.config`: `scenario` (`stop`, `revoke`, `denied_tool`, `authority`, `injected` or `fail_closed`), `subject`, `task_id`, `stream_id`, `policy_version`, `configuration_version`, `attempted_call_ids`, and `forbidden_tools` (denial scenarios) or `acknowledgement_id` (stop and revoke), plus an optional `max_acknowledgement_latency_ms`.
+
+See [authenticated containment scoring](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/containment.md).
+
+---
+
+## AIOS Evidence Export
+
+Export a report as AI Operations Specification `0.4-draft` evaluation evidence and attach it to an existing Run artifact.
+
+### `to_aios_evidence(report, *, run_id, targets=None, default_target=None, gate=None, allow_unmapped=False, id_prefix=None, occurred_at=None)`
 
 ```python
 def to_aios_evidence(
@@ -840,7 +1566,11 @@ def to_aios_evidence(
     id_prefix: str | None = None,
     occurred_at: datetime | None = None,
 ) -> AIOSEvidenceExport
+```
 
+### `attach_aios_evidence(run, export)`
+
+```python
 def attach_aios_evidence(run: dict, export: AIOSEvidenceExport | list[AIOSEvidenceExport]) -> dict
 ```
 
@@ -854,18 +1584,46 @@ merged = attach_aios_evidence(run, export)
 print(export.unmapped_cases, export.skipped_scores, export.unavailable_scores)
 ```
 
-A string target is a Step ID; a dict is an AIOS reference (`id`, `type`, optional `external`). Missing mappings, unknown case IDs and unresolved targets raise `AIOSExportError` (a `ValueError`). See [the AIOS evidence guide](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/aios-evidence.md).
+A string target is a Step ID; a dict is an AIOS reference (`id`, `type`, optional `external`).
+
+### `AIOSEvidenceExport` and `AIOSExportError`
+
+`AIOSEvidenceExport` holds the evidence, relationships and events, plus `unmapped_cases`, `unobserved_cases`, `exported_cases`, `skipped_scores` and `unavailable_scores`. Missing mappings, unknown case IDs and unresolved targets raise `AIOSExportError` (a `ValueError`). See [the AIOS evidence guide](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/aios-evidence.md).
+
+---
+
+## Native schemas
+
+### `report_schema()` and `gate_decision_schema()`
+
+Return the JSON Schemas (as dicts) for the native report and gate decision, contract version 1.0. They ship inside the package and need no network.
+
+```python
+import jsonschema
+from agentic_evals import report_schema
+
+jsonschema.validate(report.model_dump(mode="json"), report_schema())
+```
+
+Schema validity is separate from passing a gate. See [the native report contract](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/report-contract.md).
+
+---
+
+## CLI
+
+The `agentic-evals` command has seven commands: `run`, `evaluate`, `live`, `gate`, `pack list`, `pack show` and `aios export`. See the [CLI reference](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/cli.md) for flags, output formats and exit codes.
+
+---
 
 ## API readiness and support
 
 See [the public API candidate](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/public-api.md), [support and compatibility matrix](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/support-policy.md), and [executable examples](https://github.com/DeepAgentLabs/agentic-evals/blob/main/examples/README.md).
 
-
 ## Capability and contract lookup
 
-The [Developer Guide (simple)](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#capability-index) has short workflows for every capability category. The [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) includes the detailed task guides, scorer catalog, public/support policy contents, statically extracted declarations from every package module and both native schemas.
+The [Developer Guide (simple)](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/developer-guide.md#capability-index) has short workflows for every capability category. The [AI Readable Documentation](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/ai-reference-index.md) indexes the full reference, which includes the detailed task guides, scorer catalog, public/support policy contents, statically extracted declarations from every package module and both native schemas.
 
-Use the root exported APIs for application code. Names beginning `_` are private; declaration extraction does not promote implementation helpers or modules to public status. Package, report/gate and AIOS versions remain independent. See the [public API candidate](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/public-api.md), [support policy](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/support-policy.md) and [coordinated readiness](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/coordinated-v1-readiness.md).
+Package, report/gate and AIOS versions remain independent. See the [coordinated readiness notes](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/coordinated-v1-readiness.md).
 
 ---
 
