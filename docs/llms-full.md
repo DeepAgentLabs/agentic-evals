@@ -1155,7 +1155,7 @@ report = asyncio.run(aevaluate_suite(suite, samples, registry=registry, max_conc
 class Score(BaseModel):
     name: str
     metric: str = ""
-    value: float                  # 0.0 – 1.0
+    value: float  # 0.0 – 1.0
     passed: bool
     required: bool = True
     skipped: bool = False
@@ -1287,9 +1287,11 @@ Wraps any trusted function that takes an `EvaluationContext` and returns a `Scor
 ```python
 from agentic_evals import CallableEvaluator, Score, default_registry
 
+
 def polite(context):
     ok = "please" in str(context.sample.output).lower()
     return Score(name="polite", value=float(ok), passed=ok, explanation="checks for 'please'")
+
 
 registry = default_registry()
 registry.register(CallableEvaluator("polite", polite, version="1"))
@@ -1334,9 +1336,11 @@ Return this from a judge's completion callback, instead of a plain string, to re
 ```python
 from agentic_evals import FACTUALITY, JudgeResponse, LLMRubricEvaluator, RetryPolicy
 
+
 def complete_fn(prompt):
     reply = call_your_model(prompt)
     return JudgeResponse(text=reply.text, cost_usd=reply.cost, cost_source="measured")
+
 
 judge = LLMRubricEvaluator(
     "factuality",

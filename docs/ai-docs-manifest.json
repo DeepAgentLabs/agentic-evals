@@ -4,7 +4,7 @@
   "distribution": "agentic-evals",
   "document": "llms-full.md",
   "content_type": "text/markdown; charset=utf-8",
-  "sha256": "4e751f36ef91704b82fcd1382cef008b867a6cb322f12524c873b7c99e7ad584",
+  "sha256": "97fc7f2e1a003bb6ad485df0aa42e1259f8a4cb1136efd7286a53df863897948",
   "source_hash_normalization": "UTF-8 text with LF newlines",
   "human_guide": "developer-guide.md",
   "sources": [
@@ -46,7 +46,7 @@
     {
       "path": "docs/api-reference.md",
       "kind": "reference",
-      "sha256": "ae77a930685464e2395785313812c3d31df0c23db1671cddb03c6d21ef9d5826"
+      "sha256": "65bae152f52456964a3cabbafa0d9fe2d6cc68a06c82b1e43724f073b1dda150"
     },
     {
       "path": "docs/cli.md",
