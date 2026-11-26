@@ -986,7 +986,7 @@ The six lightweight `Eval()` helpers and ten rubric templates are separate from 
 
 Source: [docs/api-reference.md](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/api-reference.md)
 
-**Version:** 1.0.4
+**Version:** 1.1.0
 
 Every name below is a root export of `agentic_evals` (listed in `agentic_evals.__all__`). Names beginning `_` and the implementation modules `cli_commands`, `formatting` and `live` are private. See the [public API policy](https://github.com/DeepAgentLabs/agentic-evals/blob/main/docs/public-api.md).
 

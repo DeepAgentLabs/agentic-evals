@@ -4,14 +4,14 @@
   "distribution": "agentic-evals",
   "document": "llms-full.md",
   "content_type": "text/markdown; charset=utf-8",
-  "sha256": "3a195d1a470deb1e7b038a8b5777879773f4bc438efdb928d903db214d861849",
+  "sha256": "4e751f36ef91704b82fcd1382cef008b867a6cb322f12524c873b7c99e7ad584",
   "source_hash_normalization": "UTF-8 text with LF newlines",
   "human_guide": "developer-guide.md",
   "sources": [
     {
       "path": "pyproject.toml",
       "kind": "package-metadata",
-      "sha256": "86c7755967b7981d11f726e6d10fc8f9af13a7b65c85290cdc039b014e1ebbf8"
+      "sha256": "e01649314ba40730080275f8b15377c30a9fb3ba1d1abfd0280608bfed56f01e"
     },
     {
       "path": "docs/ai-docs.json",
@@ -46,7 +46,7 @@
     {
       "path": "docs/api-reference.md",
       "kind": "reference",
-      "sha256": "4691d88e12d9f5868b999033e7363062524ef112cc007832b3a0c29280c0a298"
+      "sha256": "ae77a930685464e2395785313812c3d31df0c23db1671cddb03c6d21ef9d5826"
     },
     {
       "path": "docs/cli.md",
@@ -361,7 +361,7 @@
     {
       "path": "src/agentic_evals/_version.py",
       "kind": "source-contract",
-      "sha256": "69cb91fd7489ce9e0ead0e53f3e01ce6061ee3c994c0e6eec234668ac16667b9"
+      "sha256": "2c6550c83b1689f7400a8eeacedc1bf115961ddb3513bb90f99a83f12023cb0e"
     },
     {
       "path": "src/agentic_evals/aios.py",
