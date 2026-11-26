@@ -6,6 +6,18 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+## 1.1.0 - 2026-11-26
+
+### Changed
+
+- Adopt the AgenticLens documentation layout: the sidebar now pins Overview, Developer Guide (simple), API Reference (detailed) and AI Readable Documentation, and the site header links the API reference.
+- Turn the overview page into a numbered map of every capability area with sub-lists and guide links.
+- Expand the API reference to every public export, adding custom evaluators and registries, async evaluation, sample loading, data models, eval packs, containment scoring, native schemas, `JudgeResponse`, `RetryPolicy` and a complete `GateConfig` table.
+- Add a limitations page covering inputs, scoring, judges, live targets, gates, containment and contracts.
+- Name every gate field, cost provenance and `list_builtin_packs()` in the developer guide.
+- Correct the README to four built-in packs and 19 methodology skills, and include the overview and limitations in the AI-readable reference.
+- Keep runtime behavior, public exports and report/gate schema versions unchanged.
+
 ## 1.0.4 - 2026-11-20
 
 ### Changed
