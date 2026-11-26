@@ -11,6 +11,14 @@
       "path": "docs/developer-guide.md"
     },
     {
+      "title": "Overview and capabilities map",
+      "path": "docs/index.md"
+    },
+    {
+      "title": "Limitations",
+      "path": "docs/limitations.md"
+    },
+    {
       "title": "Complete scorer and rubric catalog",
       "path": "docs/scorers.md"
     },
