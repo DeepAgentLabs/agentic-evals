@@ -2,7 +2,7 @@
 
 Use this simple guide to choose a capability and run a local evaluation. The [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) includes detailed workflows, the complete scorer/rubric catalog, current declarations from every package module, and both native schemas. Producing a report and passing a release gate are separate outcomes.
 
-[Capability index](#capability-index) · [Quickstart](#quickstart) · [Configuration](#settings) · [Troubleshooting](#troubleshooting) · [Reference](#reference)
+[Capability index](#capability-index) · [Capabilities map](index.md#what-it-does) · [Quickstart](#quickstart) · [Configuration](#settings) · [Troubleshooting](#troubleshooting) · [Reference](#reference)
 
 ## Capability index
 
@@ -172,7 +172,7 @@ agentic-evals pack list
 agentic-evals pack show tool-use-correctness --suite --out suite.json
 ```
 
-Four built-in packs cover tool use, JSON output contracts, factual QA and adversarial containment. `load_pack()` loads a custom suite plus `required_scorers`; `load_builtin_pack()` loads a named bundle. A pack does not implement its required judge/verifier: factual QA needs a registered completion callback, and containment needs host-configured trust. See [pack structure, dependencies and all built-ins](advanced.md#eval-packs).
+Four built-in packs cover tool use, JSON output contracts, factual QA and adversarial containment. `load_pack()` loads a custom suite plus `required_scorers`; `list_builtin_packs()` lists the built-in names and `load_builtin_pack()` loads one. A pack does not implement its required judge/verifier: factual QA needs a registered completion callback, and containment needs host-configured trust. See [pack structure, dependencies and all built-ins](advanced.md#eval-packs).
 
 <span id="judges"></span>
 
@@ -190,7 +190,7 @@ Set `samples=N` on a judge evaluator to collect repeated judgments. Score value 
 
 ### Reports, costs and breakdowns
 
-`EvaluationReport` contains case scores plus suite, metric/tag, judge and live summaries. Scores preserve evaluator identity/version, required/skipped state and explanations. Agent cost and judge cost remain separate; cost coverage/provenance distinguishes missing, estimated and measured values. Optional checks do not automatically fail a case, while required failures do; skipped and unavailable states retain distinct semantics.
+`EvaluationReport` contains case scores plus suite, metric/tag, judge and live summaries. Scores preserve evaluator identity/version, required/skipped state and explanations. Agent cost and judge cost remain separate. Set `EvalTrace.cost_source` to `"measured"` or `"estimated"`; each case carries it, and the summary reports `priced_cases` and `cost_sources`. `total_cost_usd` stays `None` unless every case has a known cost. Optional checks do not automatically fail a case, while required failures do; skipped and unavailable states retain distinct semantics.
 
 See [Score/Report fields and aggregates](core-concepts.md#scores-and-reports), [detailed tutorial](guide/data-model.md), and [judge summary fields](judge-reliability.md).
 
@@ -207,7 +207,7 @@ decision = evaluate_gate(report, GateConfig(min_pass_rate=1.0))
 assert decision.passed
 ```
 
-GateConfig supports suite quality, failed-case counts, tag/metric slices, cost/latency, judge availability/agreement/cost and live target failures/timeouts. Named slices missing from a report fail their configured checks. Default gates require every case to pass and reject unavailable judgments. See [gate parameters](api-reference.md#release-gates) and [CI policy examples](guide/release-gates.md).
+GateConfig fields: `min_pass_rate`, `min_average_score`, `max_failed_cases`, `min_tag_pass_rate`, `min_metric_pass_rate`, `max_average_latency_ms`, `max_total_cost_usd`, `max_judge_unavailable_scores`, `max_judge_cost_usd`, `min_judge_agreement`, `max_timed_out_cases` and `max_target_error_cases`. Named slices missing from a report fail their configured checks. Default gates require every case to pass and reject unavailable judgments. See [gate parameters](api-reference.md#release-gates) and [CI policy examples](guide/release-gates.md).
 
 <span id="live"></span>
 
@@ -291,7 +291,7 @@ The package also ships 19 guidance cards for defining objectives/criteria, build
 
 Configuration lives in `TestCase`, `EvaluatorConfig`, `GateConfig`, `RetryPolicy` and target/pack definitions. Provider clients, completion/embedding callbacks, registry imports, authenticated trust stores and live endpoint access belong to the host. Core installation has no required sibling dependency. `[integrity]` adds Lens; `[voice]` supports the separate voice example.
 
-Named scorers do not silently remove unrelated case expectations. Lexical similarity, rubric agreement and snapshot authentication establish different things; none independently proves task correctness or runtime enforcement. Preserve unknown cost, missing trace, skipped check and unavailable judge states. For exact fields, see [data model](core-concepts.md), [catalog semantics](scorers.md), [reliability limits](judge-reliability.md), and [support policy](support-policy.md). Historical compatibility notes apply to their stated releases.
+Named scorers do not silently remove unrelated case expectations. Lexical similarity, rubric agreement and snapshot authentication establish different things; none independently proves task correctness or runtime enforcement. Preserve unknown cost, missing trace, skipped check and unavailable judge states. See [limitations](limitations.md). For exact fields, see [data model](core-concepts.md), [catalog semantics](scorers.md), [reliability limits](judge-reliability.md), and [support policy](support-policy.md). Historical compatibility notes apply to their stated releases.
 
 ## Troubleshooting
 
@@ -299,6 +299,7 @@ Confirm case IDs and artifact types match, required scorers are registered, and 
 
 ## Reference
 
-- [API reference](api-reference.md), [scorer/rubric catalog](scorers.md) and [CLI reference](cli.md).
-- [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) and [capability/source index](ai-reference-index.md).
+- [Overview and capabilities map](index.md#what-it-does).
+- [API Reference (detailed)](api-reference.md), [scorer/rubric catalog](scorers.md) and [CLI reference](cli.md).
+- [AI Readable Documentation](ai-reference-index.md) and the [AI Reference (robust)](https://deepagentlabs.io/agentic-evals/docs/llms-full.md) it indexes.
 - [Source manifest and checksums](ai-docs-manifest.json).
